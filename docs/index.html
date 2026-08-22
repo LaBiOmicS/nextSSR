@@ -205,7 +205,7 @@
               </button>
               
               <div id="pyodide-status" class="text-xs font-mono text-slate-400 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Pyodide Engine Ready
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Initializing Engine...
               </div>
             </div>
 
@@ -619,7 +619,7 @@
       };
     }
 
-    // --- Pyodide Wasm Engine ---
+    // --- Native Self-Contained Pyodide Engine Loader ---
     function logMsg(msg) {
       const box = document.getElementById('log-box');
       box.classList.remove('hidden');
@@ -630,20 +630,245 @@
     async function initPyodideEngine() {
       const statusEl = document.getElementById('pyodide-status');
       try {
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> Initializing Pyodide Wasm Engine...';
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> Loading Wasm Runtime...';
         pyodide = await loadPyodide();
-        await pyodide.loadPackage(['micropip']);
         
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Installing nextssr from PyPI...';
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Loading Native Python Engine...';
+        
+        // Define pure-Python nextSSR module directly into Pyodide virtual filesystem
         await pyodide.runPythonAsync(`
-          import micropip
-          await micropip.install('nextssr')
-          from nextssr.config import SSRConfig
-          from nextssr.finder import SSRFinder
-          from nextssr.compound import CompoundSSRProcessor
-          from nextssr.primer import PrimerDesigner
-          from nextssr.epcr import EPCRSimulator
-          from nextssr.utils import parse_fasta
+import math
+import json
+import re
+from dataclasses import dataclass
+from typing import List, Tuple, Dict, Optional, Set
+
+# --- IUPAC MAP ---
+IUPAC_MAP = {
+    "A": {"A"}, "C": {"C"}, "G": {"G"}, "T": {"T"}, "U": {"T"},
+    "R": {"A", "G"}, "Y": {"C", "T"}, "S": {"G", "C"}, "W": {"A", "T"},
+    "K": {"G", "T"}, "M": {"A", "C"}, "B": {"C", "G", "T"},
+    "D": {"A", "G", "T"}, "H": {"A", "C", "T"}, "V": {"A", "C", "G"},
+    "N": {"A", "C", "G", "T"}
+}
+
+# --- DATACLASSES ---
+@dataclass
+class SSRMotif:
+    id: str
+    motif: str
+    repeats: int
+    start: int
+    end: int
+    sequence: str
+    flank_5p: str
+    flank_3p: str
+    primer_pair: Optional[object] = None
+
+@dataclass
+class PrimerPair:
+    forward_seq: str
+    forward_tm: float
+    forward_gc: float
+    forward_start: int
+    forward_length: int
+    reverse_seq: str
+    reverse_tm: float
+    reverse_gc: float
+    reverse_start: int
+    reverse_length: int
+    product_size: int
+    status: str = "OK"
+
+@dataclass
+class AmpliconResult:
+    seq_id: str
+    forward_primer: str
+    reverse_primer: str
+    forward_start: int
+    forward_end: int
+    forward_mismatches: int
+    reverse_start: int
+    reverse_end: int
+    reverse_mismatches: int
+    product_size: int
+    amplicon_sequence: str
+    amplicon_gc: float = 0.0
+    status: str = "SPECIFIC"
+
+# --- ENGINE MODULES ---
+class SSRFinder:
+    def __init__(self, flank_len=100):
+        self.flank_len = flank_len
+        self.min_repeats = {1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5}
+
+    def analyze_sequence(self, seq_id, sequence):
+        ssrs = []
+        seq_u = sequence.upper()
+        seq_len = len(seq_u)
+        ssr_count = 1
+
+        for motif_len in range(1, 7):
+            min_rep = self.min_repeats[motif_len]
+            regex = re.compile(rf"(([ATCG]{{{motif_len}}})\2{{{min_rep - 1},}})")
+            for match in regex.finditer(seq_u):
+                full_match = match.group(1)
+                unit_motif = match.group(2)
+                rep_count = len(full_match) // motif_len
+                start_idx = match.start()
+                end_idx = match.end()
+
+                flank_5p = seq_u[max(0, start_idx - self.flank_len):start_idx]
+                flank_3p = seq_u[end_idx:min(seq_len, end_idx + self.flank_len)]
+
+                ssr_id = f"{seq_id}_SSR_{ssr_count:03d}"
+                ssrs.append(SSRMotif(
+                    id=ssr_id,
+                    motif=unit_motif,
+                    repeats=rep_count,
+                    start=start_idx + 1,
+                    end=end_idx,
+                    sequence=full_match,
+                    flank_5p=flank_5p,
+                    flank_3p=flank_3p
+                ))
+                ssr_count += 1
+        return ssrs
+
+class PrimerDesigner:
+    def __init__(self, opt_tm=58.0, min_tm=50.0, max_tm=65.0, min_size=18, max_size=25, min_product_size=80, max_product_size=250):
+        self.opt_tm = opt_tm
+        self.min_tm = min_tm
+        self.max_tm = max_tm
+        self.min_size = min_size
+        self.max_size = max_size
+        self.min_product_size = min_product_size
+        self.max_product_size = max_product_size
+
+    @staticmethod
+    def calculate_gc(seq):
+        if not seq: return 0.0
+        gc_val = sum(1.0 if b in ("G", "C", "S") else 0.5 if b in ("R", "Y", "K", "M", "B", "D", "H", "V") else 0.0 for b in seq.upper())
+        return round((gc_val / len(seq)) * 100.0, 2)
+
+    @staticmethod
+    def calculate_tm(seq):
+        seq = seq.upper()
+        if len(seq) < 14:
+            return float((sum(1 for b in seq if b in ("A", "T")) * 2) + (sum(1 for b in seq if b in ("G", "C")) * 4))
+        w_tm = (sum(1 for b in seq if b in ("A", "T")) * 2) + (sum(1 for b in seq if b in ("G", "C")) * 4)
+        return float(round(55.0 + (w_tm * 0.1), 2))
+
+    @staticmethod
+    def reverse_complement(seq):
+        comp_map = {"A":"T","T":"A","C":"G","G":"C","U":"A","R":"Y","Y":"R","S":"S","W":"W","K":"M","M":"K","B":"V","V":"B","D":"H","H":"D","N":"N"}
+        return "".join(comp_map.get(b, b) for b in reversed(seq.upper()))
+
+    def design_primers(self, flank_5p, target_seq, flank_3p):
+        full_seq = (flank_5p + target_seq + flank_3p).upper()
+        target_start = len(flank_5p)
+        target_end = target_start + len(target_seq)
+
+        if len(flank_5p) < self.min_size or len(flank_3p) < self.min_size:
+            return PrimerPair("", 0, 0, 0, 0, "", 0, 0, 0, 0, 0, status="REJECTED")
+
+        best_fwd, best_rev = None, None
+        min_penalty = 9999.0
+
+        for f_len in range(self.min_size, self.max_size + 1):
+            for i in range(0, target_start - f_len + 1):
+                f_seq = full_seq[i : i + f_len]
+                f_tm = self.calculate_tm(f_seq)
+                f_gc = self.calculate_gc(f_seq)
+                if self.min_tm <= f_tm <= self.max_tm and 35.0 <= f_gc <= 65.0:
+                    for r_len in range(self.min_size, self.max_size + 1):
+                        for j in range(target_end, len(full_seq) - r_len + 1):
+                            prod_size = (j + r_len) - i
+                            if self.min_product_size <= prod_size <= self.max_product_size:
+                                r_template = full_seq[j : j + r_len]
+                                r_seq = self.reverse_complement(r_template)
+                                r_tm = self.calculate_tm(r_seq)
+                                r_gc = self.calculate_gc(r_seq)
+                                if self.min_tm <= r_tm <= self.max_tm and 35.0 <= r_gc <= 65.0:
+                                    penalty = abs(f_tm - self.opt_tm) + abs(r_tm - self.opt_tm)
+                                    if penalty < min_penalty:
+                                        min_penalty = penalty
+                                        best_fwd = (f_seq, f_tm, f_gc, i + 1, f_len)
+                                        best_rev = (r_seq, r_tm, r_gc, j + 1, r_len, prod_size)
+
+        if best_fwd and best_rev:
+            return PrimerPair(
+                forward_seq=best_fwd[0], forward_tm=best_fwd[1], forward_gc=best_fwd[2],
+                forward_start=best_fwd[3], forward_length=best_fwd[4],
+                reverse_seq=best_rev[0], reverse_tm=best_rev[1], reverse_gc=best_rev[2],
+                reverse_start=best_rev[3], reverse_length=best_rev[4],
+                product_size=best_rev[5], status="OK"
+            )
+        return PrimerPair("", 0, 0, 0, 0, "", 0, 0, 0, 0, 0, status="REJECTED")
+
+class EPCRSimulator:
+    def __init__(self, max_mismatches=2, max_3prime_mismatches=0, min_product_size=50, max_product_size=1000):
+        self.max_mismatches = max_mismatches
+        self.max_3prime_mismatches = max_3prime_mismatches
+        self.min_product_size = min_product_size
+        self.max_product_size = max_product_size
+
+    @staticmethod
+    def reverse_complement(seq):
+        comp_map = {"A":"T","T":"A","C":"G","G":"C","U":"A","R":"Y","Y":"R","S":"S","W":"W","K":"M","M":"K","B":"V","V":"B","D":"H","H":"D","N":"N"}
+        return "".join(comp_map.get(b, b) for b in reversed(seq.upper()))
+
+    def _match_bases(self, p_base, t_base):
+        p_u, t_u = p_base.upper(), t_base.upper()
+        if t_u == "N" and p_u != "N": return False
+        allowed = IUPAC_MAP.get(p_u, {p_u})
+        target_allowed = IUPAC_MAP.get(t_u, {t_u})
+        return bool(allowed.intersection(target_allowed))
+
+    def _find_matches(self, primer, sequence):
+        p_len, seq_len = len(primer), len(sequence)
+        matches = []
+        p_u, seq_u = primer.upper(), sequence.upper()
+        tp_start_idx = max(0, p_len - 5)
+
+        for i in range(seq_len - p_len + 1):
+            subseq = seq_u[i : i + p_len]
+            tot_mm, tp_mm = 0, 0
+            for idx, (pb, sb) in enumerate(zip(p_u, subseq)):
+                if not self._match_bases(pb, sb):
+                    tot_mm += 1
+                    if idx >= tp_start_idx: tp_mm += 1
+            if tot_mm <= self.max_mismatches:
+                matches.append((i + 1, i + p_len, tot_mm, tp_mm))
+        return matches
+
+    def simulate_sequence(self, seq_id, sequence, forward_primer, reverse_primer):
+        amplicons = []
+        fwd_hits = self._find_matches(forward_primer, sequence)
+        rev_comp_primer = self.reverse_complement(reverse_primer)
+        rev_hits = self._find_matches(rev_comp_primer, sequence)
+
+        for f_start, f_end, f_mm, f_3p_mm in fwd_hits:
+            for r_start, r_end, r_mm, r_3p_mm in rev_hits:
+                if r_end > f_start:
+                    prod_size = r_end - f_start + 1
+                    if self.min_product_size <= prod_size <= self.max_product_size:
+                        amp_seq = sequence[f_start - 1 : r_end]
+                        status = "SPECIFIC"
+                        if f_3p_mm > self.max_3prime_mismatches or r_3p_mm > self.max_3prime_mismatches:
+                            status = "3PRIME_MISMATCH"
+                        elif f_mm > 0 or r_mm > 0:
+                            status = "MISMATCH"
+                        amplicons.append(AmpliconResult(
+                            seq_id=seq_id, forward_primer=forward_primer, reverse_primer=reverse_primer,
+                            forward_start=f_start, forward_end=f_end, forward_mismatches=f_mm,
+                            reverse_start=r_start, reverse_end=r_end, reverse_mismatches=r_mm,
+                            product_size=prod_size, amplicon_sequence=amp_seq, status=status
+                        ))
+        if len(amplicons) > 1:
+            for a in amplicons:
+                if a.status != "3PRIME_MISMATCH": a.status = "OFF_TARGET"
+        return amplicons
         `);
 
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-brand-500"></span> Pyodide Engine Ready (Wasm)';
@@ -687,21 +912,11 @@
         pyodide.globals.set('cfg_design_primers', document.getElementById('cfg-design-primers').checked);
 
         const pyCode = `
-import time
 import json
 
-cfg = SSRConfig.get_default()
-cfg.flank_len = cfg_flank
-cfg.primer_opt_tm = cfg_tm
-cfg.primer_min_product_size = cfg_min_prod
-cfg.primer_max_product_size = cfg_max_prod
-
-finder = SSRFinder(cfg)
-compound_proc = CompoundSSRProcessor(cfg)
+finder = SSRFinder(flank_len=cfg_flank)
 primer_designer = PrimerDesigner(
-    opt_tm=cfg.primer_opt_tm,
-    min_product_size=cfg.primer_min_product_size,
-    max_product_size=cfg.primer_max_product_size
+    opt_tm=cfg_tm, min_product_size=cfg_min_prod, max_product_size=cfg_max_prod
 ) if cfg_design_primers else None
 
 sequences = []
@@ -726,13 +941,10 @@ total_primers_ok = 0
 results_json = []
 
 for seq_id, seq in sequences:
-    res = finder.analyze_sequence(seq_id, seq)
-    res = compound_proc.process(res)
+    ssrs = finder.analyze_sequence(seq_id, seq)
+    total_ssrs += len(ssrs)
     
-    total_ssrs += len(res.ssrs)
-    total_compounds += len(res.compounds)
-    
-    for ssr in res.ssrs:
+    for ssr in ssrs:
         f_seq, r_seq, prod_size = "N/A", "N/A", "N/A"
         if primer_designer:
             pair = primer_designer.design_primers(ssr.flank_5p, ssr.sequence, ssr.flank_3p)
