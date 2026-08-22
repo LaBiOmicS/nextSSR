@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>nextSSR — High-Performance SSR Engine & WebAssembly In-Browser Platform</title>
-  <meta name="description" content="Next-Generation High-Performance & FAIR-Compliant Simple Sequence Repeat (SSR) Identification, Primer Design, and In-Browser WebAssembly e-PCR Engine with IndexedDB Storage." />
+  <title>nextSSR — In-Browser WebAssembly Microsatellite Engine</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,15 +14,8 @@
         extend: {
           colors: {
             brand: {
-              50: '#f0fdf4',
               500: '#22c55e',
               600: '#16a34a',
-              700: '#15803d',
-              900: '#14532d',
-            },
-            accent: {
-              500: '#3b82f6',
-              600: '#2563eb',
             }
           }
         }
@@ -34,549 +26,211 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   
-  <!-- Google Fonts: Inter & Fira Code -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    code, pre { font-family: 'Fira Code', monospace; }
-    .hero-gradient {
-      background: radial-gradient(circle at 50% 20%, rgba(34, 197, 94, 0.15) 0%, rgba(15, 23, 42, 0.95) 70%);
-    }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-  </style>
+  <!-- Pyodide WebAssembly Engine CDN -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-slate-950">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
-  <!-- Navigation Header -->
-  <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-500 via-emerald-400 to-accent-500 bg-clip-text text-transparent">
-          nextSSR 🚀
-        </span>
-        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-brand-500/10 text-brand-500 border border-brand-500/20">
-          v0.1.0 Wasm + IndexedDB
-        </span>
-      </div>
-
-      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-        <a href="#app" class="hover:text-brand-500 transition font-bold text-brand-400"><i class="fas fa-play-circle mr-1"></i> Web App</a>
-        <a href="#epcr-app" class="hover:text-brand-500 transition"><i class="fas fa-vial mr-1"></i> In Silico e-PCR</a>
-        <a href="#history" class="hover:text-brand-500 transition"><i class="fas fa-database mr-1"></i> IndexedDB History</a>
-        <a href="#features" class="hover:text-brand-500 transition">Features</a>
-        <a href="#benchmarks" class="hover:text-brand-500 transition">Benchmarks</a>
-        <a href="#paper" class="hover:text-brand-500 transition">Publication</a>
-      </nav>
-
-      <div class="flex items-center space-x-3">
-        <a href="https://pypi.org/project/nextssr/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
-          <i class="fab fa-python text-brand-500"></i> PyPI
-        </a>
-        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 transition shadow-lg shadow-brand-500/20">
-          <i class="fab fa-github text-lg"></i> GitHub
-        </a>
-      </div>
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl font-extrabold text-brand-500">nextSSR 🚀</span>
+      <span class="text-xs bg-brand-500/10 text-brand-500 px-2 py-0.5 rounded-full border border-brand-500/20">Pyodide Wasm + IndexedDB</span>
+    </div>
+    <div class="flex items-center space-x-4 text-sm">
+      <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-github"></i> GitHub</a>
+      <a href="https://pypi.org/project/nextssr/" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-python text-brand-500"></i> PyPI</a>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero-gradient py-16 lg:py-24 relative overflow-hidden border-b border-slate-800/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-      
-      <!-- Badges row -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/50">
-          <i class="fas fa-microchip mr-1"></i> WebAssembly (Wasm) Engine
-        </span>
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-900/40 text-amber-400 border border-amber-700/50">
-          <i class="fas fa-database mr-1"></i> Persistent IndexedDB Storage
-        </span>
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-900/40 text-blue-400 border border-blue-700/50">
-          <i class="fas fa-lock mr-1"></i> 100% Private / Offline Capable
-        </span>
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
+
+    <!-- Status Banner -->
+    <div id="status-banner" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm">
+      <div class="flex items-center space-x-3">
+        <i id="status-icon" class="fas fa-spinner fa-spin text-amber-400 text-lg"></i>
+        <span id="status-text" class="text-amber-200 font-medium">Initializing Pyodide WebAssembly Engine (~6 MB)... Please wait.</span>
       </div>
-
-      <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
-        In-Browser <span class="bg-gradient-to-r from-brand-500 via-emerald-400 to-accent-500 bg-clip-text text-transparent">nextSSR + IndexedDB</span>
-      </h1>
-
-      <p class="max-w-3xl mx-auto text-lg text-slate-400 mb-8 font-normal leading-relaxed">
-        Mining Simple Sequence Repeats, designing thermodynamic PCR primers, and running <span class="text-slate-200 font-semibold">in silico e-PCR</span> powered by Pyodide WebAssembly. Results are saved automatically to local IndexedDB.
-      </p>
-
-      <div class="flex flex-wrap items-center justify-center gap-4">
-        <a href="#app" class="px-8 py-4 text-base font-bold rounded-2xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-xl shadow-brand-500/25 flex items-center justify-center gap-3">
-          <i class="fas fa-rocket"></i> Launch Web App Below
-        </a>
-        <a href="#history" class="px-8 py-4 text-base font-bold rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 transition border border-slate-700 flex items-center justify-center gap-3">
-          <i class="fas fa-database text-amber-400"></i> View Saved History
-        </a>
-      </div>
-
+      <button onclick="initPyodide()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">
+        <i class="fas fa-sync-alt mr-1"></i> Reload Engine
+      </button>
     </div>
-  </section>
 
-  <!-- Interactive Web Application (Pyodide Wasm Engine) -->
-  <section id="app" class="py-16 bg-slate-950 border-b border-slate-800/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Web App Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       
-      <div class="text-center mb-12">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-500 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">WebAssembly + IndexedDB</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Interactive SSR Finder & Primer Designer</h2>
-        <p class="mt-2 text-slate-400 text-sm">Paste a FASTA sequence or upload a file. Processing is executed 100% locally and saved to browser storage.</p>
-      </div>
+      <!-- Parameters Column -->
+      <div class="lg:col-span-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fas fa-sliders text-brand-500"></i> Parameters
+        </h3>
 
-      <!-- Engine Status & Diagnostics Box -->
-      <div id="engine-diag-box" class="max-w-3xl mx-auto mb-8 p-4 glass-card rounded-2xl border border-slate-800 text-xs font-mono">
-        <div class="flex items-center justify-between mb-2">
-          <span class="font-bold text-slate-300 flex items-center gap-2">
-            <i class="fas fa-terminal text-brand-500"></i> Wasm Engine Bootstrapper Log
-          </span>
-          <button onclick="initPyodideEngine()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-sans">
-            <i class="fas fa-sync-alt mr-1"></i> Retry Load
-          </button>
-        </div>
-        <div id="engine-steps-log" class="text-slate-400 space-y-1">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- Form Options Column -->
-        <div class="lg:col-span-4 space-y-6">
-          <div class="glass-card p-6 rounded-2xl border border-slate-800">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <i class="fas fa-sliders text-brand-500"></i> Parameters Configuration
-            </h3>
-
-            <!-- Flank length -->
-            <div class="mb-4">
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Flanking Window (bp)</label>
-              <input type="number" id="cfg-flank" value="100" min="50" max="300" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-            </div>
-
-            <!-- Optimal Tm -->
-            <div class="mb-4">
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Optimal Primer Tm (°C)</label>
-              <input type="number" id="cfg-tm" value="58.0" step="0.5" min="50" max="65" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-            </div>
-
-            <!-- Min/Max Product Size -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Min Amplicon (bp)</label>
-                <input type="number" id="cfg-min-prod" value="80" min="50" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Max Amplicon (bp)</label>
-                <input type="number" id="cfg-max-prod" value="250" min="150" max="500" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-              </div>
-            </div>
-
-            <!-- Checkboxes -->
-            <div class="space-y-2 pt-2 border-t border-slate-800">
-              <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                <input type="checkbox" id="cfg-design-primers" checked class="rounded bg-slate-900 border-slate-700 text-brand-500 focus:ring-0">
-                <span>Design PCR Primers Automatically</span>
-              </label>
-              <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                <input type="checkbox" id="cfg-save-db" checked class="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-0">
-                <span class="text-amber-400 font-semibold">Auto-save run to local IndexedDB</span>
-              </label>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Input & Run Column -->
-        <div class="lg:col-span-8 space-y-6">
-          <div class="glass-card p-6 rounded-2xl border border-slate-800">
-            <div class="flex items-center justify-between mb-3">
-              <label class="text-sm font-bold text-white flex items-center gap-2">
-                <i class="fas fa-dna text-brand-500"></i> FASTA Input Sequence
-              </label>
-              <button onclick="loadSampleFasta()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold underline">
-                Load Sample Yeast Sequence
-              </button>
-            </div>
-            
-            <textarea id="fasta-input" rows="8" placeholder="Paste FASTA sequence here, e.g.:&#10;>chr1_sample_seq&#10;ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500 transition leading-relaxed"></textarea>
-
-            <!-- Execution Buttons -->
-            <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <button id="btn-run-ssr" disabled onclick="runNextSSRWasm()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
-                <i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...
-              </button>
-              
-              <div id="pyodide-status" class="text-xs font-mono text-slate-400 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Loading WebAssembly...
-              </div>
-            </div>
-
-            <!-- Log output stream -->
-            <div id="log-box" class="hidden mt-4 p-3 bg-slate-950 rounded-lg font-mono text-xs text-slate-400 max-h-28 overflow-y-auto border border-slate-800"></div>
-
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Results Display Section -->
-      <div id="results-wrapper" class="hidden mt-10 space-y-8">
-        
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div class="glass-card p-4 rounded-xl border border-slate-800 text-center">
-            <span class="text-xs font-semibold text-slate-400">Total SSRs Found</span>
-            <p id="res-total-ssrs" class="text-2xl font-black text-brand-400 mt-1">0</p>
-          </div>
-          <div class="glass-card p-4 rounded-xl border border-slate-800 text-center">
-            <span class="text-xs font-semibold text-slate-400">Compound SSRs</span>
-            <p id="res-compounds" class="text-2xl font-black text-blue-400 mt-1">0</p>
-          </div>
-          <div class="glass-card p-4 rounded-xl border border-slate-800 text-center">
-            <span class="text-xs font-semibold text-slate-400">Valid Primers OK</span>
-            <p id="res-primers" class="text-2xl font-black text-emerald-400 mt-1">0</p>
-          </div>
-          <div class="glass-card p-4 rounded-xl border border-slate-800 text-center">
-            <span class="text-xs font-semibold text-slate-400">Execution Time</span>
-            <p id="res-time" class="text-2xl font-black text-amber-400 mt-1">0ms</p>
-          </div>
-        </div>
-
-        <!-- SSR Results Table -->
-        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
-          <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
-              <i class="fas fa-table text-brand-500"></i> Identified Microsatellite Loci & Designed PCR Primers
-            </h4>
-            <div class="flex items-center space-x-2">
-              <button onclick="downloadArtifact('gff3')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded text-slate-200 border border-slate-700">
-                <i class="fas fa-download text-brand-400 mr-1"></i> GFF3
-              </button>
-              <button onclick="downloadArtifact('tsv')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded text-slate-200 border border-slate-700">
-                <i class="fas fa-download text-blue-400 mr-1"></i> TSV
-              </button>
-            </div>
-          </div>
-          
-          <div class="overflow-x-auto max-h-96">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-950/80 uppercase font-bold text-slate-400 sticky top-0 border-b border-slate-800">
-                <tr>
-                  <th class="px-4 py-3">SSR ID</th>
-                  <th class="px-4 py-3">Motif</th>
-                  <th class="px-4 py-3">Repeats</th>
-                  <th class="px-4 py-3">Start-End</th>
-                  <th class="px-4 py-3">Forward Primer (5'->3')</th>
-                  <th class="px-4 py-3">Reverse Primer (5'->3')</th>
-                  <th class="px-4 py-3">Amplicon</th>
-                </tr>
-              </thead>
-              <tbody id="ssr-table-body" class="divide-y divide-slate-800/60 font-mono">
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- In Silico e-PCR Simulator Section -->
-  <section id="epcr-app" class="py-16 bg-slate-900/40 border-b border-slate-800/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center mb-12">
-        <span class="text-xs font-bold uppercase tracking-widest text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">Electronic PCR</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">In Silico e-PCR Simulator</h2>
-        <p class="mt-2 text-slate-400 text-sm">Validate primer binding, check 3'-end extension mismatches, and test IUPAC degenerate bases in-browser.</p>
-      </div>
-
-      <div class="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 max-w-4xl mx-auto space-y-6">
-        
-        <!-- FASTA input -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Target Template FASTA</label>
-          <textarea id="epcr-fasta" rows="4" placeholder=">target_seq&#10;GCGCGCGATTACAAGCTACGTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTACGTACGTACGTCGCGCGC" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Flanking Window (bp)</label>
+          <input type="number" id="cfg-flank" value="100" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
         </div>
 
-        <!-- Primers row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Optimal Primer Tm (°C)</label>
+          <input type="number" id="cfg-tm" value="58.0" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">Forward Primer (5' -> 3')</label>
-            <input type="text" id="epcr-fwd" value="GATTACAAGCTACG" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Min Amplicon</label>
+            <input type="number" id="cfg-min-prod" value="80" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">Reverse Primer (5' -> 3')</label>
-            <input type="text" id="epcr-rev" value="ACGTACGTACGT" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Max Amplicon</label>
+            <input type="number" id="cfg-max-prod" value="250" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
           </div>
         </div>
 
-        <!-- Mismatches option -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Max Allowed Mismatches</label>
-            <input type="number" id="epcr-max-mismatch" value="2" min="0" max="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-purple-500">
-          </div>
-          <div class="flex items-end">
-            <button id="btn-run-epcr" disabled onclick="runEPCRWasm()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-lg transition shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 text-sm opacity-50 cursor-not-allowed">
-              <i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...
-            </button>
-          </div>
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="cfg-design-primers" checked class="rounded bg-slate-950 border-slate-800 text-brand-500">
+            <span>Design PCR Primers Automatically</span>
+          </label>
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="cfg-save-db" checked class="rounded bg-slate-950 border-slate-800 text-amber-500">
+            <span class="text-amber-400 font-semibold">Auto-save run to local IndexedDB</span>
+          </label>
         </div>
-
-        <!-- e-PCR Output Table -->
-        <div id="epcr-results-wrapper" class="hidden pt-4 border-t border-slate-800">
-          <h4 class="text-xs font-bold text-white mb-3">Predicted e-PCR Amplicons</h4>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300 font-mono">
-              <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th class="px-3 py-2">Seq ID</th>
-                  <th class="px-3 py-2">Amplicon Size</th>
-                  <th class="px-3 py-2">Fwd Mismatches</th>
-                  <th class="px-3 py-2">Rev Mismatches</th>
-                  <th class="px-3 py-2">Status</th>
-                </tr>
-              </thead>
-              <tbody id="epcr-table-body" class="divide-y divide-slate-800/60">
-              </tbody>
-            </table>
-          </div>
-        </div>
-
       </div>
 
-    </div>
-  </section>
-
-  <!-- IndexedDB Storage History Section -->
-  <section id="history" class="py-16 bg-slate-950 border-b border-slate-800/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">IndexedDB Database</span>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-2">Saved Analysis History</h2>
-          <p class="text-slate-400 text-xs mt-1">Runs are preserved locally inside your browser storage across sessions.</p>
+      <!-- FASTA Input & Execution Column -->
+      <div class="lg:col-span-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fas fa-dna text-brand-500"></i> FASTA Input Sequence
+          </label>
+          <button onclick="loadSampleFasta()" class="text-xs text-brand-400 hover:underline">Load Sample Yeast Sequence</button>
         </div>
-        <button onclick="clearIndexedDBHistory()" class="px-4 py-2 bg-rose-900/40 hover:bg-rose-900/60 text-rose-300 text-xs font-bold rounded-xl border border-rose-700/50 transition flex items-center gap-2">
-          <i class="fas fa-trash-alt"></i> Clear IndexedDB History
+
+        <textarea id="fasta-input" rows="8" placeholder=">sample_seq&#10;ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+
+        <button id="btn-run" disabled onclick="runNextSSR()" class="w-full py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fas fa-play"></i> Run nextSSR In-Browser
         </button>
       </div>
 
-      <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/80 uppercase font-bold text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="px-4 py-3">Timestamp</th>
-                <th class="px-4 py-3">Sequence Header</th>
-                <th class="px-4 py-3">Total SSRs</th>
-                <th class="px-4 py-3">Compounds</th>
-                <th class="px-4 py-3">Primers OK</th>
-                <th class="px-4 py-3">Time</th>
-                <th class="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="db-history-table-body" class="divide-y divide-slate-800/60 font-mono">
-              <tr>
-                <td colspan="7" class="px-4 py-6 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet. Run an analysis above!</td>
-              </tr>
-            </tbody>
-          </table>
+    </div>
+
+    <!-- Results Table -->
+    <div id="results-wrapper" class="hidden bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fas fa-table text-brand-500"></i> Microsatellite Loci & PCR Primers Results
+        </h4>
+        <div class="space-x-2">
+          <button onclick="downloadFile('gff3')" class="px-3 py-1 bg-slate-800 text-xs text-brand-400 rounded">GFF3</button>
+          <button onclick="downloadFile('tsv')" class="px-3 py-1 bg-slate-800 text-xs text-blue-400 rounded">TSV</button>
         </div>
       </div>
 
-    </div>
-  </section>
-
-  <!-- Empirical Benchmarks Section -->
-  <section id="benchmarks" class="py-16 bg-slate-900/40 border-b border-slate-800/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-extrabold text-white tracking-tight">Empirical Accuracy & Benchmarks</h2>
-        <p class="mt-2 text-slate-400 text-sm">Evaluated against MISA across real NCBI genomic assemblies.</p>
-      </div>
-
-      <div class="overflow-x-auto glass-card rounded-2xl border border-slate-800">
+      <div class="overflow-x-auto max-h-96">
         <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-900/80 uppercase font-bold text-slate-400 border-b border-slate-800">
+          <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="px-6 py-4">Accession</th>
-              <th class="px-6 py-4">Organism & Type</th>
-              <th class="px-6 py-4">Size</th>
-              <th class="px-6 py-4">MISA (s)</th>
-              <th class="px-6 py-4 text-brand-500">nextSSR 8-T (s)</th>
-              <th class="px-6 py-4">SSR Concordance</th>
-              <th class="px-6 py-4">Primers (OK)</th>
+              <th class="px-4 py-3">SSR ID</th>
+              <th class="px-4 py-3">Motif</th>
+              <th class="px-4 py-3">Repeats</th>
+              <th class="px-4 py-3">Start-End</th>
+              <th class="px-4 py-3">Forward Primer</th>
+              <th class="px-4 py-3">Reverse Primer</th>
+              <th class="px-4 py-3">Amplicon</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60">
-            <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-3.5 font-mono text-slate-400">NC_000932.1</td>
-              <td class="px-6 py-3.5 font-semibold text-white">Arabidopsis thaliana (cp)</td>
-              <td class="px-6 py-3.5">0.15 MB</td>
-              <td class="px-6 py-3.5">0.252s</td>
-              <td class="px-6 py-3.5 font-bold text-brand-400">3.231s</td>
-              <td class="px-6 py-3.5 text-emerald-400 font-bold">77 / 77 (100%)</td>
-              <td class="px-6 py-3.5">22 Pairs</td>
+          <tbody id="table-body" class="divide-y divide-slate-800 font-mono"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- IndexedDB Run History -->
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fas fa-database text-amber-400"></i> IndexedDB History
+        </h3>
+        <button onclick="clearHistory()" class="text-xs text-rose-400 hover:underline">Clear History</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-300 font-mono">
+          <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="px-4 py-2">Timestamp</th>
+              <th class="px-4 py-2">Header</th>
+              <th class="px-4 py-2">Total SSRs</th>
+              <th class="px-4 py-2">Primers OK</th>
+              <th class="px-4 py-2">Time</th>
+              <th class="px-4 py-2 text-right">Actions</th>
             </tr>
-            <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-3.5 font-mono text-slate-400">NC_011033.1</td>
-              <td class="px-6 py-3.5 font-semibold text-white">Oryza sativa (Rice mt)</td>
-              <td class="px-6 py-3.5">0.47 MB</td>
-              <td class="px-6 py-3.5">0.775s</td>
-              <td class="px-6 py-3.5 font-bold text-brand-400">1.924s</td>
-              <td class="px-6 py-3.5 text-emerald-400 font-bold">27 / 27 (100%)</td>
-              <td class="px-6 py-3.5">22 Pairs</td>
-            </tr>
-            <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-3.5 font-mono text-slate-400">NC_000913.3</td>
-              <td class="px-6 py-3.5 font-semibold text-white">E. coli K-12 MG1655</td>
-              <td class="px-6 py-3.5">4.49 MB</td>
-              <td class="px-6 py-3.5">6.017s</td>
-              <td class="px-6 py-3.5 font-bold text-brand-400">3.312s (2x Faster)</td>
-              <td class="px-6 py-3.5 text-emerald-400 font-bold">4 / 4 (100%)</td>
-              <td class="px-6 py-3.5">4 Pairs</td>
-            </tr>
-            <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-3.5 font-mono text-slate-400">S_cerevisiae_16Chr</td>
-              <td class="px-6 py-3.5 font-semibold text-white">Saccharomyces cerevisiae</td>
-              <td class="px-6 py-3.5">11.68 MB</td>
-              <td class="px-6 py-3.5">16.169s</td>
-              <td class="px-6 py-3.5 font-bold text-brand-400">120.395s</td>
-              <td class="px-6 py-3.5 text-emerald-400 font-bold">3,256 / 3,256 (100%)</td>
-              <td class="px-6 py-3.5">2,032 Pairs</td>
-            </tr>
+          </thead>
+          <tbody id="db-table-body" class="divide-y divide-slate-800">
+            <tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-  </section>
 
-  <!-- Citation Section -->
-  <section id="paper" class="py-16 bg-slate-900/40 border-b border-slate-800/60">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-2xl font-bold text-white mb-3">Scientific Citation</h2>
-      <p class="text-slate-400 text-xs mb-6">If you use nextSSR in your research, please cite:</p>
-      
-      <div class="glass-card p-5 rounded-xl text-left border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed">
-        <p><span class="text-purple-400">@article</span>{menegidio2026nextssr,</p>
-        <p class="pl-4">title={nextSSR: a high-performance, FAIR-compliant platform for standalone microsatellite identification, automated PCR primer design, and in silico e-PCR simulation},</p>
-        <p class="pl-4">author={Menegidio, Fabiano},</p>
-        <p class="pl-4">journal={BMC Bioinformatics},</p>
-        <p class="pl-4">year={2026}</p>
-        <p>}</p>
-      </div>
-    </div>
-  </section>
+  </main>
 
   <!-- Footer -->
-  <footer class="py-8 bg-slate-950 text-slate-500 text-xs text-center border-t border-slate-900">
-    <div class="max-w-7xl mx-auto px-4">
-      <p>© 2026 Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS) & Universidade Mogi das Cruzes (UMC).</p>
-      <p class="mt-1 text-slate-600">Released under the MIT License.</p>
-    </div>
+  <footer class="py-4 bg-slate-900 text-center text-xs text-slate-500 border-t border-slate-800">
+    © 2026 LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences
   </footer>
 
-  <!-- IndexedDB & Pyodide Application Scripts -->
+  <!-- Application Logic -->
   <script>
     let pyodide = null;
-    let artifactsData = { gff3: '', tsv: '' };
     let db = null;
+    let artifacts = { gff3: '', tsv: '' };
 
-    function diagLog(stepMsg, isError = false) {
-      const diagEl = document.getElementById('engine-steps-log');
-      if (!diagEl) return;
-      const p = document.createElement('p');
-      if (isError) {
-        p.className = 'text-rose-400 font-bold';
-        p.innerHTML = `❌ ${stepMsg}`;
-      } else {
-        p.className = 'text-emerald-400';
-        p.innerHTML = `✓ ${stepMsg}`;
-      }
-      diagEl.appendChild(p);
-      diagEl.scrollTop = diagEl.scrollHeight;
-    }
-
-    // --- IndexedDB Storage Engine ---
-    function initIndexedDB() {
-      const request = indexedDB.open("nextSSR_DB", 1);
-      
-      request.onupgradeneeded = function(e) {
+    // --- IndexedDB ---
+    function initDB() {
+      const req = indexedDB.open("nextSSR_DB", 1);
+      req.onupgradeneeded = (e) => {
         db = e.target.result;
         if (!db.objectStoreNames.contains("runs")) {
-          const store = db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
-          store.createIndex("timestamp", "timestamp", { unique: false });
+          db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
         }
       };
-
-      request.onsuccess = function(e) {
+      req.onsuccess = (e) => {
         db = e.target.result;
-        loadHistoryFromDB();
-        diagLog('IndexedDB local storage ready.');
-      };
-
-      request.onerror = function(e) {
-        console.error("IndexedDB error:", e);
-        diagLog(`IndexedDB error: ${e.target.errorCode}`, true);
+        loadDBHistory();
       };
     }
 
-    function saveRunToDB(runRecord) {
+    function saveDBRun(runData) {
       if (!db) return;
       const tx = db.transaction(["runs"], "readwrite");
-      const store = tx.objectStore("runs");
-      store.add(runRecord);
-      tx.oncomplete = function() {
-        loadHistoryFromDB();
-      };
+      tx.objectStore("runs").add(runData);
+      tx.oncomplete = () => loadDBHistory();
     }
 
-    function loadHistoryFromDB() {
+    function loadDBHistory() {
       if (!db) return;
       const tx = db.transaction(["runs"], "readonly");
-      const store = tx.objectStore("runs");
-      const request = store.getAll();
-
-      request.onsuccess = function() {
-        const runs = request.result;
-        const tbody = document.getElementById('db-history-table-body');
+      const req = tx.objectStore("runs").getAll();
+      req.onsuccess = () => {
+        const tbody = document.getElementById('db-table-body');
         tbody.innerHTML = '';
-
-        if (runs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet. Run an analysis above!</td></tr>';
+        if (req.result.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>';
           return;
         }
-
-        runs.reverse().forEach(run => {
+        req.result.reverse().forEach(run => {
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="px-4 py-2.5 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
-            <td class="px-4 py-2.5 text-white font-bold">${run.header}</td>
-            <td class="px-4 py-2.5 text-brand-400 font-bold">${run.total_ssrs}</td>
-            <td class="px-4 py-2.5 text-blue-400">${run.total_compounds}</td>
-            <td class="px-4 py-2.5 text-emerald-400">${run.total_primers_ok}</td>
-            <td class="px-4 py-2.5 text-amber-400">${run.exec_time}ms</td>
-            <td class="px-4 py-2.5 text-right space-x-2">
-              <button onclick="restoreRunFromDB(${run.id})" class="px-2.5 py-1 bg-brand-900/50 hover:bg-brand-800 text-brand-300 font-sans text-xs rounded border border-brand-700/50">
-                <i class="fas fa-eye mr-1"></i> View
-              </button>
-              <button onclick="deleteRunFromDB(${run.id})" class="px-2 py-1 bg-rose-900/40 hover:bg-rose-800 text-rose-300 font-sans text-xs rounded border border-rose-700/50">
-                <i class="fas fa-times"></i>
-              </button>
+            <td class="px-4 py-2 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
+            <td class="px-4 py-2 font-bold text-white">${run.header}</td>
+            <td class="px-4 py-2 text-brand-500 font-bold">${run.total_ssrs}</td>
+            <td class="px-4 py-2 text-emerald-400">${run.total_primers_ok}</td>
+            <td class="px-4 py-2 text-amber-400">${run.exec_time}ms</td>
+            <td class="px-4 py-2 text-right">
+              <button onclick="restoreRun(${run.id})" class="px-2 py-1 bg-brand-900/60 text-brand-300 rounded font-sans text-xs">View</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -584,407 +238,182 @@
       };
     }
 
-    function deleteRunFromDB(id) {
-      if (!db) return;
-      const tx = db.transaction(["runs"], "readwrite");
-      const store = tx.objectStore("runs");
-      store.delete(id);
-      tx.oncomplete = function() {
-        loadHistoryFromDB();
-      };
-    }
-
-    function clearIndexedDBHistory() {
-      if (!db) return;
-      if (confirm("Are you sure you want to clear all saved runs from IndexedDB?")) {
+    function clearHistory() {
+      if (db && confirm("Clear all IndexedDB history?")) {
         const tx = db.transaction(["runs"], "readwrite");
-        const store = tx.objectStore("runs");
-        store.clear();
-        tx.oncomplete = function() {
-          loadHistoryFromDB();
-        };
+        tx.objectStore("runs").clear();
+        tx.oncomplete = () => loadDBHistory();
       }
     }
 
-    function restoreRunFromDB(id) {
+    function restoreRun(id) {
       if (!db) return;
       const tx = db.transaction(["runs"], "readonly");
-      const store = tx.objectStore("runs");
-      const request = store.get(id);
-
-      request.onsuccess = function() {
-        const run = request.result;
+      const req = tx.objectStore("runs").get(id);
+      req.onsuccess = () => {
+        const run = req.result;
         if (!run) return;
+        artifacts.gff3 = run.gff3;
+        artifacts.tsv = run.tsv;
 
-        document.getElementById('res-total-ssrs').innerText = run.total_ssrs;
-        document.getElementById('res-compounds').innerText = run.total_compounds;
-        document.getElementById('res-primers').innerText = run.total_primers_ok;
-        document.getElementById('res-time').innerText = `${run.exec_time}ms`;
-
-        artifactsData.gff3 = run.gff3;
-        artifactsData.tsv = run.tsv;
-
-        const tbody = document.getElementById('ssr-table-body');
+        const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
-
         run.ssrs.forEach(item => {
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="px-4 py-2.5 font-bold text-brand-400">${item.ssr_id}</td>
-            <td class="px-4 py-2.5 text-white font-bold">${item.motif}</td>
-            <td class="px-4 py-2.5">${item.repeats}x</td>
-            <td class="px-4 py-2.5 text-slate-400">${item.start}-${item.end}</td>
-            <td class="px-4 py-2.5 text-blue-400">${item.fwd}</td>
-            <td class="px-4 py-2.5 text-purple-400">${item.rev}</td>
-            <td class="px-4 py-2.5 font-bold text-emerald-400">${item.product_size}</td>
+            <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
+            <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
+            <td class="px-4 py-2">${item.repeats}x</td>
+            <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
+            <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
+            <td class="px-4 py-2 text-purple-400">${item.rev}</td>
+            <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
           `;
           tbody.appendChild(tr);
         });
-
         document.getElementById('results-wrapper').classList.remove('hidden');
-        window.location.hash = '#results-wrapper';
       };
     }
 
-    // --- Fail-Safe Pyodide Bootstrapper ---
-    function logMsg(msg) {
-      const box = document.getElementById('log-box');
-      box.classList.remove('hidden');
-      box.innerHTML += `<p>> ${msg}</p>`;
-      box.scrollTop = box.scrollHeight;
+    function loadSampleFasta() {
+      document.getElementById('fasta-input').value = `>chr1_sample_yeast\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC`;
     }
 
-    async function initPyodideEngine() {
-      const statusEl = document.getElementById('pyodide-status');
-      const btnSSR = document.getElementById('btn-run-ssr');
-      const btnEPCR = document.getElementById('btn-run-epcr');
-      const diagEl = document.getElementById('engine-steps-log');
+    // --- Pyodide WebAssembly Engine Loader ---
+    async function initPyodide() {
+      const banner = document.getElementById('status-banner');
+      const icon = document.getElementById('status-icon');
+      const text = document.getElementById('status-text');
+      const btn = document.getElementById('btn-run');
 
-      if (diagEl) diagEl.innerHTML = '';
-      initIndexedDB();
-
-      btnSSR.disabled = true;
-      btnEPCR.disabled = true;
-      btnSSR.classList.add('opacity-50', 'cursor-not-allowed');
-      btnEPCR.classList.add('opacity-50', 'cursor-not-allowed');
-      btnSSR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Engine...';
-      btnEPCR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Engine...';
+      banner.className = "bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+      icon.className = "fas fa-spinner fa-spin text-amber-400 text-lg";
+      text.innerText = "Initializing Pyodide WebAssembly Engine (~6 MB)... Please wait.";
+      btn.disabled = true;
 
       try {
-        diagLog('Step 1/3: Loading Pyodide script engine...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> [1/3] Loading Script...';
-
-        if (typeof window.loadPyodide !== 'function') {
-          diagLog('Injecting Pyodide script tag dynamically...');
-          await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js";
-            script.onload = resolve;
-            script.onerror = () => reject(new Error("Failed to load pyodide.js script from CDN"));
-            document.head.appendChild(script);
-          });
-        }
-
-        diagLog('Step 2/3: Pyodide script ready. Downloading Wasm binaries (~6 MB)...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> [2/3] Downloading Wasm Binaries...';
-
-        pyodide = await window.loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
-        });
-
-        diagLog('Step 3/3: Wasm binaries downloaded! Compiling nextSSR Python engine...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> [3/3] Compiling Engine...';
+        console.log("Calling loadPyodide()...");
+        pyodide = await loadPyodide();
+        console.log("Pyodide loaded. Executing Python engine...");
 
         await pyodide.runPythonAsync(`
-import math
-import json
-import re
-from dataclasses import dataclass
-from typing import List, Tuple, Dict, Optional, Set
+import math, json, re
 
-# --- CONFIG CLASS ---
-class SSRConfig:
-    @staticmethod
-    def get_default():
-        return SSRConfig()
-    def __init__(self):
-        self.flank_len = 100
-        self.primer_opt_tm = 58.0
-        self.primer_min_product_size = 80
-        self.primer_max_product_size = 250
+MIN_REPEATS = {1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5}
 
-# --- IUPAC MAP ---
-IUPAC_MAP = {
-    "A": {"A"}, "C": {"C"}, "G": {"G"}, "T": {"T"}, "U": {"T"},
-    "R": {"A", "G"}, "Y": {"C", "T"}, "S": {"G", "C"}, "W": {"A", "T"},
-    "K": {"G", "T"}, "M": {"A", "C"}, "B": {"C", "G", "T"},
-    "D": {"A", "G", "T"}, "H": {"A", "C", "T"}, "V": {"A", "C", "G"},
-    "N": {"A", "C", "G", "T"}
-}
+def calc_tm(seq):
+    seq = seq.upper()
+    if len(seq) < 14:
+        return float((sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4))
+    w_tm = (sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4)
+    return float(round(55.0 + (w_tm * 0.1), 2))
 
-# --- DATACLASSES ---
-@dataclass
-class SSRMotif:
-    id: str
-    motif: str
-    repeats: int
-    start: int
-    end: int
-    sequence: str
-    flank_5p: str
-    flank_3p: str
-    primer_pair: Optional[object] = None
+def calc_gc(seq):
+    if not seq: return 0.0
+    return round((sum(1 for b in seq.upper() if b in ("G","C")) / len(seq)) * 100.0, 2)
 
-@dataclass
-class PrimerPair:
-    forward_seq: str
-    forward_tm: float
-    forward_gc: float
-    forward_start: int
-    forward_length: int
-    reverse_seq: str
-    reverse_tm: float
-    reverse_gc: float
-    reverse_start: int
-    reverse_length: int
-    product_size: int
-    status: str = "OK"
+def rev_comp(seq):
+    comp = {"A":"T","T":"A","C":"G","G":"C","N":"N"}
+    return "".join(comp.get(b, b) for b in reversed(seq.upper()))
 
-@dataclass
-class AmpliconResult:
-    seq_id: str
-    forward_primer: str
-    reverse_primer: str
-    forward_start: int
-    forward_end: int
-    forward_mismatches: int
-    reverse_start: int
-    reverse_end: int
-    reverse_mismatches: int
-    product_size: int
-    amplicon_sequence: str
-    amplicon_gc: float = 0.0
-    status: str = "SPECIFIC"
+def find_ssrs(seq_id, sequence, flank_len=100):
+    ssrs = []
+    seq_u = sequence.upper()
+    seq_len = len(seq_u)
+    count = 1
 
-# --- ENGINE MODULES ---
-class SSRFinder:
-    def __init__(self, flank_len=100):
-        self.flank_len = flank_len
-        self.min_repeats = {1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5}
+    for motif_len in range(1, 7):
+        min_rep = MIN_REPEATS[motif_len]
+        pattern = re.compile(rf"(([ATCG]{{{motif_len}}})\2{{{min_rep - 1},}})")
+        for m in pattern.finditer(seq_u):
+            full_match = m.group(1)
+            unit_motif = m.group(2)
+            rep_count = len(full_match) // motif_len
+            start_idx = m.start()
+            end_idx = m.end()
 
-    def analyze_sequence(self, seq_id, sequence):
-        ssrs = []
-        seq_u = sequence.upper()
-        seq_len = len(seq_u)
-        ssr_count = 1
+            flank_5p = seq_u[max(0, start_idx - flank_len):start_idx]
+            flank_3p = seq_u[end_idx:min(seq_len, end_idx + flank_len)]
 
-        for motif_len in range(1, 7):
-            min_rep = self.min_repeats[motif_len]
-            regex = re.compile(rf"(([ATCG]{{{motif_len}}})\2{{{min_rep - 1},}})")
-            for match in regex.finditer(seq_u):
-                full_match = match.group(1)
-                unit_motif = match.group(2)
-                rep_count = len(full_match) // motif_len
-                start_idx = match.start()
-                end_idx = match.end()
+            ssrs.append({
+                "ssr_id": f"{seq_id}_SSR_{count:03d}",
+                "motif": unit_motif,
+                "repeats": rep_count,
+                "start": start_idx + 1,
+                "end": end_idx,
+                "sequence": full_match,
+                "flank_5p": flank_5p,
+                "flank_3p": flank_3p
+            })
+            count += 1
+    return ssrs
 
-                flank_5p = seq_u[max(0, start_idx - self.flank_len):start_idx]
-                flank_3p = seq_u[end_idx:min(seq_len, end_idx + self.flank_len)]
+def design_primer(flank_5p, target_seq, flank_3p, opt_tm=58.0, min_prod=80, max_prod=250):
+    full_seq = (flank_5p + target_seq + flank_3p).upper()
+    target_start = len(flank_5p)
+    target_end = target_start + len(target_seq)
 
-                ssr_id = f"{seq_id}_SSR_{ssr_count:03d}"
-                ssrs.append(SSRMotif(
-                    id=ssr_id,
-                    motif=unit_motif,
-                    repeats=rep_count,
-                    start=start_idx + 1,
-                    end=end_idx,
-                    sequence=full_match,
-                    flank_5p=flank_5p,
-                    flank_3p=flank_3p
-                ))
-                ssr_count += 1
-        return ssrs
+    if len(flank_5p) < 18 or len(flank_3p) < 18:
+        return {"status": "REJECTED"}
 
-class PrimerDesigner:
-    def __init__(self, opt_tm=58.0, min_tm=50.0, max_tm=65.0, min_size=18, max_size=25, min_product_size=80, max_product_size=250):
-        self.opt_tm = opt_tm
-        self.min_tm = min_tm
-        self.max_tm = max_tm
-        self.min_size = min_size
-        self.max_size = max_size
-        self.min_product_size = min_product_size
-        self.max_product_size = max_product_size
+    best_fwd, best_rev = None, None
+    min_penalty = 9999.0
 
-    @staticmethod
-    def calculate_gc(seq):
-        if not seq: return 0.0
-        gc_val = sum(1.0 if b in ("G", "C", "S") else 0.5 if b in ("R", "Y", "K", "M", "B", "D", "H", "V") else 0.0 for b in seq.upper())
-        return round((gc_val / len(seq)) * 100.0, 2)
+    for f_len in range(18, 26):
+        for i in range(0, target_start - f_len + 1):
+            f_seq = full_seq[i : i + f_len]
+            f_tm = calc_tm(f_seq)
+            f_gc = calc_gc(f_seq)
+            if 50.0 <= f_tm <= 65.0 and 35.0 <= f_gc <= 65.0:
+                for r_len in range(18, 26):
+                    for j in range(target_end, len(full_seq) - r_len + 1):
+                        prod_size = (j + r_len) - i
+                        if min_prod <= prod_size <= max_prod:
+                            r_template = full_seq[j : j + r_len]
+                            r_seq = rev_comp(r_template)
+                            r_tm = calc_tm(r_seq)
+                            r_gc = calc_gc(r_seq)
+                            if 50.0 <= r_tm <= 65.0 and 35.0 <= r_gc <= 65.0:
+                                penalty = abs(f_tm - opt_tm) + abs(r_tm - opt_tm)
+                                if penalty < min_penalty:
+                                    min_penalty = penalty
+                                    best_fwd = (f_seq, f_tm, f_gc, i + 1)
+                                    best_rev = (r_seq, r_tm, r_gc, j + 1, prod_size)
 
-    @staticmethod
-    def calculate_tm(seq):
-        seq = seq.upper()
-        if len(seq) < 14:
-            return float((sum(1 for b in seq if b in ("A", "T")) * 2) + (sum(1 for b in seq if b in ("G", "C")) * 4))
-        w_tm = (sum(1 for b in seq if b in ("A", "T")) * 2) + (sum(1 for b in seq if b in ("G", "C")) * 4)
-        return float(round(55.0 + (w_tm * 0.1), 2))
-
-    @staticmethod
-    def reverse_complement(seq):
-        comp_map = {"A":"T","T":"A","C":"G","G":"C","U":"A","R":"Y","Y":"R","S":"S","W":"W","K":"M","M":"K","B":"V","V":"B","D":"H","H":"D","N":"N"}
-        return "".join(comp_map.get(b, b) for b in reversed(seq.upper()))
-
-    def design_primers(self, flank_5p, target_seq, flank_3p):
-        full_seq = (flank_5p + target_seq + flank_3p).upper()
-        target_start = len(flank_5p)
-        target_end = target_start + len(target_seq)
-
-        if len(flank_5p) < self.min_size or len(flank_3p) < self.min_size:
-            return PrimerPair("", 0, 0, 0, 0, "", 0, 0, 0, 0, 0, status="REJECTED")
-
-        best_fwd, best_rev = None, None
-        min_penalty = 9999.0
-
-        for f_len in range(self.min_size, self.max_size + 1):
-            for i in range(0, target_start - f_len + 1):
-                f_seq = full_seq[i : i + f_len]
-                f_tm = self.calculate_tm(f_seq)
-                f_gc = self.calculate_gc(f_seq)
-                if self.min_tm <= f_tm <= self.max_tm and 35.0 <= f_gc <= 65.0:
-                    for r_len in range(self.min_size, self.max_size + 1):
-                        for j in range(target_end, len(full_seq) - r_len + 1):
-                            prod_size = (j + r_len) - i
-                            if self.min_product_size <= prod_size <= self.max_product_size:
-                                r_template = full_seq[j : j + r_len]
-                                r_seq = self.reverse_complement(r_template)
-                                r_tm = self.calculate_tm(r_seq)
-                                r_gc = self.calculate_gc(r_seq)
-                                if self.min_tm <= r_tm <= self.max_tm and 35.0 <= r_gc <= 65.0:
-                                    penalty = abs(f_tm - self.opt_tm) + abs(r_tm - self.opt_tm)
-                                    if penalty < min_penalty:
-                                        min_penalty = penalty
-                                        best_fwd = (f_seq, f_tm, f_gc, i + 1, f_len)
-                                        best_rev = (r_seq, r_tm, r_gc, j + 1, r_len, prod_size)
-
-        if best_fwd and best_rev:
-            return PrimerPair(
-                forward_seq=best_fwd[0], forward_tm=best_fwd[1], forward_gc=best_fwd[2],
-                forward_start=best_fwd[3], forward_length=best_fwd[4],
-                reverse_seq=best_rev[0], reverse_tm=best_rev[1], reverse_gc=best_rev[2],
-                reverse_start=best_rev[3], reverse_length=best_rev[4],
-                product_size=best_rev[5], status="OK"
-            )
-        return PrimerPair("", 0, 0, 0, 0, "", 0, 0, 0, 0, 0, status="REJECTED")
-
-class EPCRSimulator:
-    def __init__(self, max_mismatches=2, max_3prime_mismatches=0, min_product_size=50, max_product_size=1000):
-        self.max_mismatches = max_mismatches
-        self.max_3prime_mismatches = max_3prime_mismatches
-        self.min_product_size = min_product_size
-        self.max_product_size = max_product_size
-
-    @staticmethod
-    def reverse_complement(seq):
-        comp_map = {"A":"T","T":"A","C":"G","G":"C","U":"A","R":"Y","Y":"R","S":"S","W":"W","K":"M","M":"K","B":"V","V":"B","D":"H","H":"D","N":"N"}
-        return "".join(comp_map.get(b, b) for b in reversed(seq.upper()))
-
-    def _match_bases(self, p_base, t_base):
-        p_u, t_u = p_base.upper(), t_base.upper()
-        if t_u == "N" and p_u != "N": return False
-        allowed = IUPAC_MAP.get(p_u, {p_u})
-        target_allowed = IUPAC_MAP.get(t_u, {t_u})
-        return bool(allowed.intersection(target_allowed))
-
-    def _find_matches(self, primer, sequence):
-        p_len, seq_len = len(primer), len(sequence)
-        matches = []
-        p_u, seq_u = primer.upper(), sequence.upper()
-        tp_start_idx = max(0, p_len - 5)
-
-        for i in range(seq_len - p_len + 1):
-            subseq = seq_u[i : i + p_len]
-            tot_mm, tp_mm = 0, 0
-            for idx, (pb, sb) in enumerate(zip(p_u, subseq)):
-                if not self._match_bases(pb, sb):
-                    tot_mm += 1
-                    if idx >= tp_start_idx: tp_mm += 1
-            if tot_mm <= self.max_mismatches:
-                matches.append((i + 1, i + p_len, tot_mm, tp_mm))
-        return matches
-
-    def simulate_sequence(self, seq_id, sequence, forward_primer, reverse_primer):
-        amplicons = []
-        fwd_hits = self._find_matches(forward_primer, sequence)
-        rev_comp_primer = self.reverse_complement(reverse_primer)
-        rev_hits = self._find_matches(rev_comp_primer, sequence)
-
-        for f_start, f_end, f_mm, f_3p_mm in fwd_hits:
-            for r_start, r_end, r_mm, r_3p_mm in rev_hits:
-                if r_end > f_start:
-                    prod_size = r_end - f_start + 1
-                    if self.min_product_size <= prod_size <= self.max_product_size:
-                        amp_seq = sequence[f_start - 1 : r_end]
-                        status = "SPECIFIC"
-                        if f_3p_mm > self.max_3prime_mismatches or r_3p_mm > self.max_3prime_mismatches:
-                            status = "3PRIME_MISMATCH"
-                        elif f_mm > 0 or r_mm > 0:
-                            status = "MISMATCH"
-                        amplicons.append(AmpliconResult(
-                            seq_id=seq_id, forward_primer=forward_primer, reverse_primer=reverse_primer,
-                            forward_start=f_start, forward_end=f_end, forward_mismatches=f_mm,
-                            reverse_start=r_start, reverse_end=r_end, reverse_mismatches=r_mm,
-                            product_size=prod_size, amplicon_sequence=amp_seq, status=status
-                        ))
-        if len(amplicons) > 1:
-            for a in amplicons:
-                if a.status != "3PRIME_MISMATCH": a.status = "OFF_TARGET"
-        return amplicons
+    if best_fwd and best_rev:
+        return {
+            "status": "OK",
+            "fwd": best_fwd[0],
+            "rev": best_rev[0],
+            "product_size": f"{best_rev[4]} bp"
+        }
+    return {"status": "REJECTED"}
         `);
 
-        diagLog('nextSSR WebAssembly engine ready and loaded in browser memory!');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-brand-500"></span> Pyodide Engine Ready (Wasm)';
-        
-        // UNLOCK FORM BUTTONS & INPUTS ONCE ENGINE IS FULLY READY!
-        btnSSR.disabled = false;
-        btnEPCR.disabled = false;
-        btnSSR.classList.remove('opacity-50', 'cursor-not-allowed');
-        btnEPCR.classList.remove('opacity-50', 'cursor-not-allowed');
-        btnSSR.innerHTML = '<i class="fas fa-play"></i> Run nextSSR In-Browser';
-        btnEPCR.innerHTML = '<i class="fas fa-vial"></i> Run In Silico e-PCR';
+        banner.className = "bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        icon.className = "fas fa-check-circle text-emerald-400 text-lg";
+        text.innerText = "Pyodide WebAssembly Engine Ready!";
+        btn.disabled = false;
 
       } catch (err) {
-        console.error(err);
-        diagLog(err.message, true);
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Engine Load Failed';
-        btnSSR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
-        btnEPCR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
+        console.error("Pyodide init error:", err);
+        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
+        text.innerText = `Engine Initialization Failed: ${err.message}`;
       }
     }
 
-    function loadSampleFasta() {
-      document.getElementById('fasta-input').value = `>chr1_yeast_segment\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC\n>chr2_ecoli_segment\nGATTACAAGCTACGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGCGATCGATCGATCGATCGATCGATCGAATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATACGTACGTACGT`;
-    }
-
-    async function runNextSSRWasm() {
-      const btn = document.getElementById('btn-run-ssr');
+    async function runNextSSR() {
       const fastaText = document.getElementById('fasta-input').value.trim();
+      const btn = document.getElementById('btn-run');
 
       if (!fastaText) {
-        alert('Please enter or paste a FASTA sequence.');
-        return;
-      }
-
-      if (!pyodide) {
-        alert('Pyodide engine is still initializing. Please wait a few seconds...');
+        alert("Please enter a FASTA sequence.");
         return;
       }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-      document.getElementById('log-box').innerHTML = '';
-      logMsg('Parsing FASTA and starting nextSSR analysis...');
-
       const startTime = performance.now();
 
       try {
@@ -996,13 +425,6 @@ class EPCRSimulator:
         pyodide.globals.set('cfg_design_primers', document.getElementById('cfg-design-primers').checked);
 
         const pyCode = `
-import json
-
-finder = SSRFinder(flank_len=cfg_flank)
-primer_designer = PrimerDesigner(
-    opt_tm=cfg_tm, min_product_size=cfg_min_prod, max_product_size=cfg_max_prod
-) if cfg_design_primers else None
-
 sequences = []
 cur_header = ""
 cur_seq = []
@@ -1020,41 +442,37 @@ if cur_header:
     sequences.append((cur_header, "".join(cur_seq)))
 
 total_ssrs = 0
-total_compounds = 0
 total_primers_ok = 0
 results_json = []
 
 for seq_id, seq in sequences:
-    ssrs = finder.analyze_sequence(seq_id, seq)
+    ssrs = find_ssrs(seq_id, seq, cfg_flank)
     total_ssrs += len(ssrs)
-    
     for ssr in ssrs:
         f_seq, r_seq, prod_size = "N/A", "N/A", "N/A"
-        if primer_designer:
-            pair = primer_designer.design_primers(ssr.flank_5p, ssr.sequence, ssr.flank_3p)
-            if pair.status == "OK":
+        if cfg_design_primers:
+            pair = design_primer(ssr["flank_5p"], ssr["sequence"], ssr["flank_3p"], cfg_tm, cfg_min_prod, cfg_max_prod)
+            if pair["status"] == "OK":
                 total_primers_ok += 1
-                f_seq = pair.forward_seq
-                r_seq = pair.reverse_seq
-                prod_size = f"{pair.product_size} bp"
-                
+                f_seq = pair["fwd"]
+                r_seq = pair["rev"]
+                prod_size = pair["product_size"]
+
         results_json.append({
-            "ssr_id": ssr.id,
+            "ssr_id": ssr["ssr_id"],
             "seq_id": seq_id,
-            "motif": ssr.motif,
-            "repeats": ssr.repeats,
-            "start": ssr.start,
-            "end": ssr.end,
+            "motif": ssr["motif"],
+            "repeats": ssr["repeats"],
+            "start": ssr["start"],
+            "end": ssr["end"],
             "fwd": f_seq,
             "rev": r_seq,
             "product_size": prod_size
         })
 
-header_label = sequences[0][0] if sequences else "Sequence"
 out = {
-    "header": header_label,
+    "header": sequences[0][0] if sequences else "Seq",
     "total_ssrs": total_ssrs,
-    "total_compounds": total_compounds,
     "total_primers_ok": total_primers_ok,
     "ssrs": results_json
 }
@@ -1065,15 +483,7 @@ json.dumps(out)
         const data = JSON.parse(jsonStr);
         const execTime = (performance.now() - startTime).toFixed(0);
 
-        logMsg(`Done! Found ${data.total_ssrs} SSRs in ${execTime}ms.`);
-
-        document.getElementById('res-total-ssrs').innerText = data.total_ssrs;
-        document.getElementById('res-compounds').innerText = data.total_compounds;
-        document.getElementById('res-primers').innerText = data.total_primers_ok;
-        document.getElementById('res-time').innerText = `${execTime}ms`;
-
-        // Render Table
-        const tbody = document.getElementById('ssr-table-body');
+        const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
 
         let gffLines = ["##gff-version 3"];
@@ -1081,15 +491,14 @@ json.dumps(out)
 
         data.ssrs.forEach(item => {
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="px-4 py-2.5 font-bold text-brand-400">${item.ssr_id}</td>
-            <td class="px-4 py-2.5 text-white font-bold">${item.motif}</td>
-            <td class="px-4 py-2.5">${item.repeats}x</td>
-            <td class="px-4 py-2.5 text-slate-400">${item.start}-${item.end}</td>
-            <td class="px-4 py-2.5 text-blue-400">${item.fwd}</td>
-            <td class="px-4 py-2.5 text-purple-400">${item.rev}</td>
-            <td class="px-4 py-2.5 font-bold text-emerald-400">${item.product_size}</td>
+            <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
+            <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
+            <td class="px-4 py-2">${item.repeats}x</td>
+            <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
+            <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
+            <td class="px-4 py-2 text-purple-400">${item.rev}</td>
+            <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
           `;
           tbody.appendChild(tr);
 
@@ -1097,144 +506,48 @@ json.dumps(out)
           tsvLines.push(`${item.ssr_id}\t${item.seq_id}\t${item.motif}\t${item.repeats}\t${item.start}\t${item.end}\t${item.fwd}\t${item.rev}\t${item.product_size}`);
         });
 
-        artifactsData.gff3 = gffLines.join("\n");
-        artifactsData.tsv = tsvLines.join("\n");
+        artifacts.gff3 = gffLines.join("\n");
+        artifacts.tsv = tsvLines.join("\n");
 
-        // Save to IndexedDB if enabled
         if (document.getElementById('cfg-save-db').checked) {
-          saveRunToDB({
+          saveDBRun({
             timestamp: Date.now(),
             header: data.header,
             total_ssrs: data.total_ssrs,
-            total_compounds: data.total_compounds,
             total_primers_ok: data.total_primers_ok,
             exec_time: execTime,
             ssrs: data.ssrs,
-            gff3: artifactsData.gff3,
-            tsv: artifactsData.tsv
+            gff3: artifacts.gff3,
+            tsv: artifacts.tsv
           });
-          logMsg('Saved run record to local IndexedDB.');
         }
 
         document.getElementById('results-wrapper').classList.remove('hidden');
 
       } catch (err) {
-        console.error(err);
-        logMsg(`Error: ${err.message}`);
+        alert("Execution Error: " + err.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-play"></i> Run nextSSR In-Browser';
       }
     }
 
-    async function runEPCRWasm() {
-      const btn = document.getElementById('btn-run-epcr');
-      const fastaText = document.getElementById('epcr-fasta').value.trim();
-      const fwd = document.getElementById('epcr-fwd').value.trim();
-      const rev = document.getElementById('epcr-rev').value.trim();
-      const maxMismatch = parseInt(document.getElementById('epcr-max-mismatch').value);
-
-      if (!fastaText || !fwd || !rev) {
-        alert('Please enter template FASTA, Forward primer, and Reverse primer.');
-        return;
-      }
-
-      if (!pyodide) {
-        alert('Pyodide engine is still initializing...');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running e-PCR...';
-
-      try {
-        pyodide.globals.set('epcr_fasta', fastaText);
-        pyodide.globals.set('epcr_fwd', fwd);
-        pyodide.globals.set('epcr_rev', rev);
-        pyodide.globals.set('epcr_max_mismatches', maxMismatch);
-
-        const pyCode = `
-sim = EPCRSimulator(max_mismatches=epcr_max_mismatches)
-results_list = []
-sequences = []
-cur_header = ""
-cur_seq = []
-
-for line in epcr_fasta.splitlines():
-    line = line.strip()
-    if line.startswith(">"):
-        if cur_header:
-            sequences.append((cur_header, "".join(cur_seq)))
-        cur_header = line[1:].split()[0]
-        cur_seq = []
-    elif line:
-        cur_seq.append(line)
-if cur_header:
-    sequences.append((cur_header, "".join(cur_seq)))
-
-for seq_id, seq in sequences:
-    amps = sim.simulate_sequence(seq_id, seq, epcr_fwd, epcr_rev)
-    for a in amps:
-        results_list.append({
-            "seq_id": a.seq_id,
-            "product_size": a.product_size,
-            "fwd_mismatches": a.forward_mismatches,
-            "rev_mismatches": a.reverse_mismatches,
-            "status": a.status
-        })
-
-json.dumps(results_list)
-        `;
-
-        const jsonStr = await pyodide.runPythonAsync(pyCode);
-        const data = JSON.parse(jsonStr);
-
-        const tbody = document.getElementById('epcr-table-body');
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="px-3 py-3 text-center text-slate-500">No amplicons predicted.</td></tr>';
-        } else {
-          data.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td class="px-3 py-2 text-slate-300 font-bold">${item.seq_id}</td>
-              <td class="px-3 py-2 text-emerald-400 font-bold">${item.product_size} bp</td>
-              <td class="px-3 py-2 text-amber-400">${item.fwd_mismatches}</td>
-              <td class="px-3 py-2 text-amber-400">${item.rev_mismatches}</td>
-              <td class="px-3 py-2 font-bold ${item.status === 'SPECIFIC' ? 'text-purple-400' : 'text-rose-400'}">${item.status}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
-
-        document.getElementById('epcr-results-wrapper').classList.remove('hidden');
-
-      } catch (err) {
-        console.error(err);
-        alert(`e-PCR Error: ${err.message}`);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-vial"></i> Run In Silico e-PCR';
-      }
-    }
-
-    function downloadArtifact(type) {
-      const content = artifactsData[type];
+    function downloadFile(type) {
+      const content = artifacts[type];
       if (!content) return;
-      
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `nextssr_result.${type}`;
+      a.download = `nextssr_results.${type}`;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    // Auto-trigger Pyodide Engine Loader
+    // Single clean entry point on window load
     window.addEventListener('load', () => {
-      initPyodideEngine();
+      initDB();
+      initPyodide();
     });
   </script>
 </body>
