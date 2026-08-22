@@ -52,4 +52,4 @@ jobs:
 
       - name: Run pip-audit (Vulnerability Scan)
         run: |
-          pip-audit
+          pip-audit --local

@@ -7,7 +7,9 @@ From: python:3.11-slim
     Description Reproducible Apptainer/Singularity container for nextSSR
 
 %files
-    . /opt/nextSSR
+    pyproject.toml /opt/nextSSR/pyproject.toml
+    README.md /opt/nextSSR/README.md
+    nextssr /opt/nextSSR/nextssr
 
 %post
     apt-get update && apt-get install -y --no-install-recommends build-essential git
