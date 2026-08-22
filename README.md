@@ -1,7 +1,7 @@
 # nextSSR 🚀
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/LaBiOmicS/nextSSR/logo.jpeg" alt="nextSSR Logo" width="70%">
+  <img src="https://raw.githubusercontent.com/LaBiOmicS/nextSSR/refs/heads/main/logo.jpeg" alt="nextSSR Logo" width="70%">
 </p>
 
 
