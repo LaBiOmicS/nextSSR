@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+devel/
+dist/
+downloads/
+*.egg-info/
+.eggs/
+nextssr-*/
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Antigravity CLI / Local scratch files
+.system_generated/
+scratch/
+
+# OS metadata
+.DS_Store
+Thumbs.db

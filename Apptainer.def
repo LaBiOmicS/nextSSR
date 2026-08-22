@@ -1,0 +1,17 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+%labels
+    Maintainer Fabiano Menegidio
+    Version 0.1.0
+    Description Reproducible Apptainer/Singularity container for nextSSR
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends build-essential git
+    pip install --no-cache-dir click pydantic biopython
+
+%environment
+    export LC_ALL=C
+
+%runscript
+    exec nextssr "$@"

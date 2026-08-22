@@ -1,0 +1,9 @@
+##gff-version 3
+#!Date 2026-08-21
+#!Source-version nextSSR 0.1.0
+#!Sequence-Ontology-Terms SO:0000289(microsatellite), SO:0001061(compound_microsatellite)
+##sequence-region NC_000913.3 1 4641652
+NC_000913.3	nextSSR	microsatellite	105358	105372	.	+	.	ID=NC_000913.3.ssr1;Ontology_term=SO:0000289;Note=motif_class=trinucleotide;weber_class=Perfect;motif=CGG;repeats=5;sequence=CGGCGGCGGCGGCGG
+NC_000913.3	nextSSR	microsatellite	367842	367853	.	+	.	ID=NC_000913.3.ssr2;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=GC;repeats=6;sequence=GCGCGCGCGCGC
+NC_000913.3	nextSSR	microsatellite	380013	380022	.	+	.	ID=NC_000913.3.ssr3;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=G;repeats=10;sequence=GGGGGGGGGG
+NC_000913.3	nextSSR	microsatellite	3406399	3406413	.	+	.	ID=NC_000913.3.ssr4;Ontology_term=SO:0000289;Note=motif_class=trinucleotide;weber_class=Perfect;motif=CGG;repeats=5;sequence=CGGCGGCGGCGGCGG

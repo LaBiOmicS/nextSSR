@@ -1,0 +1,63 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "nextSSR Microsatellite Analysis Results",
+      "description": "FAIR-compliant SSR and compound microsatellite identification dataset.",
+      "datePublished": "2026-08-21T13:55:16.873127+00:00",
+      "license": "https://spdx.org/licenses/MIT.html",
+      "hasPart": [
+        {
+          "@id": "NC_011033.1_Oryza_mt.fasta"
+        },
+        {
+          "@id": "nextssr_results.gff3"
+        },
+        {
+          "@id": "nextssr_results.tsv"
+        }
+      ]
+    },
+    {
+      "@id": "NC_011033.1_Oryza_mt.fasta",
+      "@type": "File",
+      "name": "NC_011033.1_Oryza_mt.fasta",
+      "sha256": "6312d71d7845003787c1f8f48f68539913bab463714dfec29cc7d840ad59a758"
+    },
+    {
+      "@id": "nextSSR_software",
+      "@type": "SoftwareApplication",
+      "name": "nextSSR",
+      "softwareVersion": "0.1.0",
+      "programmingLanguage": "Python 3.13.12",
+      "executionEnvironment": "Linux-5.4.17-2136.310.7.el8uek.x86_64-x86_64-with-glibc2.28",
+      "threadsUsed": 8,
+      "deviceUsed": "CPU Multi-core"
+    },
+    {
+      "@id": "execution_run",
+      "@type": "CreateAction",
+      "name": "SSR Identification Run",
+      "instrument": {
+        "@id": "nextSSR_software"
+      },
+      "object": {
+        "@id": "NC_011033.1_Oryza_mt.fasta"
+      },
+      "endTime": "2026-08-21T13:55:16.873170+00:00",
+      "configHash": "e8dc4dcac63733136a81c6b3ef0ac47b9d881a392ba96f0544d1f047b7341bcd"
+    }
+  ]
+}

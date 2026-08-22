@@ -1,0 +1,35 @@
+##gff-version 3
+#!Date 2026-08-21
+#!Source-version nextSSR 0.1.0
+#!Sequence-Ontology-Terms SO:0000289(microsatellite), SO:0001061(compound_microsatellite)
+##sequence-region NC_011033.1 1 490520
+NC_011033.1	nextSSR	microsatellite	11679	11688	.	+	.	ID=NC_011033.1.ssr1;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	14822	14831	.	+	.	ID=NC_011033.1.ssr2;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	34516	34525	.	+	.	ID=NC_011033.1.ssr3;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	79869	79878	.	+	.	ID=NC_011033.1.ssr4;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=A;repeats=10;sequence=AAAAAAAAAA
+NC_011033.1	nextSSR	microsatellite	84070	84079	.	+	.	ID=NC_011033.1.ssr5;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=A;repeats=10;sequence=AAAAAAAAAA
+NC_011033.1	nextSSR	microsatellite	106206	106215	.	+	.	ID=NC_011033.1.ssr6;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	109349	109358	.	+	.	ID=NC_011033.1.ssr7;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	129043	129052	.	+	.	ID=NC_011033.1.ssr8;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	149957	149968	.	+	.	ID=NC_011033.1.ssr9;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=CT;repeats=6;sequence=CTCTCTCTCTCT
+NC_011033.1	nextSSR	microsatellite	185090	185101	.	+	.	ID=NC_011033.1.ssr10;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=12;sequence=TTTTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	196532	196543	.	+	.	ID=NC_011033.1.ssr11;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=AT;repeats=6;sequence=ATATATATATAT
+NC_011033.1	nextSSR	microsatellite	199421	199432	.	+	.	ID=NC_011033.1.ssr12;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=G;repeats=12;sequence=GGGGGGGGGGGG
+NC_011033.1	nextSSR	microsatellite	213447	213456	.	+	.	ID=NC_011033.1.ssr13;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	222653	222664	.	+	.	ID=NC_011033.1.ssr14;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=AG;repeats=6;sequence=AGAGAGAGAGAG
+NC_011033.1	nextSSR	microsatellite	222678	222689	.	+	.	ID=NC_011033.1.ssr15;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=TC;repeats=6;sequence=TCTCTCTCTCTC
+NC_011033.1	nextSSR	microsatellite	237000	237009	.	+	.	ID=NC_011033.1.ssr16;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	251384	251393	.	+	.	ID=NC_011033.1.ssr17;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=A;repeats=10;sequence=AAAAAAAAAA
+NC_011033.1	nextSSR	microsatellite	281779	281790	.	+	.	ID=NC_011033.1.ssr18;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=AG;repeats=6;sequence=AGAGAGAGAGAG
+NC_011033.1	nextSSR	microsatellite	281804	281815	.	+	.	ID=NC_011033.1.ssr19;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=TC;repeats=6;sequence=TCTCTCTCTCTC
+NC_011033.1	nextSSR	microsatellite	310081	310090	.	+	.	ID=NC_011033.1.ssr20;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=10;sequence=TTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	320800	320809	.	+	.	ID=NC_011033.1.ssr21;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=A;repeats=10;sequence=AAAAAAAAAA
+NC_011033.1	nextSSR	microsatellite	321457	321469	.	+	.	ID=NC_011033.1.ssr22;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=T;repeats=13;sequence=TTTTTTTTTTTTT
+NC_011033.1	nextSSR	microsatellite	365854	365864	.	+	.	ID=NC_011033.1.ssr23;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=G;repeats=11;sequence=GGGGGGGGGGG
+NC_011033.1	nextSSR	microsatellite	412700	412711	.	+	.	ID=NC_011033.1.ssr24;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=AG;repeats=6;sequence=AGAGAGAGAGAG
+NC_011033.1	nextSSR	microsatellite	412725	412736	.	+	.	ID=NC_011033.1.ssr25;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=TC;repeats=6;sequence=TCTCTCTCTCTC
+NC_011033.1	nextSSR	microsatellite	446941	446951	.	+	.	ID=NC_011033.1.ssr26;Ontology_term=SO:0000289;Note=motif_class=mononucleotide;weber_class=Perfect;motif=G;repeats=11;sequence=GGGGGGGGGGG
+NC_011033.1	nextSSR	microsatellite	473058	473069	.	+	.	ID=NC_011033.1.ssr27;Ontology_term=SO:0000289;Note=motif_class=dinucleotide;weber_class=Perfect;motif=CT;repeats=6;sequence=CTCTCTCTCTCT
+NC_011033.1	nextSSR	compound_microsatellite	222653	222689	.	+	.	ID=NC_011033.1.compound1;Ontology_term=SO:0001061;Note=weber_class=Compound Disrupted;pattern=(AG)6 + (TC)6
+NC_011033.1	nextSSR	compound_microsatellite	281779	281815	.	+	.	ID=NC_011033.1.compound2;Ontology_term=SO:0001061;Note=weber_class=Compound Disrupted;pattern=(AG)6 + (TC)6
+NC_011033.1	nextSSR	compound_microsatellite	412700	412736	.	+	.	ID=NC_011033.1.compound3;Ontology_term=SO:0001061;Note=weber_class=Compound Disrupted;pattern=(AG)6 + (TC)6

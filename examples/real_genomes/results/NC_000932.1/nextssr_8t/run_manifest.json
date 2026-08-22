@@ -1,0 +1,18 @@
+{
+  "execution_id": "e8dc4dcac63733136a81c6b3ef0ac47b9d881a392ba96f0544d1f047b7341bcd",
+  "timestamp": "2026-08-21T13:55:12.367636+00:00",
+  "input_file": "NC_000932.1_Arabidopsis_cp.fasta",
+  "artifacts": {
+    "gff3_annotation": "annotations/nextssr_results.gff3",
+    "tsv_primers": "primers/nextssr_primers.tsv",
+    "ro_crate": "provenance/ro-crate-metadata.json",
+    "summary": "summary/nextssr_summary_statistics.txt"
+  },
+  "metrics": {
+    "total_sequences": 1,
+    "total_ssrs": 77,
+    "total_compounds": 11,
+    "total_primers_designed": 22,
+    "execution_time": "2.90s"
+  }
+}

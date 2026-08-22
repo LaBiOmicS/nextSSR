@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nextssr"
+version = "0.1.0"
+description = "Next-generation High-Performance & FAIR-compliant Simple Sequence Repeat (SSR) platform"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Fabiano Menegidio", email = "labiomics@bioinformatica.com.br" }
+]
+maintainers = [
+    { name = "Fabiano Menegidio", email = "labiomics@bioinformatica.com.br" }
+]
+requires-python = ">=3.9"
+keywords = [
+    "SSR",
+    "microsatellite",
+    "bioinformatics",
+    "primer-design",
+    "PCR",
+    "FAIR",
+    "RO-Crate",
+    "GFF3",
+    "genomics"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "click>=8.0.0",
+    "rich>=12.0.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0.0",
+    "biopython>=1.80",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+    "build",
+    "twine"
+]
+
+[project.urls]
+Homepage = "https://github.com/fabianomenegidio/nextSSR"
+Documentation = "https://github.com/fabianomenegidio/nextSSR#readme"
+Repository = "https://github.com/fabianomenegidio/nextSSR.git"
+Issues = "https://github.com/fabianomenegidio/nextSSR/issues"
+
+[project.scripts]
+nextssr = "nextssr.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-v"

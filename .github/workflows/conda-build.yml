@@ -1,0 +1,30 @@
+name: Conda Package Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  conda-build:
+    name: Build & Test Conda Recipe
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Micromamba / Conda Environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: conda-build-env
+          create-args: >-
+            python=3.11
+            conda-build
+            anaconda-client
+            bioconda::bioconda-utils
+          channels: conda-forge,bioconda,defaults
+
+      - name: Test Conda Build
+        run: |
+          micromamba run -n conda-build-env conda-build recipe/

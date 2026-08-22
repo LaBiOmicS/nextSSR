@@ -1,0 +1,18 @@
+===============================================
+        nextSSR EXECUTION SUMMARY REPORT        
+===============================================
+
+Tool Version:              nextSSR 0.1.0
+Platform:                  Linux-5.4.17-2136.310.7.el8uek.x86_64-x86_64-with-glibc2.28
+Device Used:               CPU Multi-core
+Threads Used:              1
+Execution Time:            2.86s
+Input File SHA-256:        9439e8fd98eb7a98892e6bf3d13ceedc15d2b233b57176f01ca4274f6b692dc5
+
+RESULTS OVERVIEW
+-----------------------------------------------
+Total Sequences Analyzed:  1
+Total SSRs Identified:     77
+Total Compound SSRs:       11
+PCR Primers Designed:      22
+===============================================

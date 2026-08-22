@@ -1,0 +1,18 @@
+{
+  "execution_id": "e8dc4dcac63733136a81c6b3ef0ac47b9d881a392ba96f0544d1f047b7341bcd",
+  "timestamp": "2026-08-21T13:57:53.943199+00:00",
+  "input_file": "yeast_16_chromosomes.fasta",
+  "artifacts": {
+    "gff3_annotation": "annotations/nextssr_results.gff3",
+    "tsv_primers": "primers/nextssr_primers.tsv",
+    "ro_crate": "provenance/ro-crate-metadata.json",
+    "summary": "summary/nextssr_summary_statistics.txt"
+  },
+  "metrics": {
+    "total_sequences": 16,
+    "total_ssrs": 3256,
+    "total_compounds": 275,
+    "total_primers_designed": 2032,
+    "execution_time": "126.19s"
+  }
+}

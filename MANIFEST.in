@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include Dockerfile
+include Apptainer.def
+recursive-include recipe *
+recursive-include tests *.py
+recursive-include examples *.py *.md *.fasta
