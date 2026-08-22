@@ -136,6 +136,21 @@
         <p class="mt-2 text-slate-400 text-sm">Paste a FASTA sequence or upload a file. Processing is executed 100% locally and saved to browser storage.</p>
       </div>
 
+      <!-- Engine Status & Diagnostics Box -->
+      <div id="engine-diag-box" class="max-w-3xl mx-auto mb-8 p-4 glass-card rounded-2xl border border-slate-800 text-xs font-mono">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-slate-300 flex items-center gap-2">
+            <i class="fas fa-terminal text-brand-500"></i> Wasm Engine Bootstrapper Log
+          </span>
+          <button onclick="initPyodideEngine()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-sans">
+            <i class="fas fa-sync-alt mr-1"></i> Retry Load
+          </button>
+        </div>
+        <div id="engine-steps-log" class="text-slate-400 space-y-1">
+          <p>> Waiting to initialize Pyodide WebAssembly runtime...</p>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <!-- Form Options Column -->
@@ -484,6 +499,20 @@
     let artifactsData = { gff3: '', tsv: '' };
     let db = null;
 
+    function diagLog(stepMsg, isError = false) {
+      const diagEl = document.getElementById('engine-steps-log');
+      const p = document.createElement('p');
+      if (isError) {
+        p.className = 'text-rose-400 font-bold';
+        p.innerHTML = `❌ Error: ${stepMsg}`;
+      } else {
+        p.className = 'text-emerald-400';
+        p.innerHTML = `✓ ${stepMsg}`;
+      }
+      diagEl.appendChild(p);
+      diagEl.scrollTop = diagEl.scrollHeight;
+    }
+
     // --- IndexedDB Storage Engine ---
     function initIndexedDB() {
       const request = indexedDB.open("nextSSR_DB", 1);
@@ -499,10 +528,12 @@
       request.onsuccess = function(e) {
         db = e.target.result;
         loadHistoryFromDB();
+        diagLog('IndexedDB local database initialized.');
       };
 
       request.onerror = function(e) {
         console.error("IndexedDB error:", e);
+        diagLog(`IndexedDB error: ${e.target.errorCode}`, true);
       };
     }
 
@@ -619,7 +650,7 @@
       };
     }
 
-    // --- Pyodide Engine Loader ---
+    // --- Transparent Verbose Pyodide Engine Loader ---
     function logMsg(msg) {
       const box = document.getElementById('log-box');
       box.classList.remove('hidden');
@@ -632,14 +663,24 @@
       const btnSSR = document.getElementById('btn-run-ssr');
       const btnEPCR = document.getElementById('btn-run-epcr');
 
+      btnSSR.disabled = true;
+      btnEPCR.disabled = true;
+      btnSSR.classList.add('opacity-50', 'cursor-not-allowed');
+      btnEPCR.classList.add('opacity-50', 'cursor-not-allowed');
+      btnSSR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...';
+      btnEPCR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...';
+
       try {
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> Loading Wasm Runtime...';
+        diagLog('[1/3] Downloading Pyodide WebAssembly binaries from CDN...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> [1/3] Downloading Wasm...';
         
         pyodide = await loadPyodide({
           indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
         });
         
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Injecting Engine Modules...';
+        diagLog('[2/3] Pyodide WebAssembly runtime loaded successfully.');
+        diagLog('[3/3] Compiling CPython 3.11 engine modules & data structures...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> [3/3] Compiling nextSSR Wasm...';
         
         await pyodide.runPythonAsync(`
 import math
@@ -887,6 +928,7 @@ class EPCRSimulator:
         return amplicons
         `);
 
+        diagLog('nextSSR WebAssembly engine ready and loaded in browser memory!');
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-brand-500"></span> Pyodide Engine Ready (Wasm)';
         
         // UNLOCK FORM BUTTONS & INPUTS ONCE ENGINE IS FULLY READY!
@@ -899,6 +941,7 @@ class EPCRSimulator:
 
       } catch (err) {
         console.error(err);
+        diagLog(err.message, true);
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Engine Load Failed';
         btnSSR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
         btnEPCR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
