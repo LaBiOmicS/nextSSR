@@ -317,7 +317,7 @@
       appendStreamLog("Checking Pyodide script availability in browser window...");
 
       if (typeof window.loadPyodide !== 'function') {
-        appendStreamLog("window.loadPyodide function is not defined. Script not loaded yet.", "error");
+        appendStreamLog("window.loadPyodide function is not defined. Checking script tag...", "error");
         title.innerText = "Pyodide Script Load Error";
         icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
         banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl space-y-2 text-sm";
@@ -328,6 +328,7 @@
         appendStreamLog("Downloading Pyodide Wasm binaries & stdlib from CDN...");
 
         pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
           messageCallback: (msg) => {
             appendStreamLog(`[Pyodide Core] ${msg}`);
           }
@@ -585,10 +586,17 @@ json.dumps(out)
       URL.revokeObjectURL(url);
     }
 
-    window.addEventListener('load', () => {
+    // Fail-safe bootstrapper checking readyState
+    function bootstrapper() {
       initDB();
       initPyodide();
-    });
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(bootstrapper, 10);
+    } else {
+      document.addEventListener('DOMContentLoaded', bootstrapper);
+    }
   </script>
 </body>
 </html>
