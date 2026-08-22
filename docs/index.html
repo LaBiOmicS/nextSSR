@@ -399,6 +399,9 @@
         <button onclick="switchTab('nextflow')" id="tab-btn-nextflow" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
           <i class="fas fa-network-wired mr-1.5"></i> Nextflow Pipeline
         </button>
+        <button onclick="switchTab('snakemake')" id="tab-btn-snakemake" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
+          <i class="fas fa-project-diagram mr-1.5"></i> Snakemake Rule
+        </button>
       </div>
 
       <!-- Tab Content 1: CLI Run -->
@@ -499,6 +502,41 @@ designer = PrimerDesigner(opt_tm=58.0)
         --threads ${task.cpus}
     """</span>
 }</code></pre>
+      </div>
+
+      <!-- Tab Content 5: Snakemake -->
+      <div id="tab-snakemake" class="tab-content hidden glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-project-diagram text-amber-400"></i> Snakemake Rule Integration
+          </h3>
+          <span class="text-xs font-mono text-slate-400">Snakemake Workflow</span>
+        </div>
+        <p class="text-slate-400 text-xs leading-relaxed">
+          Define automated SSR identification rules in your `Snakefile` with built-in Conda environment management and multi-sample processing.
+        </p>
+        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">rule</span> <span class="text-brand-400">nextssr_mining</span>:
+    <span class="text-blue-400">input</span>:
+        fasta=<span class="text-emerald-400">"genomes/{sample}.fasta"</span>
+    <span class="text-blue-400">output</span>:
+        gff=<span class="text-emerald-400">"results/{sample}.gff3"</span>,
+        tsv=<span class="text-emerald-400">"results/{sample}.tsv"</span>
+    <span class="text-blue-400">params</span>:
+        threads=8,
+        opt_tm=58.0,
+        flank_len=100
+    <span class="text-blue-400">conda</span>:
+        <span class="text-emerald-400">"bioconda::nextssr=0.1.0"</span>
+    <span class="text-blue-400">shell</span>:
+        <span class="text-emerald-400">"""
+        nextssr run \\
+            --input {input.fasta} \\
+            --output-dir results \\
+            --threads {params.threads} \\
+            --flank-len {params.flank_len} \\
+            --primer-opt-tm {params.opt_tm} \\
+            --format gff3,tsv
+        """</span></code></pre>
       </div>
 
     </div>
