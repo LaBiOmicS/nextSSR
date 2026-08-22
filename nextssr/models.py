@@ -55,7 +55,7 @@ class ExecutionProvenance:
     """FAIR-compliant execution provenance tracking for reproducibility."""
 
     tool_name: str = "nextSSR"
-    tool_version: str = "0.1.0"
+    tool_version: str = "0.1.1"
     python_version: str = platform.python_version()
     platform_info: str = platform.platform()
     execution_time: Optional[str] = None

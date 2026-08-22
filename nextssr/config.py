@@ -59,7 +59,7 @@ class SSRConfig:
         """Generate a documented YAML configuration file for nextSSR."""
         default_dict = {
             "nextssr": {
-                "version": "0.1.0",
+                "version": "0.1.1",
                 "ssr_criteria": {
                     "unit_min_repeats": {
                         "1": 10,

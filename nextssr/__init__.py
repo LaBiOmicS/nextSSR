@@ -7,7 +7,7 @@ from nextssr.finder import SSRFinder
 from nextssr.primer import PrimerDesigner, PrimerPair
 from nextssr.epcr import EPCRSimulator, AmpliconResult
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "SSRConfig",

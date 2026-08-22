@@ -1,5 +1,5 @@
 {% set name = "nextssr" %}
-{% set version = "0.1.0" %}
+{% set version = "0.1.1" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/nextssr-{{ version }}.tar.gz
-  sha256: 91cd52c2d82e1b9307beb9e0618c29fdbcd39d9623d8dc1d0aa58965f1cebed7
+  sha256: 7faf41f40bfa3b205b816094b55ee835b7dfd3cad86fd9ed24856b499bce1781
 
 build:
   number: 0

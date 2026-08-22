@@ -18,9 +18,9 @@
 [![JOSS Status](https://img.shields.io/badge/JOSS-Pre--submission-brightgreen.svg)](https://joss.theoj.org/)
 
 <!-- Tech & Method Badges -->
-[![PyPI Package](https://img.shields.io/badge/PyPI-v0.1.0-blue.svg)](https://pypi.org/project/nextssr/)
+[![PyPI Package](https://img.shields.io/badge/PyPI-v0.1.1-blue.svg)](https://pypi.org/project/nextssr/)
 [![Python Versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/nextssr/)
-[![Conda Package](https://img.shields.io/badge/bioconda-v0.1.0-green.svg)](https://anaconda.org/bioconda/nextssr)
+[![Conda Package](https://img.shields.io/badge/bioconda-v0.1.1-green.svg)](https://anaconda.org/bioconda/nextssr)
 
 
 
