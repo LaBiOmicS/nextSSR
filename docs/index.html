@@ -46,40 +46,41 @@
     body { font-family: 'Inter', sans-serif; }
     code, pre { font-family: 'Fira Code', monospace; }
     .hero-gradient {
-      background: radial-gradient(circle at 50% 15%, rgba(34, 197, 94, 0.18) 0%, rgba(15, 23, 42, 0.98) 75%);
+      background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.15) 0%, rgba(15, 23, 42, 0.98) 70%);
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(16px);
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .glass-card:hover {
       border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.15);
     }
     .tab-active {
       border-color: #22c55e !important;
       color: #4ade80 !important;
-      background: rgba(34, 197, 94, 0.1);
+      background: rgba(34, 197, 94, 0.12);
     }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-slate-950">
 
   <!-- Navigation Header -->
-  <header class="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">
+        <span class="text-xl font-black tracking-tight bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">
           nextSSR 🚀
         </span>
-        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
-          v0.1.0 Release
+        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
+          v0.1.0
         </span>
       </div>
 
-      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
+      <nav class="hidden md:flex items-center space-x-6 text-xs font-semibold text-slate-300">
         <a href="#overview" class="hover:text-brand-400 transition">Overview</a>
-        <a href="#institution" class="hover:text-brand-400 transition">Institutional</a>
+        <a href="#institution" class="hover:text-brand-400 transition">LaBiOmicS UMC</a>
         <a href="#pipeline" class="hover:text-brand-400 transition">Architecture</a>
         <a href="#features" class="hover:text-brand-400 transition">Features</a>
         <a href="#installation" class="hover:text-brand-400 transition">Installation</a>
@@ -88,56 +89,56 @@
         <a href="#citation" class="hover:text-brand-400 transition">Publication</a>
       </nav>
 
-      <div class="flex items-center space-x-3">
-        <a href="https://pypi.org/project/nextssr/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
+      <div class="flex items-center space-x-2">
+        <a href="https://pypi.org/project/nextssr/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
           <i class="fab fa-python text-brand-400"></i> PyPI
         </a>
-        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-lg shadow-brand-500/20">
-          <i class="fab fa-github text-lg"></i> GitHub
+        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold rounded-lg bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-md shadow-brand-500/20">
+          <i class="fab fa-github text-sm"></i> GitHub
         </a>
       </div>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <section id="overview" class="hero-gradient py-20 lg:py-28 relative overflow-hidden border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+  <section id="overview" class="hero-gradient py-12 lg:py-16 relative overflow-hidden border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4">
       
       <!-- Badges row -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-900/80 text-slate-200 border border-slate-700/80">
-          <i class="fas fa-flask text-brand-400 mr-1"></i> LaBiOmicS / UMC Research Initiative
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-900/80 text-slate-300 border border-slate-700/80">
+          <i class="fas fa-flask text-brand-400 mr-1"></i> LaBiOmicS / UMC Research
         </span>
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-700/50">
-          <i class="fas fa-microchip mr-1"></i> Multi-Threaded Parallel Engine
+        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-700/50">
+          <i class="fas fa-microchip mr-1"></i> Parallel Engine
         </span>
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-950/60 text-blue-300 border border-blue-700/50">
-          <i class="fas fa-vial mr-1"></i> SantaLucia (1998) Nearest-Neighbor Model
+        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-950/60 text-blue-300 border border-blue-700/50">
+          <i class="fas fa-vial mr-1"></i> SantaLucia (1998) Model
         </span>
-        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-950/60 text-purple-300 border border-purple-700/50">
-          <i class="fas fa-check-double mr-1"></i> FAIR Principles Compliant
+        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-purple-950/60 text-purple-300 border border-purple-700/50">
+          <i class="fas fa-check-double mr-1"></i> FAIR Principles
         </span>
       </div>
 
-      <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
         Next-Generation <span class="bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">Microsatellite Mining</span> & PCR Primer Design
       </h1>
 
-      <p class="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 font-normal leading-relaxed">
-        <span class="text-white font-semibold">nextSSR</span> is a high-performance, standalone bioinformatics platform for identifying Simple Sequence Repeats (SSRs), designing thermodynamic PCR primers, and running in silico e-PCR simulations.
+      <p class="max-w-4xl mx-auto text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+        <strong class="text-white">nextSSR</strong> is a high-performance bioinformatics platform for identifying Simple Sequence Repeats (SSRs), designing thermodynamic PCR primers, and running in silico e-PCR simulations.
       </p>
 
-      <div class="flex flex-wrap items-center justify-center gap-4">
-        <a href="#installation" class="px-8 py-4 text-base font-bold rounded-2xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-xl shadow-brand-500/25 flex items-center justify-center gap-3">
-          <i class="fas fa-download"></i> Install nextSSR Now
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a href="#installation" class="px-6 py-2.5 text-xs font-bold rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-lg shadow-brand-500/20 flex items-center gap-2">
+          <i class="fas fa-download"></i> Install nextSSR
         </a>
-        <a href="#usage" class="px-8 py-4 text-base font-bold rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 transition border border-slate-700 flex items-center justify-center gap-3">
-          <i class="fas fa-terminal text-brand-400"></i> Explore Usage & Code Examples
+        <a href="#usage" class="px-6 py-2.5 text-xs font-bold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 transition border border-slate-700 flex items-center gap-2">
+          <i class="fas fa-terminal text-brand-400"></i> Usage & Code Examples
         </a>
       </div>
 
       <!-- Quick Command Pill -->
-      <div class="mt-10 inline-flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-6 py-3 font-mono text-xs text-slate-300 shadow-2xl">
+      <div class="mt-4 inline-flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2 font-mono text-xs text-slate-300 shadow-xl">
         <span class="text-brand-400 font-bold">$</span>
         <span>pip install nextssr</span>
         <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied to clipboard!');" class="ml-2 text-slate-400 hover:text-white transition">
@@ -149,138 +150,78 @@
   </section>
 
   <!-- Institutional Spotlight Section: LaBiOmicS & UMC -->
-  <section id="institution" class="py-16 bg-gradient-to-b from-slate-950 via-slate-900/90 to-slate-950 border-b border-slate-800/80">
+  <section id="institution" class="py-10 bg-slate-900/40 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="glass-card p-8 sm:p-12 rounded-3xl border border-brand-500/30 relative overflow-hidden shadow-2xl">
-        <div class="absolute -right-12 -bottom-12 opacity-10 text-brand-400 text-9xl pointer-events-none">
-          <i class="fas fa-university"></i>
+      <div class="glass-card p-6 sm:p-8 rounded-2xl border border-brand-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <div class="space-y-2 text-left">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-bold uppercase tracking-wider">
+            <i class="fas fa-flask"></i> Institutional Research Spotlight
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-white">
+            Developed by <span class="text-brand-400">LaBiOmicS</span> — <span class="text-slate-200">Universidade Mogi das Cruzes (UMC)</span>
+          </h2>
+          <p class="text-slate-300 text-xs leading-relaxed max-w-4xl">
+            Engineered at the <strong>Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS / UMC)</strong>, Brazil. Dedicated to building high-performance, open-source bioinformatics software adhering strictly to FAIR (Findable, Accessible, Interoperable, Reusable) data standards.
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-          
-          <div class="lg:col-span-8 space-y-4">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-bold uppercase tracking-wider">
-              <i class="fas fa-flask"></i> Institutional Research Spotlight
-            </div>
-
-            <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Developed by <span class="text-brand-400">LaBiOmicS</span>
-            </h2>
-
-            <h3 class="text-lg font-bold text-slate-300">
-              Laboratory of Bioinformatics and Omics Sciences — <span class="text-white">Universidade Mogi das Cruzes (UMC)</span>
-            </h3>
-
-            <p class="text-slate-300 text-sm leading-relaxed max-w-3xl">
-              <strong class="text-white">nextSSR</strong> was conceived and engineered at the <strong>Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS)</strong> at <strong>Universidade Mogi das Cruzes (UMC)</strong>, Brazil. Our mission is to build next-generation, high-performance, open-source bioinformatics software adhering strictly to <strong>FAIR (Findable, Accessible, Interoperable, and Reusable)</strong> data principles for the global scientific community.
-            </p>
-          </div>
-
-          <div class="lg:col-span-4 flex flex-col space-y-3 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 text-xs">
-            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-              <span class="text-slate-400">Research Group:</span>
-              <span class="font-bold text-brand-400">LaBiOmicS</span>
-            </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-              <span class="text-slate-400">University:</span>
-              <span class="font-bold text-white">UMC (Mogi das Cruzes)</span>
-            </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
-              <span class="text-slate-400">Open Science:</span>
-              <span class="font-bold text-emerald-400">MIT Open License</span>
-            </div>
-            <div class="flex items-center justify-between py-2">
-              <span class="text-slate-400">GitHub Organization:</span>
-              <a href="https://github.com/LaBiOmicS" target="_blank" class="font-bold text-blue-400 hover:underline">github.com/LaBiOmicS</a>
-            </div>
-          </div>
-
+        <div class="flex items-center gap-4 text-xs font-mono shrink-0">
+          <a href="https://github.com/LaBiOmicS" target="_blank" class="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-xl text-blue-400 font-bold transition flex items-center gap-2">
+            <i class="fab fa-github"></i> github.com/LaBiOmicS
+          </a>
         </div>
+
       </div>
-
     </div>
   </section>
 
   <!-- Educational Pipeline Flow Diagram -->
-  <section id="pipeline" class="py-20 bg-slate-900/50 border-b border-slate-800/80">
+  <section id="pipeline" class="py-12 bg-slate-950 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">How It Works</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Didactic Pipeline Architecture</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">An end-to-end multi-stage pipeline designed for precision, speed, and reproducibility.</p>
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">How It Works</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">Pipeline Architecture</h2>
       </div>
 
       <!-- Flowchart Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <!-- Step 1 -->
-        <div class="glass-card p-6 rounded-3xl border border-slate-800 flex flex-col justify-between relative">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="w-8 h-8 rounded-xl bg-brand-500 text-slate-950 font-black text-sm flex items-center justify-center">1</span>
-              <i class="fas fa-dna text-brand-400 text-xl"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">FASTA Genome Parsing</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">
-              Streams raw genome FASTA assemblies in chunks with automated sequence validation and SHA-256 checksum generation.
-            </p>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-lg bg-brand-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
+            <i class="fas fa-dna text-brand-400"></i>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-xxs font-mono text-slate-400">
-            Input: .fasta / .fa / .gz
-          </div>
+          <h3 class="text-sm font-bold text-white">1. FASTA Parsing</h3>
+          <p class="text-slate-400 text-xs leading-normal">Streams FASTA assemblies in chunks with SHA-256 validation.</p>
         </div>
 
-        <!-- Step 2 -->
-        <div class="glass-card p-6 rounded-3xl border border-slate-800 flex flex-col justify-between relative">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="w-8 h-8 rounded-xl bg-blue-500 text-slate-950 font-black text-sm flex items-center justify-center">2</span>
-              <i class="fas fa-search text-blue-400 text-xl"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">SSR Motif Identification</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">
-              Scans for mono- to hexanucleotides (1–6 bp) using optimized parallel regular expressions and Weber (1990) compound SSR classification.
-            </p>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-lg bg-blue-500 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
+            <i class="fas fa-search text-blue-400"></i>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-xxs font-mono text-blue-400">
-            Weber (1990) Standards
-          </div>
+          <h3 class="text-sm font-bold text-white">2. SSR Mining</h3>
+          <p class="text-slate-400 text-xs leading-normal">Parallel search for 1–6 bp motifs & Weber (1990) compound SSRs.</p>
         </div>
 
-        <!-- Step 3 -->
-        <div class="glass-card p-6 rounded-3xl border border-slate-800 flex flex-col justify-between relative">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="w-8 h-8 rounded-xl bg-purple-500 text-slate-950 font-black text-sm flex items-center justify-center">3</span>
-              <i class="fas fa-vial text-purple-400 text-xl"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">Primer Thermodynamics</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">
-              Computes Nearest-Neighbor melting temperatures (T<sub>m</sub>), GC%, product sizes, and cross-dimer penalties for locus flanking regions.
-            </p>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-lg bg-purple-500 text-slate-950 font-black text-xs flex items-center justify-center">3</span>
+            <i class="fas fa-vial text-purple-400"></i>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-xxs font-mono text-purple-400">
-            SantaLucia (1998) Unified Parameters
-          </div>
+          <h3 class="text-sm font-bold text-white">3. Thermodynamics</h3>
+          <p class="text-slate-400 text-xs leading-normal">SantaLucia (1998) Nearest-Neighbor T<sub>m</sub>, GC% & dimer analysis.</p>
         </div>
 
-        <!-- Step 4 -->
-        <div class="glass-card p-6 rounded-3xl border border-slate-800 flex flex-col justify-between relative">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="w-8 h-8 rounded-xl bg-emerald-500 text-slate-950 font-black text-sm flex items-center justify-center">4</span>
-              <i class="fas fa-file-invoice text-emerald-400 text-xl"></i>
-            </div>
-            <h3 class="text-base font-bold text-white mb-2">FAIR Report Generation</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">
-              Outputs standardized GFF3, TSV, JSON-LD, and RO-Crate metadata for complete provenance and browser integration.
-            </p>
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">4</span>
+            <i class="fas fa-file-invoice text-emerald-400"></i>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-xxs font-mono text-emerald-400">
-            GFF3 / TSV / JSON-LD / RO-Crate
-          </div>
+          <h3 class="text-sm font-bold text-white">4. FAIR Outputs</h3>
+          <p class="text-slate-400 text-xs leading-normal">Generates GFF3, TSV, JSON-LD & W3C RO-Crate provenance.</p>
         </div>
 
       </div>
@@ -289,81 +230,56 @@
   </section>
 
   <!-- Key Features Grid -->
-  <section id="features" class="py-20 bg-slate-950 border-b border-slate-800/80">
+  <section id="features" class="py-12 bg-slate-900/40 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Core Capabilities</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Why Choose nextSSR?</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Built from the ground up for modern genomic scale, high speed, and complete scientific compliance.</p>
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">Capabilities</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">Why Choose nextSSR?</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <!-- Feature 1 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xl mb-6">
-            <i class="fas fa-tachometer-alt"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">High-Speed Parallel Engine</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Multi-threaded genome scanning engine capable of processing whole chromosomes in seconds, outperforming legacy single-threaded tools on large assemblies.
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-tachometer-alt text-brand-400"></i> Parallel Engine
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Multi-threaded genome scanning processing whole chromosomes in seconds.</p>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xl mb-6">
-            <i class="fas fa-vial"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">SantaLucia (1998) Nearest-Neighbor Model</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Automated primer pair selection using exact Nearest-Neighbor thermodynamic calculations (T<sub>m</sub>, GC%, hairpin stability, and cross-dimer penalties).
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-vial text-blue-400"></i> SantaLucia Thermodynamics
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Exact Nearest-Neighbor T<sub>m</sub>, GC%, hairpin & dimer penalty calculations.</p>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl mb-6">
-            <i class="fas fa-dna"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">In Silico e-PCR Simulator</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Integrated electronic PCR module to test primer binding, check 3'-end extension mismatches, and support IUPAC degenerate bases across target genomes.
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-dna text-purple-400"></i> In Silico e-PCR Simulator
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Tests binding specificity, 3'-mismatches & IUPAC degenerate bases.</p>
         </div>
 
-        <!-- Feature 4 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl mb-6">
-            <i class="fas fa-file-export"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">FAIR Specification Outputs</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Generates standardized GFF3, JSON, TSV, and HTML interactive reports for direct integration with genome browsers (IGV, JBrowse) and pipelines.
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-file-export text-amber-400"></i> FAIR Standard Outputs
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Standard GFF3, TSV, JSON-LD & RO-Crate for IGV, JBrowse & pipelines.</p>
         </div>
 
-        <!-- Feature 5 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl mb-6">
-            <i class="fas fa-box-open"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Zero External Dependencies</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Fully self-contained python package. No need to install external C++ dependencies or legacy binary wrappers like Primer3 or Perl interpreters.
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-box-open text-emerald-400"></i> Zero External Dependencies
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Pure standalone Python package with no external binary requirements.</p>
         </div>
 
-        <!-- Feature 6 -->
-        <div class="glass-card p-8 rounded-3xl transition duration-300">
-          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xl mb-6">
-            <i class="fas fa-code-branch"></i>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Bioconda & PyPI Native</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Installable in a single command via Conda, Mamba, or Pip, with full support for Linux, macOS, Windows, and CI/CD HPC clusters.
-          </p>
+        <div class="glass-card p-5 rounded-2xl">
+          <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
+            <i class="fas fa-code-branch text-rose-400"></i> Conda & PyPI Ready
+          </h3>
+          <p class="text-slate-400 text-xs leading-normal">Instant installation via Conda, Mamba, Pip, Docker, or Apptainer.</p>
         </div>
 
       </div>
@@ -372,60 +288,38 @@
   </section>
 
   <!-- Installation Section -->
-  <section id="installation" class="py-20 bg-slate-900/50 border-b border-slate-800/80">
+  <section id="installation" class="py-12 bg-slate-950 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Installation</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Quick & Easy Installation</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-xl mx-auto">Choose your preferred package manager to get started in seconds.</p>
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">Installation</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">Get Started in Seconds</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <!-- PyPI Card -->
-        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <div class="flex items-center space-x-3 mb-4">
-              <i class="fab fa-python text-3xl text-brand-400"></i>
-              <h3 class="text-xl font-bold text-white">PyPI (pip)</h3>
-            </div>
-            <p class="text-slate-400 text-sm mb-6">Standard Python package manager. Recommended for general usage and virtual environments.</p>
+            <h3 class="text-xs font-bold text-white flex items-center gap-1.5 mb-1"><i class="fab fa-python text-brand-400"></i> PyPI</h3>
+            <code class="text-xs font-mono text-brand-400">pip install nextssr</code>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-brand-400 border border-slate-800 flex items-center justify-between">
-            <span>pip install nextssr</span>
-            <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
-          </div>
+          <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white text-xs"><i class="far fa-copy"></i></button>
         </div>
 
-        <!-- Bioconda Card -->
-        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <div class="flex items-center space-x-3 mb-4">
-              <i class="fas fa-cubes text-3xl text-blue-400"></i>
-              <h3 class="text-xl font-bold text-white">Bioconda</h3>
-            </div>
-            <p class="text-slate-400 text-sm mb-6">Conda package for scientific pipelines, Nextflow, Snakemake, and HPC environments.</p>
+            <h3 class="text-xs font-bold text-white flex items-center gap-1.5 mb-1"><i class="fas fa-cubes text-blue-400"></i> Bioconda</h3>
+            <code class="text-xs font-mono text-blue-400">conda install -c bioconda nextssr</code>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-blue-400 border border-slate-800 flex items-center justify-between">
-            <span>conda install -c bioconda nextssr</span>
-            <button onclick="navigator.clipboard.writeText('conda install -c bioconda nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
-          </div>
+          <button onclick="navigator.clipboard.writeText('conda install -c bioconda nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white text-xs"><i class="far fa-copy"></i></button>
         </div>
 
-        <!-- Source Card -->
-        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+        <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
-            <div class="flex items-center space-x-3 mb-4">
-              <i class="fab fa-github text-3xl text-purple-400"></i>
-              <h3 class="text-xl font-bold text-white">From Source</h3>
-            </div>
-            <p class="text-slate-400 text-sm mb-6">Clone the repository for development, latest main branch code, and contributions.</p>
+            <h3 class="text-xs font-bold text-white flex items-center gap-1.5 mb-1"><i class="fab fa-github text-purple-400"></i> Source</h3>
+            <code class="text-xs font-mono text-purple-400">git clone https://github.com/LaBiOmicS/nextSSR.git</code>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-purple-400 border border-slate-800 flex items-center justify-between">
-            <span>git clone https://github.com/LaBiOmicS/nextSSR.git</span>
-            <button onclick="navigator.clipboard.writeText('git clone https://github.com/LaBiOmicS/nextSSR.git'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
-          </div>
+          <button onclick="navigator.clipboard.writeText('git clone https://github.com/LaBiOmicS/nextSSR.git'); alert('Copied!');" class="text-slate-400 hover:text-white text-xs"><i class="far fa-copy"></i></button>
         </div>
 
       </div>
@@ -434,96 +328,63 @@
   </section>
 
   <!-- Interactive Usage & Code Tabs Section -->
-  <section id="usage" class="py-20 bg-slate-950 border-b border-slate-800/80">
+  <section id="usage" class="py-12 bg-slate-900/40 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Interactive Guide</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Usage & Integration Examples</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Explore commands and integration patterns across different environments.</p>
+      <div class="text-center mb-6">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">Usage & Examples</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">Code & Command Snippets</h2>
       </div>
 
       <!-- Tab Navigation Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-8">
-        <button onclick="switchTab('cli-run')" id="tab-btn-cli-run" class="tab-btn tab-active px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800">
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+        <button onclick="switchTab('cli-run')" id="tab-btn-cli-run" class="tab-btn tab-active px-4 py-2 rounded-xl font-semibold text-xs transition border border-slate-800">
           <i class="fas fa-play mr-1.5"></i> CLI: SSR Mining
         </button>
-        <button onclick="switchTab('cli-epcr')" id="tab-btn-cli-epcr" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
+        <button onclick="switchTab('cli-epcr')" id="tab-btn-cli-epcr" class="tab-btn px-4 py-2 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
           <i class="fas fa-vial mr-1.5"></i> CLI: e-PCR Simulation
         </button>
-        <button onclick="switchTab('python-api')" id="tab-btn-python-api" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
+        <button onclick="switchTab('python-api')" id="tab-btn-python-api" class="tab-btn px-4 py-2 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
           <i class="fab fa-python mr-1.5"></i> Python API
         </button>
-        <button onclick="switchTab('nextflow')" id="tab-btn-nextflow" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
+        <button onclick="switchTab('nextflow')" id="tab-btn-nextflow" class="tab-btn px-4 py-2 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
           <i class="fas fa-network-wired mr-1.5"></i> Nextflow Pipeline
         </button>
-        <button onclick="switchTab('snakemake')" id="tab-btn-snakemake" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
+        <button onclick="switchTab('snakemake')" id="tab-btn-snakemake" class="tab-btn px-4 py-2 rounded-xl font-semibold text-xs transition border border-slate-800 text-slate-400 bg-slate-900">
           <i class="fas fa-project-diagram mr-1.5"></i> Snakemake Rule
         </button>
       </div>
 
       <!-- Tab Content 1: CLI Run -->
-      <div id="tab-cli-run" class="tab-content glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+      <div id="tab-cli-run" class="tab-content glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fas fa-play text-brand-400"></i> Command 1: Mine SSRs & Design Primers
-          </h3>
-          <span class="text-xs font-mono text-slate-400">Terminal CLI</span>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-play text-brand-400"></i> Command 1: Mine SSRs & Design Primers</h3>
+          <span class="text-xs font-mono text-slate-400">CLI</span>
         </div>
-        <p class="text-slate-400 text-xs leading-relaxed">
-          Scans a FASTA sequence file, identifies all microsatellites (mono-to-hexanucleotides), designs thermodynamic primers, and outputs GFF3 + TSV reports.
-        </p>
-        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code><span class="text-slate-500"># Run nextSSR on a genome FASTA with 8 threads</span>
-nextssr run \
-  --input genome.fasta \
-  --output-dir ./results \
-  --threads 8 \
-  --flank-len 100 \
-  --primer-opt-tm 58.0 \
-  --format gff3,tsv,json</code></pre>
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code>nextssr run --input genome.fasta --output-dir ./results --threads 8 --flank-len 100 --primer-opt-tm 58.0 --format gff3,tsv,json</code></pre>
       </div>
 
       <!-- Tab Content 2: CLI e-PCR -->
-      <div id="tab-cli-epcr" class="tab-content hidden glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+      <div id="tab-cli-epcr" class="tab-content hidden glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fas fa-vial text-purple-400"></i> Command 2: In Silico e-PCR Simulation
-          </h3>
-          <span class="text-xs font-mono text-slate-400">Terminal CLI</span>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-vial text-purple-400"></i> Command 2: In Silico e-PCR Simulation</h3>
+          <span class="text-xs font-mono text-slate-400">CLI</span>
         </div>
-        <p class="text-slate-400 text-xs leading-relaxed">
-          Tests primer pairs against template genomes, evaluates binding site specificity, checks 3'-extension mismatches, and supports IUPAC degenerate bases.
-        </p>
-        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code><span class="text-slate-500"># Simulate e-PCR amplification across genome</span>
-nextssr epcr \
-  --fasta target_genome.fasta \
-  --forward GATTACAAGCTACG \
-  --reverse ACGTACGTACGT \
-  --max-mismatch 2 \
-  --output epcr_results.tsv</code></pre>
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code>nextssr epcr --fasta target_genome.fasta --forward GATTACAAGCTACG --reverse ACGTACGTACGT --max-mismatch 2 --output epcr_results.tsv</code></pre>
       </div>
 
       <!-- Tab Content 3: Python API -->
-      <div id="tab-python-api" class="tab-content hidden glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+      <div id="tab-python-api" class="tab-content hidden glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fab fa-python text-brand-400"></i> Python API Programmatic Integration
-          </h3>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fab fa-python text-brand-400"></i> Python API Programmatic Integration</h3>
           <span class="text-xs font-mono text-slate-400">Python 3.8+</span>
         </div>
-        <p class="text-slate-400 text-xs leading-relaxed">
-          Import nextSSR modules directly inside custom Python scripts, Jupyter notebooks, or computational pipelines.
-        </p>
-        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">from</span> nextssr <span class="text-purple-400">import</span> SSRFinder, PrimerDesigner, SSRConfig
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">from</span> nextssr <span class="text-purple-400">import</span> SSRFinder, PrimerDesigner, SSRConfig
 
-<span class="text-slate-500"># 1. Initialize configuration</span>
 config = SSRConfig(flank_len=100, opt_tm=58.0)
-
-<span class="text-slate-500"># 2. Mine SSR loci from sequence</span>
 finder = SSRFinder(config)
 result = finder.analyze_sequence(seq_id=<span class="text-emerald-400">"Chr01"</span>, sequence=<span class="text-emerald-400">"ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGATCG"</span>)
 
-<span class="text-slate-500"># 3. Design thermodynamic PCR primers</span>
 designer = PrimerDesigner(opt_tm=58.0)
 <span class="text-purple-400">for</span> ssr <span class="text-purple-400">in</span> result.ssrs:
     pair = designer.design_primers(ssr.flank_5p, ssr.sequence, ssr.flank_3p)
@@ -531,145 +392,108 @@ designer = PrimerDesigner(opt_tm=58.0)
       </div>
 
       <!-- Tab Content 4: Nextflow -->
-      <div id="tab-nextflow" class="tab-content hidden glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+      <div id="tab-nextflow" class="tab-content hidden glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fas fa-network-wired text-blue-400"></i> Nextflow Pipeline Process Module
-          </h3>
-          <span class="text-xs font-mono text-slate-400">Nextflow DSL2</span>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-network-wired text-blue-400"></i> Nextflow Pipeline Process Module</h3>
+          <span class="text-xs font-mono text-slate-400">DSL2</span>
         </div>
-        <p class="text-slate-400 text-xs leading-relaxed">
-          Plug nextSSR directly into Nextflow workflows using containers (Docker/Singularity) or Bioconda environments.
-        </p>
-        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-blue-400">process</span> <span class="text-brand-400">NEXTSSR_MINING</span> {
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-blue-400">process</span> <span class="text-brand-400">NEXTSSR_MINING</span> {
     tag <span class="text-emerald-400">"$meta.id"</span>
     conda <span class="text-emerald-400">'bioconda::nextssr=0.1.0'</span>
 
-    input:
-    tuple val(meta), path(fasta)
-
-    output:
-    tuple val(meta), path(<span class="text-emerald-400">"*.gff3"</span>), emit: gff
-    tuple val(meta), path(<span class="text-emerald-400">"*.tsv"</span>) , emit: tsv
+    input: tuple val(meta), path(fasta)
+    output: tuple val(meta), path(<span class="text-emerald-400">"*.gff3"</span>), emit: gff
 
     script:
-    <span class="text-emerald-400">"""
-    nextssr run \\
-        --input ${fasta} \\
-        --output-dir . \\
-        --threads ${task.cpus}
-    """</span>
+    <span class="text-emerald-400">"nextssr run --input ${fasta} --output-dir . --threads ${task.cpus}"</span>
 }</code></pre>
       </div>
 
       <!-- Tab Content 5: Snakemake -->
-      <div id="tab-snakemake" class="tab-content hidden glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+      <div id="tab-snakemake" class="tab-content hidden glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fas fa-project-diagram text-amber-400"></i> Snakemake Rule Integration
-          </h3>
-          <span class="text-xs font-mono text-slate-400">Snakemake Workflow</span>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-project-diagram text-amber-400"></i> Snakemake Rule Integration</h3>
+          <span class="text-xs font-mono text-slate-400">Workflow</span>
         </div>
-        <p class="text-slate-400 text-xs leading-relaxed">
-          Define automated SSR identification rules in your `Snakefile` with built-in Conda environment management and multi-sample processing.
-        </p>
-        <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">rule</span> <span class="text-brand-400">nextssr_mining</span>:
-    <span class="text-blue-400">input</span>:
-        fasta=<span class="text-emerald-400">"genomes/{sample}.fasta"</span>
-    <span class="text-blue-400">output</span>:
-        gff=<span class="text-emerald-400">"results/{sample}.gff3"</span>,
-        tsv=<span class="text-emerald-400">"results/{sample}.tsv"</span>
-    <span class="text-blue-400">params</span>:
-        threads=8,
-        opt_tm=58.0,
-        flank_len=100
-    <span class="text-blue-400">conda</span>:
-        <span class="text-emerald-400">"bioconda::nextssr=0.1.0"</span>
-    <span class="text-blue-400">shell</span>:
-        <span class="text-emerald-400">"""
-        nextssr run \\
-            --input {input.fasta} \\
-            --output-dir results \\
-            --threads {params.threads} \\
-            --flank-len {params.flank_len} \\
-            --primer-opt-tm {params.opt_tm} \\
-            --format gff3,tsv
-        """</span></code></pre>
+        <pre class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">rule</span> <span class="text-brand-400">nextssr_mining</span>:
+    input: fasta=<span class="text-emerald-400">"genomes/{sample}.fasta"</span>
+    output: gff=<span class="text-emerald-400">"results/{sample}.gff3"</span>, tsv=<span class="text-emerald-400">"results/{sample}.tsv"</span>
+    conda: <span class="text-emerald-400">"bioconda::nextssr=0.1.0"</span>
+    shell: <span class="text-emerald-400">"nextssr run --input {input.fasta} --output-dir results --threads 8 --format gff3,tsv"</span></code></pre>
       </div>
 
     </div>
   </section>
 
   <!-- Empirical Benchmarks Section -->
-  <section id="benchmarks" class="py-20 bg-slate-900/50 border-b border-slate-800/80">
+  <section id="benchmarks" class="py-12 bg-slate-950 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Empirical Performance</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Empirical Benchmarks across Real Genomes</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Evaluated against MISA (Perl v2.1) across standard NCBI reference assemblies.</p>
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">Empirical Benchmarks</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">Performance across Real NCBI Genomes</h2>
       </div>
 
       <!-- Benchmarks Table -->
-      <div class="overflow-x-auto glass-card rounded-3xl border border-slate-800">
+      <div class="overflow-x-auto glass-card rounded-2xl border border-slate-800">
         <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-950/80 uppercase font-bold text-slate-400 border-b border-slate-800">
+          <thead class="bg-slate-950/90 uppercase font-bold text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="px-6 py-4">Accession</th>
-              <th class="px-6 py-4">Organism & Genome Type</th>
-              <th class="px-6 py-4">Size (MB)</th>
-              <th class="px-6 py-4">MISA Perl (s)</th>
-              <th class="px-6 py-4 text-blue-400">nextSSR 1-Thread (s)</th>
-              <th class="px-6 py-4 text-brand-400">nextSSR 8-Threads (s)</th>
-              <th class="px-6 py-4">Total SSRs</th>
-              <th class="px-6 py-4">PCR Primers OK</th>
-              <th class="px-6 py-4">Concordance</th>
+              <th class="px-4 py-3">Accession</th>
+              <th class="px-4 py-3">Organism & Type</th>
+              <th class="px-4 py-3">Size (MB)</th>
+              <th class="px-4 py-3">MISA Perl (s)</th>
+              <th class="px-4 py-3 text-blue-400">nextSSR 1-Thread (s)</th>
+              <th class="px-4 py-3 text-brand-400">nextSSR 8-Threads (s)</th>
+              <th class="px-4 py-3">Total SSRs</th>
+              <th class="px-4 py-3">Primers OK</th>
+              <th class="px-4 py-3">Concordance</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/60 font-mono">
             <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-4 text-slate-400">NC_000932.1</td>
-              <td class="px-6 py-4 font-sans font-semibold text-white">Arabidopsis thaliana (cp)</td>
-              <td class="px-6 py-4">0.15 MB</td>
-              <td class="px-6 py-4 text-slate-400">0.252s</td>
-              <td class="px-6 py-4 text-blue-400">3.250s</td>
-              <td class="px-6 py-4 font-bold text-brand-400">3.231s</td>
-              <td class="px-6 py-4 font-bold text-white">77 == 77</td>
-              <td class="px-6 py-4 text-emerald-400">22 Pairs</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
+              <td class="px-4 py-2.5 text-slate-400">NC_000932.1</td>
+              <td class="px-4 py-2.5 font-sans font-semibold text-white">Arabidopsis thaliana (cp)</td>
+              <td class="px-4 py-2.5">0.15 MB</td>
+              <td class="px-4 py-2.5 text-slate-400">0.252s</td>
+              <td class="px-4 py-2.5 text-blue-400">3.250s</td>
+              <td class="px-4 py-2.5 font-bold text-brand-400">3.231s</td>
+              <td class="px-4 py-2.5 font-bold text-white">77 == 77</td>
+              <td class="px-4 py-2.5 text-emerald-400">22 Pairs</td>
+              <td class="px-4 py-2.5 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-4 text-slate-400">NC_011033.1</td>
-              <td class="px-6 py-4 font-sans font-semibold text-white">Oryza sativa (Rice mt)</td>
-              <td class="px-6 py-4">0.47 MB</td>
-              <td class="px-6 py-4 text-slate-400">0.775s</td>
-              <td class="px-6 py-4 text-blue-400">1.798s</td>
-              <td class="px-6 py-4 font-bold text-brand-400">1.924s</td>
-              <td class="px-6 py-4 font-bold text-white">27 == 27</td>
-              <td class="px-6 py-4 text-emerald-400">22 Pairs</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
+              <td class="px-4 py-2.5 text-slate-400">NC_011033.1</td>
+              <td class="px-4 py-2.5 font-sans font-semibold text-white">Oryza sativa (Rice mt)</td>
+              <td class="px-4 py-2.5">0.47 MB</td>
+              <td class="px-4 py-2.5 text-slate-400">0.775s</td>
+              <td class="px-4 py-2.5 text-blue-400">1.798s</td>
+              <td class="px-4 py-2.5 font-bold text-brand-400">1.924s</td>
+              <td class="px-4 py-2.5 font-bold text-white">27 == 27</td>
+              <td class="px-4 py-2.5 text-emerald-400">22 Pairs</td>
+              <td class="px-4 py-2.5 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-4 text-slate-400">NC_000913.3</td>
-              <td class="px-6 py-4 font-sans font-semibold text-white">E. coli K-12 MG1655</td>
-              <td class="px-6 py-4">4.49 MB</td>
-              <td class="px-6 py-4 text-slate-400">6.017s</td>
-              <td class="px-6 py-4 text-blue-400 font-bold">3.260s</td>
-              <td class="px-6 py-4 font-bold text-brand-400">3.312s (2x Faster)</td>
-              <td class="px-6 py-4 font-bold text-white">4 == 4</td>
-              <td class="px-6 py-4 text-emerald-400">4 Pairs</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
+              <td class="px-4 py-2.5 text-slate-400">NC_000913.3</td>
+              <td class="px-4 py-2.5 font-sans font-semibold text-white">E. coli K-12 MG1655</td>
+              <td class="px-4 py-2.5">4.49 MB</td>
+              <td class="px-4 py-2.5 text-slate-400">6.017s</td>
+              <td class="px-4 py-2.5 text-blue-400 font-bold">3.260s</td>
+              <td class="px-4 py-2.5 font-bold text-brand-400">3.312s (2x Faster)</td>
+              <td class="px-4 py-2.5 font-bold text-white">4 == 4</td>
+              <td class="px-4 py-2.5 text-emerald-400">4 Pairs</td>
+              <td class="px-4 py-2.5 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
-              <td class="px-6 py-4 text-slate-400">S_cerevisiae_16Chr</td>
-              <td class="px-6 py-4 font-sans font-semibold text-white">Saccharomyces cerevisiae</td>
-              <td class="px-6 py-4">11.68 MB</td>
-              <td class="px-6 py-4 text-slate-400">16.169s</td>
-              <td class="px-6 py-4 text-blue-400">126.143s</td>
-              <td class="px-6 py-4 font-bold text-brand-400">120.395s</td>
-              <td class="px-6 py-4 font-bold text-white">3,256 == 3,256</td>
-              <td class="px-6 py-4 text-emerald-400">2,032 Pairs</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
+              <td class="px-4 py-2.5 text-slate-400">S_cerevisiae_16Chr</td>
+              <td class="px-4 py-2.5 font-sans font-semibold text-white">Saccharomyces cerevisiae</td>
+              <td class="px-4 py-2.5">11.68 MB</td>
+              <td class="px-4 py-2.5 text-slate-400">16.169s</td>
+              <td class="px-4 py-2.5 text-blue-400">126.143s</td>
+              <td class="px-4 py-2.5 font-bold text-brand-400">120.395s</td>
+              <td class="px-4 py-2.5 font-bold text-white">3,256 == 3,256</td>
+              <td class="px-4 py-2.5 text-emerald-400">2,032 Pairs</td>
+              <td class="px-4 py-2.5 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
           </tbody>
         </table>
@@ -679,16 +503,16 @@ designer = PrimerDesigner(opt_tm=58.0)
   </section>
 
   <!-- Scientific Publication & Citation Section -->
-  <section id="citation" class="py-20 bg-slate-950 border-b border-slate-800/80">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Scientific Publication</span>
-      <h2 class="text-3xl font-black text-white tracking-tight mt-3 mb-4">How to Cite nextSSR</h2>
-      <p class="text-slate-400 text-sm mb-8 leading-relaxed">
-        If you use nextSSR in your research, genome annotation pipelines, or marker discovery studies, please cite our BMC Bioinformatics software description paper:
+  <section id="citation" class="py-12 bg-slate-900/40 border-b border-slate-800/80">
+    <div class="max-w-4xl mx-auto px-4 text-center space-y-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">Scientific Publication</span>
+      <h2 class="text-2xl font-black text-white tracking-tight">How to Cite nextSSR</h2>
+      <p class="text-slate-400 text-xs leading-relaxed">
+        If you use nextSSR in your research or genome annotation pipelines, please cite our software manuscript:
       </p>
 
-      <div class="glass-card p-6 rounded-3xl text-left border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed shadow-2xl relative">
-        <button onclick="navigator.clipboard.writeText(document.getElementById('bibtex-text').innerText); alert('BibTeX copied to clipboard!');" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-lg text-xs font-sans">
+      <div class="glass-card p-5 rounded-2xl text-left border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed shadow-xl relative">
+        <button onclick="navigator.clipboard.writeText(document.getElementById('bibtex-text').innerText); alert('BibTeX copied to clipboard!');" class="absolute top-3 right-3 text-slate-400 hover:text-white bg-slate-800 px-2.5 py-1 rounded text-xs font-sans">
           <i class="far fa-copy mr-1"></i> Copy BibTeX
         </button>
         <div id="bibtex-text">
@@ -705,15 +529,8 @@ designer = PrimerDesigner(opt_tm=58.0)
   </section>
 
   <!-- Footer -->
-  <footer class="py-12 bg-slate-950 text-slate-500 text-xs text-center border-t border-slate-900">
-    <div class="max-w-7xl mx-auto px-4 space-y-3">
-      <div class="flex items-center justify-center space-x-4">
-        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" class="hover:text-slate-300 transition">GitHub</a>
-        <span>•</span>
-        <a href="https://pypi.org/project/nextssr/" target="_blank" class="hover:text-slate-300 transition">PyPI</a>
-        <span>•</span>
-        <a href="https://github.com/LaBiOmicS/nextSSR/tree/main/paper" target="_blank" class="hover:text-slate-300 transition">Paper Manuscript</a>
-      </div>
+  <footer class="py-8 bg-slate-950 text-slate-500 text-xs text-center border-t border-slate-900 space-y-2">
+    <div class="max-w-7xl mx-auto px-4">
       <p class="font-semibold text-slate-400">Developed by Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS) — Universidade Mogi das Cruzes (UMC).</p>
       <p class="text-slate-600">Released under the MIT Open Source License.</p>
     </div>
