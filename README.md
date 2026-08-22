@@ -5,6 +5,22 @@
 [![Conda Package](https://img.shields.io/badge/bioconda-v0.1.0-green.svg)](https://anaconda.org/bioconda/nextssr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<!-- Institutional Badges -->
+[![University: UMC](https://img.shields.io/badge/University-UMC-0D47A1.svg)](https://www.umc.br/)
+[![Laboratory: LaBiOmicS](https://img.shields.io/badge/Laboratory-LaBiOmicS-7B1FA2.svg)](https://github.com/LaBiOmicS)
+[![Bioinformatics](https://img.shields.io/badge/Bioinformatics-lncRNA-green.svg)](https://github.com/LaBiOmicS/metaLncRNA)
+
+<!-- Open Science Badges -->
+[![PyPI Version](https://img.shields.io/pypi/v/metalncrna.svg)](https://pypi.org/project/metalncrna/)
+[![Open Source](https://img.shields.io/badge/Open-Source-brightgreen.svg)](https://github.com/LaBiOmicS/metaLncRNA)
+[![Open Science](https://img.shields.io/badge/Open-Science-blue.svg)](https://github.com/LaBiOmicS/metaLncRNA)
+[![Open Data](https://img.shields.io/badge/Open-Data-brightgreen.svg)](https://github.com/LaBiOmicS/metaLncRNA)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![JOSS Status](https://img.shields.io/badge/JOSS-Pre--submission-brightgreen.svg)](https://joss.theoj.org/)
+
+<!-- Tech & Method Badges -->
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+
 **nextSSR** is a next-generation, high-performance, standalone Simple Sequence Repeat (SSR / microsatellite) identification and PCR primer design platform written in Python. It provides ultra-fast parallel CPU multi-processing, optional CUDA GPU hardware acceleration, low-memory streaming, automated PCR primer design, and complete **FAIR compliance** (W3C RO-Crate JSON-LD provenance and Sequence Ontology GFF3 annotations).
 
 ---
