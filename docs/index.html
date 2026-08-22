@@ -350,18 +350,17 @@ nextssr epcr \
           <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">from</span> nextssr <span class="text-purple-400">import</span> SSRFinder, PrimerDesigner, SSRConfig
 
 <span class="text-slate-500"># 1. Initialize configuration</span>
-config = SSRConfig(flank_len=100, primer_opt_tm=58.0)
+config = SSRConfig(flank_len=100, opt_tm=58.0)
 
-<span class="text-slate-500"># 2. Mine SSR loci</span>
+<span class="text-slate-500"># 2. Mine SSR loci from sequence</span>
 finder = SSRFinder(config)
-ssrs = finder.analyze_sequence(seq_id=<span class="text-emerald-400">"Chr01"</span>, sequence=<span class="text-emerald-400">"ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGATCG"</span>)
+result = finder.analyze_sequence(seq_id=<span class="text-emerald-400">"Chr01"</span>, sequence=<span class="text-emerald-400">"ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGATCG"</span>)
 
 <span class="text-slate-500"># 3. Design thermodynamic PCR primers</span>
-designer = PrimerDesigner(config)
-<span class="text-purple-400">for</span> ssr <span class="text-purple-400">in</span> ssrs:
-    primers = designer.design_primers(flank_5p=ssr.flank_5p, target_seq=ssr.sequence, flank_3p=ssr.flank_3p)
-    <span class="text-purple-400">if</span> primers.status == <span class="text-emerald-400">"OK"</span>:
-        <span class="text-purple-400">print</span>(f<span class="text-emerald-400">"Locus: {ssr.id} | Forward: {primers.forward_seq} | Product: {primers.product_size}bp"</span>)</code></pre>
+designer = PrimerDesigner(opt_tm=58.0)
+<span class="text-purple-400">for</span> ssr <span class="text-purple-400">in</span> result.ssrs:
+    pair = designer.design_primers(ssr.flank_5p, ssr.sequence, ssr.flank_3p)
+    <span class="text-purple-400">print</span>(f<span class="text-emerald-400">"Locus: {ssr.seq_id} | Motif: {ssr.motif} | Repeats: {ssr.repeats}x | Status: {pair.status}"</span>)</code></pre>
         </div>
 
       </div>
