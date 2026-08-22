@@ -1,6 +1,24 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Dict
-from nextssr.utils import parse_fasta
+from typing import List, Tuple, Dict, Set
+
+IUPAC_MAP: Dict[str, Set[str]] = {
+    "A": {"A"},
+    "C": {"C"},
+    "G": {"G"},
+    "T": {"T"},
+    "U": {"T"},
+    "R": {"A", "G"},
+    "Y": {"C", "T"},
+    "S": {"G", "C"},
+    "W": {"A", "T"},
+    "K": {"G", "T"},
+    "M": {"A", "C"},
+    "B": {"C", "G", "T"},
+    "D": {"A", "G", "T"},
+    "H": {"A", "C", "T"},
+    "V": {"A", "C", "G"},
+    "N": {"A", "C", "G", "T"},
+}
 
 
 @dataclass
@@ -18,7 +36,8 @@ class AmpliconResult:
     reverse_mismatches: int
     product_size: int
     amplicon_sequence: str
-    status: str = "SPECIFIC"  # SPECIFIC, OFF_TARGET, MISMATCH
+    amplicon_gc: float = 0.0
+    status: str = "SPECIFIC"  # SPECIFIC, OFF_TARGET, MISMATCH, 3PRIME_MISMATCH
 
 
 class EPCRSimulator:
@@ -27,23 +46,67 @@ class EPCRSimulator:
     def __init__(
         self,
         max_mismatches: int = 2,
+        max_3prime_mismatches: int = 0,
+        three_prime_len: int = 5,
         min_product_size: int = 50,
         max_product_size: int = 1000,
     ):
         self.max_mismatches = max_mismatches
+        self.max_3prime_mismatches = max_3prime_mismatches
+        self.three_prime_len = three_prime_len
         self.min_product_size = min_product_size
         self.max_product_size = max_product_size
 
     @staticmethod
     def reverse_complement(seq: str) -> str:
-        """Return the reverse complement of a DNA sequence."""
-        complement = str.maketrans("ATCGNatcgn", "TAGCNtagcn")
-        return seq.translate(complement)[::-1]
+        """Return the reverse complement of a DNA sequence including IUPAC bases."""
+        comp_map = {
+            "A": "T",
+            "T": "A",
+            "C": "G",
+            "G": "C",
+            "U": "A",
+            "R": "Y",
+            "Y": "R",
+            "S": "S",
+            "W": "W",
+            "K": "M",
+            "M": "K",
+            "B": "V",
+            "V": "B",
+            "D": "H",
+            "H": "D",
+            "N": "N",
+        }
+        seq_upper = seq.upper()
+        res = [comp_map.get(b, b) for b in reversed(seq_upper)]
+        return "".join(res)
 
-    def _find_matches(self, primer: str, sequence: str) -> List[Tuple[int, int, int]]:
+    @staticmethod
+    def calculate_gc(sequence: str) -> float:
+        """Calculate GC percentage of sequence."""
+        if not sequence:
+            return 0.0
+        seq_u = sequence.upper()
+        gc_count = seq_u.count("G") + seq_u.count("C")
+        return round((gc_count / len(seq_u)) * 100, 2)
+
+    def _match_bases(self, primer_base: str, target_base: str) -> bool:
+        """Check if primer base matches target base under IUPAC rules."""
+        p_u = primer_base.upper()
+        t_u = target_base.upper()
+        if t_u == "N" and p_u != "N":
+            return False
+        allowed = IUPAC_MAP.get(p_u, {p_u})
+        target_allowed = IUPAC_MAP.get(t_u, {t_u})
+        return bool(allowed.intersection(target_allowed))
+
+    def _find_matches(
+        self, primer: str, sequence: str
+    ) -> List[Tuple[int, int, int, int]]:
         """Find primer binding sites in a sequence allowing up to max_mismatches.
 
-        Returns list of (start_idx, end_idx, mismatch_count).
+        Returns list of (start_idx, end_idx, total_mismatches, 3prime_mismatches).
         """
         primer_len = len(primer)
         seq_len = len(sequence)
@@ -52,11 +115,23 @@ class EPCRSimulator:
         primer_upper = primer.upper()
         seq_upper = sequence.upper()
 
+        three_prime_start_idx = max(0, primer_len - self.three_prime_len)
+
         for i in range(seq_len - primer_len + 1):
             subseq = seq_upper[i : i + primer_len]
-            mismatches = sum(1 for a, b in zip(primer_upper, subseq) if a != b)
-            if mismatches <= self.max_mismatches:
-                matches.append((i + 1, i + primer_len, mismatches))
+            total_mismatches = 0
+            three_prime_mismatches = 0
+
+            for idx, (p_base, s_base) in enumerate(zip(primer_upper, subseq)):
+                if not self._match_bases(p_base, s_base):
+                    total_mismatches += 1
+                    if idx >= three_prime_start_idx:
+                        three_prime_mismatches += 1
+
+            if total_mismatches <= self.max_mismatches:
+                matches.append(
+                    (i + 1, i + primer_len, total_mismatches, three_prime_mismatches)
+                )
 
         return matches
 
@@ -73,15 +148,22 @@ class EPCRSimulator:
         rev_comp_primer = self.reverse_complement(reverse_primer)
         rev_hits = self._find_matches(rev_comp_primer, sequence)
 
-        for f_start, f_end, f_mismatches in fwd_hits:
-            for r_start, r_end, r_mismatches in rev_hits:
+        for f_start, f_end, f_mismatches, f_3p_mismatches in fwd_hits:
+            for r_start, r_end, r_mismatches, r_3p_mismatches in rev_hits:
                 # Forward primer must be upstream of Reverse primer
                 if r_end > f_start:
                     prod_size = r_end - f_start + 1
                     if self.min_product_size <= prod_size <= self.max_product_size:
                         amplicon_seq = sequence[f_start - 1 : r_end]
+                        amplicon_gc = self.calculate_gc(amplicon_seq)
+
                         status = "SPECIFIC"
-                        if f_mismatches > 0 or r_mismatches > 0:
+                        if (
+                            f_3p_mismatches > self.max_3prime_mismatches
+                            or r_3p_mismatches > self.max_3prime_mismatches
+                        ):
+                            status = "3PRIME_MISMATCH"
+                        elif f_mismatches > 0 or r_mismatches > 0:
                             status = "MISMATCH"
 
                         amplicons.append(
@@ -97,6 +179,7 @@ class EPCRSimulator:
                                 reverse_mismatches=r_mismatches,
                                 product_size=prod_size,
                                 amplicon_sequence=amplicon_seq,
+                                amplicon_gc=amplicon_gc,
                                 status=status,
                             )
                         )
@@ -104,7 +187,8 @@ class EPCRSimulator:
         # Mark off-target if multiple amplicons found for same primer pair
         if len(amplicons) > 1:
             for amp in amplicons:
-                amp.status = "OFF_TARGET"
+                if amp.status != "3PRIME_MISMATCH":
+                    amp.status = "OFF_TARGET"
 
         return amplicons
 
@@ -112,6 +196,8 @@ class EPCRSimulator:
         self, fasta_path: str, forward_primer: str, reverse_primer: str
     ) -> List[AmpliconResult]:
         """Run in silico e-PCR against a FASTA file for a specific primer pair."""
+        from nextssr.utils import parse_fasta
+
         results = []
         for seq_id, sequence in parse_fasta(fasta_path):
             amps = self.simulate_sequence(
@@ -126,7 +212,6 @@ class EPCRSimulator:
         """Run in silico e-PCR for all primer pairs in a nextSSR primers TSV file."""
         all_results = {}
 
-        # Parse TSV
         primer_pairs = []
         with open(primers_tsv_path, "r", encoding="utf-8") as f:
             headers = f.readline().strip().split("\t")
@@ -144,7 +229,6 @@ class EPCRSimulator:
                         if fwd and rev and fwd != "N/A" and rev != "N/A":
                             primer_pairs.append((ssr_id, fwd, rev))
 
-        # Run e-PCR for each pair across FASTA
         for ssr_id, fwd, rev in primer_pairs:
             pair_key = f"{ssr_id} ({fwd} / {rev})"
             amps = self.run_fasta(fasta_path, fwd, rev)
