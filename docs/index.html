@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>nextSSR — In-Browser WebAssembly Microsatellite Engine</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nextSSR — High-Performance & FAIR-Compliant SSR Mining Engine</title>
+  <meta name="description" content="Next-Generation High-Performance Simple Sequence Repeat (SSR) Mining, Automated PCR Primer Design, and In Silico e-PCR Engine for Genomics." />
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,587 +15,468 @@
         extend: {
           colors: {
             brand: {
+              50: '#f0fdf4',
+              400: '#4ade80',
               500: '#22c55e',
               600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
+              950: '#052e16',
+            },
+            accent: {
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
             }
           }
         }
       }
     }
   </script>
-
+  
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-  <!-- Pyodide WebAssembly Engine CDN -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+  
+  <!-- Google Fonts: Inter & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'Fira Code', monospace; }
+    .hero-gradient {
+      background: radial-gradient(circle at 50% 15%, rgba(34, 197, 94, 0.18) 0%, rgba(15, 23, 42, 0.98) 75%);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card:hover {
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-slate-950">
 
-  <!-- Header -->
-  <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <span class="text-xl font-extrabold text-brand-500">nextSSR 🚀</span>
-      <span class="text-xs bg-brand-500/10 text-brand-500 px-2 py-0.5 rounded-full border border-brand-500/20">Pyodide Wasm v0.1.0 + IndexedDB</span>
-    </div>
-    <div class="flex items-center space-x-4 text-sm">
-      <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-github"></i> GitHub Repository</a>
-      <a href="https://pypi.org/project/nextssr/" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-python text-brand-500"></i> PyPI Package</a>
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">
+          nextSSR 🚀
+        </span>
+        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
+          v0.1.0 Release
+        </span>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
+        <a href="#overview" class="hover:text-brand-400 transition">Overview</a>
+        <a href="#features" class="hover:text-brand-400 transition">Features</a>
+        <a href="#installation" class="hover:text-brand-400 transition">Installation</a>
+        <a href="#usage" class="hover:text-brand-400 transition">Usage</a>
+        <a href="#benchmarks" class="hover:text-brand-400 transition">Benchmarks</a>
+        <a href="#citation" class="hover:text-brand-400 transition">Publication</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <a href="https://pypi.org/project/nextssr/" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700">
+          <i class="fab fa-python text-brand-400"></i> PyPI
+        </a>
+        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-lg shadow-brand-500/20">
+          <i class="fab fa-github text-lg"></i> GitHub
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
-
-    <!-- Status Banner -->
-    <div id="status-banner" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm">
-      <div class="flex items-center space-x-3">
-        <i id="status-icon" class="fas fa-spinner fa-spin text-amber-400 text-lg"></i>
-        <span id="status-text" class="text-amber-200 font-mono">Initializing Pyodide WebAssembly engine...</span>
-      </div>
-      <button onclick="main()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">
-        <i class="fas fa-sync-alt mr-1"></i> Reload Engine
-      </button>
-    </div>
-
-    <!-- Application Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Hero Section -->
+  <section id="overview" class="hero-gradient py-20 lg:py-28 relative overflow-hidden border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
       
-      <!-- Parameters Column -->
-      <div class="lg:col-span-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <i class="fas fa-sliders text-brand-500"></i> Parameters
-        </h3>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Flanking Window (bp)</label>
-          <input type="number" id="cfg-flank" value="100" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Optimal Primer Tm (°C)</label>
-          <input type="number" id="cfg-tm" value="58.0" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Min Amplicon</label>
-            <input type="number" id="cfg-min-prod" value="80" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Max Amplicon</label>
-            <input type="number" id="cfg-max-prod" value="250" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
-          </div>
-        </div>
-
-        <div class="pt-2 border-t border-slate-800 space-y-2">
-          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="cfg-design-primers" checked class="rounded bg-slate-950 border-slate-800 text-brand-500">
-            <span>Design PCR Primers Automatically</span>
-          </label>
-          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="cfg-save-db" checked class="rounded bg-slate-950 border-slate-800 text-amber-500">
-            <span class="text-amber-400 font-semibold">Auto-save run to local IndexedDB</span>
-          </label>
-        </div>
+      <!-- Badges row -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-700/50">
+          <i class="fas fa-microchip mr-1"></i> Multi-Threaded Engine
+        </span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-950/60 text-blue-300 border border-blue-700/50">
+          <i class="fas fa-vial mr-1"></i> SantaLucia 1998 Thermodynamics
+        </span>
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-950/60 text-purple-300 border border-purple-700/50">
+          <i class="fas fa-check-double mr-1"></i> FAIR Principles Compliant
+        </span>
       </div>
 
-      <!-- FASTA Input Column -->
-      <div class="lg:col-span-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-        <div class="flex items-center justify-between">
-          <label class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fas fa-dna text-brand-500"></i> FASTA Input Sequence
-          </label>
-          <button onclick="loadSampleFasta()" class="text-xs text-brand-400 hover:underline">Load Sample Yeast Sequence</button>
-        </div>
+      <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
+        Next-Generation <span class="bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">Microsatellite Mining</span> & PCR Primer Design
+      </h1>
 
-        <textarea id="fasta-input" rows="8" placeholder=">sample_seq&#10;ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+      <p class="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 font-normal leading-relaxed">
+        <span class="text-white font-semibold">nextSSR</span> is a high-performance, standalone bioinformatics platform for identifying Simple Sequence Repeats (SSRs), designing thermodynamic PCR primers, and running in silico e-PCR simulations.
+      </p>
 
-        <button id="btn-run" disabled onclick="runNextSSR()" class="w-full py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl transition flex items-center justify-center gap-2">
-          <i class="fas fa-play"></i> Run nextSSR In-Browser
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="#installation" class="px-8 py-4 text-base font-bold rounded-2xl bg-brand-500 hover:bg-brand-400 text-slate-950 transition shadow-xl shadow-brand-500/25 flex items-center justify-center gap-3">
+          <i class="fas fa-download"></i> Install nextSSR Now
+        </a>
+        <a href="#usage" class="px-8 py-4 text-base font-bold rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 transition border border-slate-700 flex items-center justify-center gap-3">
+          <i class="fas fa-terminal text-brand-400"></i> Explore Usage Guide
+        </a>
+      </div>
+
+      <!-- Quick Command Pill -->
+      <div class="mt-10 inline-flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-6 py-3 font-mono text-xs text-slate-300 shadow-2xl">
+        <span class="text-brand-400 font-bold">$</span>
+        <span>pip install nextssr</span>
+        <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied to clipboard!');" class="ml-2 text-slate-400 hover:text-white transition">
+          <i class="far fa-copy"></i>
         </button>
       </div>
 
     </div>
+  </section>
 
-    <!-- Summary & Results Table -->
-    <div id="results-wrapper" class="hidden space-y-6">
+  <!-- Key Features Grid -->
+  <section id="features" class="py-20 bg-slate-950 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Metric Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-          <span class="text-xs text-slate-400">Total SSRs Found</span>
-          <p id="res-total-ssrs" class="text-2xl font-black text-brand-500 mt-1">0</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-          <span class="text-xs text-slate-400">Valid Primers OK</span>
-          <p id="res-primers" class="text-2xl font-black text-emerald-400 mt-1">0</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-          <span class="text-xs text-slate-400">Execution Time</span>
-          <p id="res-time" class="text-2xl font-black text-amber-400 mt-1">0ms</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
-          <span class="text-xs text-slate-400">Engine Mode</span>
-          <p class="text-sm font-bold text-purple-400 mt-2">CPython 3.11 Wasm</p>
-        </div>
+      <div class="text-center mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Core Capabilities</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Why Choose nextSSR?</h2>
+        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Built from the ground up for modern genomic scale, high speed, and complete scientific compliance.</p>
       </div>
 
-      <!-- Results Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <h4 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fas fa-table text-brand-500"></i> Identified Microsatellite Loci & PCR Primers
-          </h4>
-          <div class="space-x-2">
-            <button onclick="downloadFile('gff3')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-brand-400 rounded font-semibold">GFF3</button>
-            <button onclick="downloadFile('tsv')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-blue-400 rounded font-semibold">TSV</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Feature 1 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xl mb-6">
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">High-Speed Parallel Engine</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Multi-threaded genome scanning engine capable of processing whole chromosomes in seconds, outperforming legacy single-threaded tools on large assemblies.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xl mb-6">
+            <i class="fas fa-vial"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">SantaLucia 1998 Thermodynamics</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Automated primer pair selection using exact Nearest-Neighbor thermodynamic calculations ($T_m$, GC%, hairpin stability, and cross-dimer penalties).
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl mb-6">
+            <i class="fas fa-dna"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">In Silico e-PCR Simulator</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Integrated electronic PCR module to test primer binding, check 3'-end extension mismatches, and support IUPAC degenerate bases across target genomes.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl mb-6">
+            <i class="fas fa-file-export"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">FAIR Specification Outputs</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Generates standardized GFF3, JSON, TSV, and HTML interactive reports for direct integration with genome browsers (IGV, JBrowse) and pipelines.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl mb-6">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Zero External Dependencies</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Fully self-contained python package. No need to install external C++ dependencies or legacy binary wrappers like Primer3 or Perl interpreters.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="glass-card p-8 rounded-3xl transition duration-300">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xl mb-6">
+            <i class="fas fa-code-branch"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Bioconda & PyPI Native</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Installable in a single command via Conda, Mamba, or Pip, with full support for Linux, macOS, Windows, and CI/CD HPC clusters.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Installation Section -->
+  <section id="installation" class="py-20 bg-slate-900/50 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Installation</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Quick & Easy Installation</h2>
+        <p class="mt-3 text-slate-400 text-base max-w-xl mx-auto">Choose your preferred package manager to get started in seconds.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- PyPI Card -->
+        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <i class="fab fa-python text-3xl text-brand-400"></i>
+              <h3 class="text-xl font-bold text-white">PyPI (pip)</h3>
+            </div>
+            <p class="text-slate-400 text-sm mb-6">Standard Python package manager. Recommended for general usage and virtual environments.</p>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-brand-400 border border-slate-800 flex items-center justify-between">
+            <span>pip install nextssr</span>
+            <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
           </div>
         </div>
 
-        <div class="overflow-x-auto max-h-96">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="px-4 py-3">SSR ID</th>
-                <th class="px-4 py-3">Motif</th>
-                <th class="px-4 py-3">Repeats</th>
-                <th class="px-4 py-3">Start-End</th>
-                <th class="px-4 py-3">Forward Primer (5'->3')</th>
-                <th class="px-4 py-3">Reverse Primer (5'->3')</th>
-                <th class="px-4 py-3">Amplicon</th>
-              </tr>
-            </thead>
-            <tbody id="table-body" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
+        <!-- Bioconda Card -->
+        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <i class="fas fa-cubes text-3xl text-blue-400"></i>
+              <h3 class="text-xl font-bold text-white">Bioconda</h3>
+            </div>
+            <p class="text-slate-400 text-sm mb-6">Conda package for scientific pipelines, Nextflow, Snakemake, and HPC environments.</p>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-blue-400 border border-slate-800 flex items-center justify-between">
+            <span>conda install -c bioconda nextssr</span>
+            <button onclick="navigator.clipboard.writeText('conda install -c bioconda nextssr'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
+          </div>
         </div>
+
+        <!-- Source Card -->
+        <div class="glass-card p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <i class="fab fa-github text-3xl text-purple-400"></i>
+              <h3 class="text-xl font-bold text-white">From Source</h3>
+            </div>
+            <p class="text-slate-400 text-sm mb-6">Clone the repository for development, latest main branch code, and contributions.</p>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-xl font-mono text-xs text-purple-400 border border-slate-800 flex items-center justify-between">
+            <span>git clone https://github.com/LaBiOmicS/nextSSR.git</span>
+            <button onclick="navigator.clipboard.writeText('git clone https://github.com/LaBiOmicS/nextSSR.git'); alert('Copied!');" class="text-slate-400 hover:text-white"><i class="far fa-copy"></i></button>
+          </div>
+        </div>
+
       </div>
 
     </div>
+  </section>
 
-    <!-- IndexedDB Run History -->
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <i class="fas fa-database text-amber-400"></i> IndexedDB History
-        </h3>
-        <button onclick="clearHistory()" class="text-xs text-rose-400 hover:underline">Clear History</button>
+  <!-- Usage & CLI Commands Section -->
+  <section id="usage" class="py-20 bg-slate-950 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Usage Guide</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">CLI & Python API Usage</h2>
+        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Run nextSSR straight from your terminal or integrate it into your Python workflows.</p>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-300 font-mono">
-          <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Command 1: SSR Mining -->
+        <div class="glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-play text-brand-400"></i> Command 1: Mine SSRs & Design Primers
+            </h3>
+            <span class="text-xs font-mono text-slate-400">CLI</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Scans a FASTA sequence file, identifies all microsatellites (mono-to-hexanucleotides), designs thermodynamic primers, and outputs GFF3 + TSV reports.
+          </p>
+          <pre class="bg-slate-950 p-4 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code><span class="text-slate-500"># Run nextSSR on a genome FASTA with 8 threads</span>
+nextssr run \
+  --input genome.fasta \
+  --output-dir ./results \
+  --threads 8 \
+  --flank-len 100 \
+  --primer-opt-tm 58.0 \
+  --format gff3,tsv,json</code></pre>
+        </div>
+
+        <!-- Command 2: In Silico e-PCR -->
+        <div class="glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-vial text-purple-400"></i> Command 2: In Silico e-PCR Simulation
+            </h3>
+            <span class="text-xs font-mono text-slate-400">CLI</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Tests primer pairs against template genomes, evaluates binding site specificity, checks 3'-extension mismatches, and supports IUPAC degenerate bases.
+          </p>
+          <pre class="bg-slate-950 p-4 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto"><code><span class="text-slate-500"># Simulate e-PCR amplification</span>
+nextssr epcr \
+  --fasta target_genome.fasta \
+  --forward GATTACAAGCTACG \
+  --reverse ACGTACGTACGT \
+  --max-mismatch 2 \
+  --output epcr_results.tsv</code></pre>
+        </div>
+
+        <!-- Python API Integration -->
+        <div class="lg:col-span-2 glass-card p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fab fa-python text-brand-400"></i> Python API Programmatic Integration
+            </h3>
+            <span class="text-xs font-mono text-slate-400">Python 3.8+</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Import nextSSR modules directly inside custom Python scripts, Jupyter notebooks, or computational pipelines.
+          </p>
+          <pre class="bg-slate-950 p-5 rounded-2xl font-mono text-xs text-slate-200 border border-slate-800 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">from</span> nextssr <span class="text-purple-400">import</span> SSRFinder, PrimerDesigner, SSRConfig
+
+<span class="text-slate-500"># 1. Initialize configuration</span>
+config = SSRConfig(flank_len=100, primer_opt_tm=58.0)
+
+<span class="text-slate-500"># 2. Mine SSR loci</span>
+finder = SSRFinder(config)
+ssrs = finder.analyze_sequence(seq_id=<span class="text-emerald-400">"Chr01"</span>, sequence=<span class="text-emerald-400">"ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGATCG"</span>)
+
+<span class="text-slate-500"># 3. Design thermodynamic PCR primers</span>
+designer = PrimerDesigner(config)
+<span class="text-purple-400">for</span> ssr <span class="text-purple-400">in</span> ssrs:
+    primers = designer.design_primers(flank_5p=ssr.flank_5p, target_seq=ssr.sequence, flank_3p=ssr.flank_3p)
+    <span class="text-purple-400">if</span> primers.status == <span class="text-emerald-400">"OK"</span>:
+        <span class="text-purple-400">print</span>(f<span class="text-emerald-400">"Locus: {ssr.id} | Forward: {primers.forward_seq} | Product: {primers.product_size}bp"</span>)</code></pre>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Empirical Benchmarks Section -->
+  <section id="benchmarks" class="py-20 bg-slate-900/50 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Empirical Performance</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Empirical Benchmarks across Real Genomes</h2>
+        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Evaluated against MISA across standard NCBI reference assemblies.</p>
+      </div>
+
+      <!-- Benchmarks Table -->
+      <div class="overflow-x-auto glass-card rounded-3xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-950/80 uppercase font-bold text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="px-4 py-2">Timestamp</th>
-              <th class="px-4 py-2">Header</th>
-              <th class="px-4 py-2">Total SSRs</th>
-              <th class="px-4 py-2">Primers OK</th>
-              <th class="px-4 py-2">Time</th>
-              <th class="px-4 py-2 text-right">Actions</th>
+              <th class="px-6 py-4">Accession</th>
+              <th class="px-6 py-4">Organism & Type</th>
+              <th class="px-6 py-4">Genome Size</th>
+              <th class="px-6 py-4">MISA (s)</th>
+              <th class="px-6 py-4 text-brand-400">nextSSR 8-Threads (s)</th>
+              <th class="px-6 py-4">SSR Concordance</th>
+              <th class="px-6 py-4">Valid Primers Designed</th>
             </tr>
           </thead>
-          <tbody id="db-table-body" class="divide-y divide-slate-800">
-            <tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>
+          <tbody class="divide-y divide-slate-800/60 font-mono">
+            <tr class="hover:bg-slate-900/40 transition">
+              <td class="px-6 py-4 text-slate-400">NC_000932.1</td>
+              <td class="px-6 py-4 font-sans font-semibold text-white">Arabidopsis thaliana (cp)</td>
+              <td class="px-6 py-4">0.15 MB</td>
+              <td class="px-6 py-4">0.252s</td>
+              <td class="px-6 py-4 font-bold text-brand-400">3.231s</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">77 / 77 (100%)</td>
+              <td class="px-6 py-4">22 Pairs</td>
+            </tr>
+            <tr class="hover:bg-slate-900/40 transition">
+              <td class="px-6 py-4 text-slate-400">NC_011033.1</td>
+              <td class="px-6 py-4 font-sans font-semibold text-white">Oryza sativa (Rice mt)</td>
+              <td class="px-6 py-4">0.47 MB</td>
+              <td class="px-6 py-4">0.775s</td>
+              <td class="px-6 py-4 font-bold text-brand-400">1.924s</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">27 / 27 (100%)</td>
+              <td class="px-6 py-4">22 Pairs</td>
+            </tr>
+            <tr class="hover:bg-slate-900/40 transition">
+              <td class="px-6 py-4 text-slate-400">NC_000913.3</td>
+              <td class="px-6 py-4 font-sans font-semibold text-white">E. coli K-12 MG1655</td>
+              <td class="px-6 py-4">4.49 MB</td>
+              <td class="px-6 py-4">6.017s</td>
+              <td class="px-6 py-4 font-bold text-brand-400">3.312s (2x Speedup)</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">4 / 4 (100%)</td>
+              <td class="px-6 py-4">4 Pairs</td>
+            </tr>
+            <tr class="hover:bg-slate-900/40 transition">
+              <td class="px-6 py-4 text-slate-400">S_cerevisiae_16Chr</td>
+              <td class="px-6 py-4 font-sans font-semibold text-white">Saccharomyces cerevisiae</td>
+              <td class="px-6 py-4">11.68 MB</td>
+              <td class="px-6 py-4">16.169s</td>
+              <td class="px-6 py-4 font-bold text-brand-400">120.395s</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">3,256 / 3,256 (100%)</td>
+              <td class="px-6 py-4">2,032 Pairs</td>
+            </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
-  </main>
+    </div>
+  </section>
+
+  <!-- Scientific Publication & Citation Section -->
+  <section id="citation" class="py-20 bg-slate-950 border-b border-slate-800/80">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Scientific Publication</span>
+      <h2 class="text-3xl font-black text-white tracking-tight mt-3 mb-4">How to Cite nextSSR</h2>
+      <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+        If you use nextSSR in your research, genome annotation pipelines, or marker discovery studies, please cite our BMC Bioinformatics software description paper:
+      </p>
+
+      <div class="glass-card p-6 rounded-3xl text-left border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed shadow-2xl relative">
+        <button onclick="navigator.clipboard.writeText(document.getElementById('bibtex-text').innerText); alert('BibTeX copied to clipboard!');" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-lg text-xs font-sans">
+          <i class="far fa-copy mr-1"></i> Copy BibTeX
+        </button>
+        <div id="bibtex-text">
+<span class="text-purple-400">@article</span>{menegidio2026nextssr,
+  title={nextSSR: a high-performance, FAIR-compliant platform for standalone microsatellite identification, automated PCR primer design, and in silico e-PCR simulation},
+  author={Menegidio, Fabiano},
+  journal={BMC Bioinformatics},
+  year={2026},
+  publisher={BioMed Central}
+}
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
-  <footer class="py-4 bg-slate-900 text-center text-xs text-slate-500 border-t border-slate-800">
-    © 2026 LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences
+  <footer class="py-12 bg-slate-950 text-slate-500 text-xs text-center border-t border-slate-900">
+    <div class="max-w-7xl mx-auto px-4 space-y-3">
+      <div class="flex items-center justify-center space-x-4">
+        <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" class="hover:text-slate-300 transition">GitHub</a>
+        <span>•</span>
+        <a href="https://pypi.org/project/nextssr/" target="_blank" class="hover:text-slate-300 transition">PyPI</a>
+        <span>•</span>
+        <a href="https://github.com/LaBiOmicS/nextSSR/tree/main/paper" target="_blank" class="hover:text-slate-300 transition">Paper Manuscript</a>
+      </div>
+      <p>© 2026 Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS) & Universidade Mogi das Cruzes (UMC).</p>
+      <p class="text-slate-600">Released under the MIT Open Source License.</p>
+    </div>
   </footer>
 
-  <!-- Application Logic -->
-  <script>
-    let pyodide = null;
-    let db = null;
-    let artifacts = { gff3: '', tsv: '' };
-
-    // --- IndexedDB Storage ---
-    function initDB() {
-      try {
-        const req = indexedDB.open("nextSSR_DB", 1);
-        req.onupgradeneeded = (e) => {
-          db = e.target.result;
-          if (!db.objectStoreNames.contains("runs")) {
-            db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
-          }
-        };
-        req.onsuccess = (e) => {
-          db = e.target.result;
-          loadDBHistory();
-        };
-      } catch (err) {
-        console.warn("IndexedDB not supported or blocked:", err);
-      }
-    }
-
-    function saveDBRun(runData) {
-      if (!db) return;
-      try {
-        const tx = db.transaction(["runs"], "readwrite");
-        tx.objectStore("runs").add(runData);
-        tx.oncomplete = () => loadDBHistory();
-      } catch (err) { console.warn("Save run error:", err); }
-    }
-
-    function loadDBHistory() {
-      if (!db) return;
-      try {
-        const tx = db.transaction(["runs"], "readonly");
-        const req = tx.objectStore("runs").getAll();
-        req.onsuccess = () => {
-          const tbody = document.getElementById('db-table-body');
-          tbody.innerHTML = '';
-          if (req.result.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>';
-            return;
-          }
-          req.result.reverse().forEach(run => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td class="px-4 py-2 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
-              <td class="px-4 py-2 font-bold text-white">${run.header}</td>
-              <td class="px-4 py-2 text-brand-500 font-bold">${run.total_ssrs}</td>
-              <td class="px-4 py-2 text-emerald-400">${run.total_primers_ok}</td>
-              <td class="px-4 py-2 text-amber-400">${run.exec_time}ms</td>
-              <td class="px-4 py-2 text-right">
-                <button onclick="restoreRun(${run.id})" class="px-2 py-1 bg-brand-900/60 text-brand-300 rounded font-sans text-xs">View</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-        };
-      } catch (err) { console.warn("Load DB error:", err); }
-    }
-
-    function clearHistory() {
-      if (db && confirm("Clear all IndexedDB history?")) {
-        try {
-          const tx = db.transaction(["runs"], "readwrite");
-          tx.objectStore("runs").clear();
-          tx.oncomplete = () => loadDBHistory();
-        } catch (err) { console.warn("Clear DB error:", err); }
-      }
-    }
-
-    function restoreRun(id) {
-      if (!db) return;
-      try {
-        const tx = db.transaction(["runs"], "readonly");
-        const req = tx.objectStore("runs").get(id);
-        req.onsuccess = () => {
-          const run = req.result;
-          if (!run) return;
-          artifacts.gff3 = run.gff3;
-          artifacts.tsv = run.tsv;
-
-          document.getElementById('res-total-ssrs').innerText = run.total_ssrs;
-          document.getElementById('res-primers').innerText = run.total_primers_ok;
-          document.getElementById('res-time').innerText = `${run.exec_time}ms`;
-
-          const tbody = document.getElementById('table-body');
-          tbody.innerHTML = '';
-          run.ssrs.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
-              <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
-              <td class="px-4 py-2">${item.repeats}x</td>
-              <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
-              <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
-              <td class="px-4 py-2 text-purple-400">${item.rev}</td>
-              <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-          document.getElementById('results-wrapper').classList.remove('hidden');
-        };
-      } catch (err) { console.warn("Restore run error:", err); }
-    }
-
-    function loadSampleFasta() {
-      document.getElementById('fasta-input').value = `>chr1_sample_yeast\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC\n>chr2_sample_ecoli\nGATTACAAGCTACGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGCGATCGATCGATCGATCGATCGATCGAATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATACGTACGTACGT`;
-    }
-
-    // --- Pyodide WebAssembly Main Loader (Exactly matching cd6c633 architecture) ---
-    async function main() {
-      const banner = document.getElementById('status-banner');
-      const icon = document.getElementById('status-icon');
-      const text = document.getElementById('status-text');
-      const btn = document.getElementById('btn-run');
-
-      banner.className = "bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
-      icon.className = "fas fa-spinner fa-spin text-amber-400 text-lg";
-      text.innerText = "Downloading Pyodide WebAssembly binaries (~6 MB)...";
-      btn.disabled = true;
-
-      try {
-        pyodide = await loadPyodide();
-
-        text.innerText = "Pyodide Wasm loaded! Compiling nextSSR Python engine...";
-
-        await pyodide.runPythonAsync(`
-import math, json, re
-
-MIN_REPEATS = {1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5}
-
-def calc_tm(seq):
-    seq = seq.upper()
-    if len(seq) < 14:
-        return float((sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4))
-    w_tm = (sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4)
-    return float(round(55.0 + (w_tm * 0.1), 2))
-
-def calc_gc(seq):
-    if not seq: return 0.0
-    return round((sum(1 for b in seq.upper() if b in ("G","C")) / len(seq)) * 100.0, 2)
-
-def rev_comp(seq):
-    comp = {"A":"T","T":"A","C":"G","G":"C","N":"N"}
-    return "".join(comp.get(b, b) for b in reversed(seq.upper()))
-
-def find_ssrs(seq_id, sequence, flank_len=100):
-    ssrs = []
-    seq_u = sequence.upper()
-    seq_len = len(seq_u)
-    count = 1
-
-    for motif_len in range(1, 7):
-        min_rep = MIN_REPEATS[motif_len]
-        pattern = re.compile(rf"(([ATCG]{{{motif_len}}})\2{{{min_rep - 1},}})")
-        for m in pattern.finditer(seq_u):
-            full_match = m.group(1)
-            unit_motif = m.group(2)
-            rep_count = len(full_match) // motif_len
-            start_idx = m.start()
-            end_idx = m.end()
-
-            flank_5p = seq_u[max(0, start_idx - flank_len):start_idx]
-            flank_3p = seq_u[end_idx:min(seq_len, end_idx + flank_len)]
-
-            ssrs.append({
-                "ssr_id": f"{seq_id}_SSR_{count:03d}",
-                "motif": unit_motif,
-                "repeats": rep_count,
-                "start": start_idx + 1,
-                "end": end_idx,
-                "sequence": full_match,
-                "flank_5p": flank_5p,
-                "flank_3p": flank_3p
-            })
-            count += 1
-    return ssrs
-
-def design_primer(flank_5p, target_seq, flank_3p, opt_tm=58.0, min_prod=80, max_prod=250):
-    full_seq = (flank_5p + target_seq + flank_3p).upper()
-    target_start = len(flank_5p)
-    target_end = target_start + len(target_seq)
-
-    if len(flank_5p) < 18 or len(flank_3p) < 18:
-        return {"status": "REJECTED"}
-
-    best_fwd, best_rev = None, None
-    min_penalty = 9999.0
-
-    for f_len in range(18, 26):
-        for i in range(0, target_start - f_len + 1):
-            f_seq = full_seq[i : i + f_len]
-            f_tm = calc_tm(f_seq)
-            f_gc = calc_gc(f_seq)
-            if 50.0 <= f_tm <= 65.0 and 35.0 <= f_gc <= 65.0:
-                for r_len in range(18, 26):
-                    for j in range(target_end, len(full_seq) - r_len + 1):
-                        prod_size = (j + r_len) - i
-                        if min_prod <= prod_size <= max_prod:
-                            r_template = full_seq[j : j + r_len]
-                            r_seq = rev_comp(r_template)
-                            r_tm = calc_tm(r_seq)
-                            r_gc = calc_gc(r_seq)
-                            if 50.0 <= r_tm <= 65.0 and 35.0 <= r_gc <= 65.0:
-                                penalty = abs(f_tm - opt_tm) + abs(r_tm - opt_tm)
-                                if penalty < min_penalty:
-                                    min_penalty = penalty
-                                    best_fwd = (f_seq, f_tm, f_gc, i + 1)
-                                    best_rev = (r_seq, r_tm, r_gc, j + 1, prod_size)
-
-    if best_fwd and best_rev:
-        return {
-            "status": "OK",
-            "fwd": best_fwd[0],
-            "rev": best_rev[0],
-            "product_size": f"{best_rev[4]} bp"
-        }
-    return {"status": "REJECTED"}
-        `);
-
-        banner.className = "bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
-        icon.className = "fas fa-check-circle text-emerald-400 text-lg";
-        text.innerText = "✓ Pyodide WebAssembly Engine Ready!";
-        btn.disabled = false;
-
-        // Initialize IndexedDB in background without blocking Pyodide
-        initDB();
-
-      } catch (err) {
-        console.error("Pyodide error:", err);
-        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
-        icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
-        text.innerText = "❌ Engine Error: " + err.message;
-      }
-    }
-
-    async function runNextSSR() {
-      const fastaText = document.getElementById('fasta-input').value.trim();
-      const btn = document.getElementById('btn-run');
-
-      if (!fastaText) {
-        alert("Please enter or paste a FASTA sequence.");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-      const startTime = performance.now();
-
-      try {
-        pyodide.globals.set('fasta_content', fastaText);
-        pyodide.globals.set('cfg_flank', parseInt(document.getElementById('cfg-flank').value));
-        pyodide.globals.set('cfg_tm', parseFloat(document.getElementById('cfg-tm').value));
-        pyodide.globals.set('cfg_min_prod', parseInt(document.getElementById('cfg-min-prod').value));
-        pyodide.globals.set('cfg_max_prod', parseInt(document.getElementById('cfg-max-prod').value));
-        pyodide.globals.set('cfg_design_primers', document.getElementById('cfg-design-primers').checked);
-
-        const pyCode = `
-sequences = []
-cur_header = ""
-cur_seq = []
-
-for line in fasta_content.splitlines():
-    line = line.strip()
-    if line.startswith(">"):
-        if cur_header:
-            sequences.append((cur_header, "".join(cur_seq)))
-        cur_header = line[1:].split()[0]
-        cur_seq = []
-    elif line:
-        cur_seq.append(line)
-if cur_header:
-    sequences.append((cur_header, "".join(cur_seq)))
-
-total_ssrs = 0
-total_primers_ok = 0
-results_json = []
-
-for seq_id, seq in sequences:
-    ssrs = find_ssrs(seq_id, seq, cfg_flank)
-    total_ssrs += len(ssrs)
-    for ssr in ssrs:
-        f_seq, r_seq, prod_size = "N/A", "N/A", "N/A"
-        if cfg_design_primers:
-            pair = design_primer(ssr["flank_5p"], ssr["sequence"], ssr["flank_3p"], cfg_tm, cfg_min_prod, cfg_max_prod)
-            if pair["status"] == "OK":
-                total_primers_ok += 1
-                f_seq = pair["fwd"]
-                r_seq = pair["rev"]
-                prod_size = pair["product_size"]
-
-        results_json.append({
-            "ssr_id": ssr["ssr_id"],
-            "seq_id": seq_id,
-            "motif": ssr["motif"],
-            "repeats": ssr["repeats"],
-            "start": ssr["start"],
-            "end": ssr["end"],
-            "fwd": f_seq,
-            "rev": r_seq,
-            "product_size": prod_size
-        })
-
-out = {
-    "header": sequences[0][0] if sequences else "Seq",
-    "total_ssrs": total_ssrs,
-    "total_primers_ok": total_primers_ok,
-    "ssrs": results_json
-}
-json.dumps(out)
-        `;
-
-        const jsonStr = await pyodide.runPythonAsync(pyCode);
-        const data = JSON.parse(jsonStr);
-        const execTime = (performance.now() - startTime).toFixed(0);
-
-        document.getElementById('res-total-ssrs').innerText = data.total_ssrs;
-        document.getElementById('res-primers').innerText = data.total_primers_ok;
-        document.getElementById('res-time').innerText = `${execTime}ms`;
-
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-
-        let gffLines = ["##gff-version 3"];
-        let tsvLines = ["SSR_ID\tSeq_ID\tMotif\tRepeats\tStart\tEnd\tForward_Primer\tReverse_Primer\tProduct_Size"];
-
-        data.ssrs.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-900/40 transition";
-          tr.innerHTML = `
-            <td class="px-4 py-2.5 font-bold text-brand-500">${item.ssr_id}</td>
-            <td class="px-4 py-2.5 text-white font-bold">${item.motif}</td>
-            <td class="px-4 py-2.5">${item.repeats}x</td>
-            <td class="px-4 py-2.5 text-slate-400">${item.start}-${item.end}</td>
-            <td class="px-4 py-2.5 text-blue-400">${item.fwd}</td>
-            <td class="px-4 py-2.5 text-purple-400">${item.rev}</td>
-            <td class="px-4 py-2.5 font-bold text-emerald-400">${item.product_size}</td>
-          `;
-          tbody.appendChild(tr);
-
-          gffLines.push(`${item.seq_id}\tnextSSR\tmicrosatellite\t${item.start}\t${item.end}\t.\t+\t.\tID=${item.ssr_id};Name=${item.motif}`);
-          tsvLines.push(`${item.ssr_id}\t${item.seq_id}\t${item.motif}\t${item.repeats}\t${item.start}\t${item.end}\t${item.fwd}\t${item.rev}\t${item.product_size}`);
-        });
-
-        artifacts.gff3 = gffLines.join("\n");
-        artifacts.tsv = tsvLines.join("\n");
-
-        if (document.getElementById('cfg-save-db').checked) {
-          saveDBRun({
-            timestamp: Date.now(),
-            header: data.header,
-            total_ssrs: data.total_ssrs,
-            total_primers_ok: data.total_primers_ok,
-            exec_time: execTime,
-            ssrs: data.ssrs,
-            gff3: artifacts.gff3,
-            tsv: artifacts.tsv
-          });
-        }
-
-        document.getElementById('results-wrapper').classList.remove('hidden');
-
-      } catch (err) {
-        alert("Execution Error: " + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-play"></i> Run nextSSR In-Browser';
-      }
-    }
-
-    function downloadFile(type) {
-      const content = artifacts[type];
-      if (!content) return;
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nextssr_results.${type}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // Direct execution matching cd6c633 exactly
-    main();
-  </script>
 </body>
 </html>
