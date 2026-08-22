@@ -70,11 +70,16 @@ class PrimerDesigner:
 
     @staticmethod
     def calculate_gc(seq: str) -> float:
-        """Calculate GC percentage of sequence."""
+        """Calculate GC percentage of sequence including IUPAC degenerate bases."""
         if not seq:
             return 0.0
-        gc_count = sum(1 for base in seq.upper() if base in ("G", "C"))
-        return round((gc_count / len(seq)) * 100.0, 2)
+        gc_val = 0.0
+        for base in seq.upper():
+            if base in ("G", "C", "S"):
+                gc_val += 1.0
+            elif base in ("R", "Y", "K", "M", "B", "D", "H", "V"):
+                gc_val += 0.5
+        return round((gc_val / len(seq)) * 100.0, 2)
 
     @staticmethod
     def calculate_tm(seq: str) -> float:
@@ -123,9 +128,28 @@ class PrimerDesigner:
 
     @staticmethod
     def reverse_complement(seq: str) -> str:
-        """Return reverse complement of sequence."""
-        trans = str.maketrans("ACGTNacgtn", "TGCANtgcan")
-        return seq.translate(trans)[::-1]
+        """Return reverse complement of sequence supporting IUPAC degenerate bases."""
+        comp_map = {
+            "A": "T",
+            "T": "A",
+            "C": "G",
+            "G": "C",
+            "U": "A",
+            "R": "Y",
+            "Y": "R",
+            "S": "S",
+            "W": "W",
+            "K": "M",
+            "M": "K",
+            "B": "V",
+            "V": "B",
+            "D": "H",
+            "H": "D",
+            "N": "N",
+        }
+        seq_upper = seq.upper()
+        res = [comp_map.get(b, b) for b in reversed(seq_upper)]
+        return "".join(res)
 
     def design_primers(
         self, flank_5p: str, target_seq: str, flank_3p: str
