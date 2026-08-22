@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>nextSSR — High-Performance & FAIR-Compliant SSR Mining Engine</title>
-  <meta name="description" content="Next-Generation High-Performance Simple Sequence Repeat (SSR) Mining, Automated PCR Primer Design, and In Silico e-PCR Engine for Genomics." />
+  <meta name="description" content="Next-Generation High-Performance Simple Sequence Repeat (SSR) Mining, Automated PCR Primer Design, and In Silico e-PCR Engine for Genomics developed by LaBiOmicS UMC." />
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -79,10 +79,11 @@
 
       <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
         <a href="#overview" class="hover:text-brand-400 transition">Overview</a>
-        <a href="#pipeline" class="hover:text-brand-400 transition">Pipeline Architecture</a>
+        <a href="#institution" class="hover:text-brand-400 transition">Institutional</a>
+        <a href="#pipeline" class="hover:text-brand-400 transition">Architecture</a>
         <a href="#features" class="hover:text-brand-400 transition">Features</a>
         <a href="#installation" class="hover:text-brand-400 transition">Installation</a>
-        <a href="#usage" class="hover:text-brand-400 transition">Usage & Code</a>
+        <a href="#usage" class="hover:text-brand-400 transition">Usage</a>
         <a href="#benchmarks" class="hover:text-brand-400 transition">Benchmarks</a>
         <a href="#citation" class="hover:text-brand-400 transition">Publication</a>
       </nav>
@@ -104,6 +105,9 @@
       
       <!-- Badges row -->
       <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-900/80 text-slate-200 border border-slate-700/80">
+          <i class="fas fa-flask text-brand-400 mr-1"></i> LaBiOmicS / UMC Research Initiative
+        </span>
         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-700/50">
           <i class="fas fa-microchip mr-1"></i> Multi-Threaded Parallel Engine
         </span>
@@ -139,6 +143,60 @@
         <button onclick="navigator.clipboard.writeText('pip install nextssr'); alert('Copied to clipboard!');" class="ml-2 text-slate-400 hover:text-white transition">
           <i class="far fa-copy"></i>
         </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Institutional Spotlight Section: LaBiOmicS & UMC -->
+  <section id="institution" class="py-16 bg-gradient-to-b from-slate-950 via-slate-900/90 to-slate-950 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="glass-card p-8 sm:p-12 rounded-3xl border border-brand-500/30 relative overflow-hidden shadow-2xl">
+        <div class="absolute -right-12 -bottom-12 opacity-10 text-brand-400 text-9xl pointer-events-none">
+          <i class="fas fa-university"></i>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+          
+          <div class="lg:col-span-8 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-bold uppercase tracking-wider">
+              <i class="fas fa-flask"></i> Institutional Research Spotlight
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+              Developed by <span class="text-brand-400">LaBiOmicS</span>
+            </h2>
+
+            <h3 class="text-lg font-bold text-slate-300">
+              Laboratory of Bioinformatics and Omics Sciences — <span class="text-white">Universidade Mogi das Cruzes (UMC)</span>
+            </h3>
+
+            <p class="text-slate-300 text-sm leading-relaxed max-w-3xl">
+              <strong class="text-white">nextSSR</strong> was conceived and engineered at the <strong>Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS)</strong> at <strong>Universidade Mogi das Cruzes (UMC)</strong>, Brazil. Our mission is to build next-generation, high-performance, open-source bioinformatics software adhering strictly to <strong>FAIR (Findable, Accessible, Interoperable, and Reusable)</strong> data principles for the global scientific community.
+            </p>
+          </div>
+
+          <div class="lg:col-span-4 flex flex-col space-y-3 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 text-xs">
+            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">Research Group:</span>
+              <span class="font-bold text-brand-400">LaBiOmicS</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">University:</span>
+              <span class="font-bold text-white">UMC (Mogi das Cruzes)</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">Open Science:</span>
+              <span class="font-bold text-emerald-400">MIT Open License</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="text-slate-400">GitHub Organization:</span>
+              <a href="https://github.com/LaBiOmicS" target="_blank" class="font-bold text-blue-400 hover:underline">github.com/LaBiOmicS</a>
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -656,7 +714,7 @@ designer = PrimerDesigner(opt_tm=58.0)
         <span>•</span>
         <a href="https://github.com/LaBiOmicS/nextSSR/tree/main/paper" target="_blank" class="hover:text-slate-300 transition">Paper Manuscript</a>
       </div>
-      <p>© 2026 Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS) & Universidade Mogi das Cruzes (UMC).</p>
+      <p class="font-semibold text-slate-400">Developed by Laboratory of Bioinformatics and Omics Sciences (LaBiOmicS) — Universidade Mogi das Cruzes (UMC).</p>
       <p class="text-slate-600">Released under the MIT Open Source License.</p>
     </div>
   </footer>
