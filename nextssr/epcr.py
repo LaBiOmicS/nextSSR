@@ -138,7 +138,17 @@ class EPCRSimulator:
     def simulate_sequence(
         self, seq_id: str, sequence: str, forward_primer: str, reverse_primer: str
     ) -> List[AmpliconResult]:
-        """Simulate in silico PCR for a single target sequence."""
+        """Simulate in silico PCR for a single target sequence.
+
+        Args:
+            seq_id (str): Identifier header of target sequence.
+            sequence (str): Nucleotide sequence template.
+            forward_primer (str): 5' forward primer sequence.
+            reverse_primer (str): 3' reverse primer sequence.
+
+        Returns:
+            List[AmpliconResult]: List of predicted amplicon result dataclasses.
+        """
         amplicons = []
 
         # Forward primer binds on positive strand (+)
@@ -195,7 +205,16 @@ class EPCRSimulator:
     def run_fasta(
         self, fasta_path: str, forward_primer: str, reverse_primer: str
     ) -> List[AmpliconResult]:
-        """Run in silico e-PCR against a FASTA file for a specific primer pair."""
+        """Run in silico e-PCR against a FASTA file for a specific primer pair.
+
+        Args:
+            fasta_path (str): Path to FASTA genome file.
+            forward_primer (str): Forward primer sequence.
+            reverse_primer (str): Reverse primer sequence.
+
+        Returns:
+            List[AmpliconResult]: List of all amplicons found across sequences in FASTA.
+        """
         from nextssr.utils import parse_fasta
 
         results = []
@@ -209,7 +228,15 @@ class EPCRSimulator:
     def run_primers_tsv(
         self, fasta_path: str, primers_tsv_path: str
     ) -> Dict[str, List[AmpliconResult]]:
-        """Run in silico e-PCR for all primer pairs in a nextSSR primers TSV file."""
+        """Run in silico e-PCR for all primer pairs listed in a nextSSR primers TSV file.
+
+        Args:
+            fasta_path (str): Path to FASTA genome file.
+            primers_tsv_path (str): Path to nextSSR primers TSV file.
+
+        Returns:
+            Dict[str, List[AmpliconResult]]: Mapping of primer pair key to amplicon results.
+        """
         all_results = {}
 
         primer_pairs = []

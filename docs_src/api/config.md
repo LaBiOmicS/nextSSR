@@ -1,0 +1,3 @@
+# nextssr.config
+
+::: nextssr.config

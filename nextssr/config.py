@@ -8,7 +8,29 @@ import hashlib
 
 @dataclass
 class SSRConfig:
-    """Advanced configuration for nextSSR, supporting multi-processing, GPU, memory optimization, and FAIR standards."""
+    """Configuration class for nextSSR identification and primer design.
+
+    Attributes:
+        unit_min_repeats (Dict[int, int]): Mapping of motif unit size to minimum repeat count threshold.
+        max_compound_distance (int): Maximum base-pair distance between adjacent SSRs to be considered compound.
+        threads (int): Number of parallel CPU worker threads.
+        use_gpu (bool): Whether CUDA GPU acceleration is enabled.
+        gpu_device_id (int): CUDA GPU device ordinal index.
+        chunk_size_mb (int): Memory chunk size in megabytes for streaming inputs.
+        batch_size (int): Number of FASTA records per processing batch.
+        design_primers (bool): Flag indicating whether to perform PCR primer design.
+        flank_len (int): Flanking region length (bp) extracted for primer design.
+        opt_tm (float): Optimal melting temperature (°C) for designed primers.
+        min_tm (float): Minimum allowable melting temperature (°C).
+        max_tm (float): Maximum allowable melting temperature (°C).
+        min_product_size (int): Minimum PCR amplicon product size (bp).
+        max_product_size (int): Maximum PCR amplicon product size (bp).
+        output_gff (bool): Enable GFF3 output generation.
+        output_tsv (bool): Enable TSV tabular output generation.
+        output_json_ld (bool): Enable JSON-LD metadata generation.
+        seed (int): Random seed for reproducibility.
+        generate_ro_crate (bool): Enable FAIR RO-Crate metadata generation.
+    """
 
     # Motifs definition: unit_size -> min_repeats
     unit_min_repeats: Dict[int, int] = field(
@@ -42,7 +64,11 @@ class SSRConfig:
     generate_ro_crate: bool = True
 
     def get_hash(self) -> str:
-        """Returns a deterministic SHA256 hash of configuration parameters for FAIR provenance."""
+        """Returns a deterministic SHA256 hash of configuration parameters for FAIR provenance.
+
+        Returns:
+            str: SHA256 hex digest representing the configuration signature.
+        """
         config_str = json.dumps(
             {
                 "unit_min_repeats": self.unit_min_repeats,
@@ -56,7 +82,14 @@ class SSRConfig:
 
     @classmethod
     def generate_default_config(cls, filepath: str = "nextssr.yaml") -> str:
-        """Generate a documented YAML configuration file for nextSSR."""
+        """Generate a documented YAML configuration file for nextSSR.
+
+        Args:
+            filepath (str): Target output path for the generated YAML config file. Defaults to "nextssr.yaml".
+
+        Returns:
+            str: Absolute path of the created configuration file.
+        """
         default_dict = {
             "nextssr": {
                 "version": "0.1.1",
@@ -108,7 +141,19 @@ class SSRConfig:
         threads: Optional[int] = None,
         use_gpu: Optional[bool] = None,
     ) -> "SSRConfig":
-        """Parse nextSSR YAML, JSON, or INI configuration file."""
+        """Parse nextSSR YAML, JSON, or INI configuration file.
+
+        Args:
+            config_path (str): Path to the configuration file.
+            threads (Optional[int]): Override for thread count.
+            use_gpu (Optional[bool]): Override for GPU usage flag.
+
+        Returns:
+            SSRConfig: Populated SSRConfig instance.
+
+        Raises:
+            FileNotFoundError: If `config_path` does not exist.
+        """
         if not os.path.exists(config_path):
             raise FileNotFoundError(f"Config file not found: {config_path}")
 

@@ -8,7 +8,24 @@ logger = logging.getLogger("nextssr.primer")
 
 @dataclass
 class PrimerPair:
-    """Dataclass holding designed primer pairs and quality parameters."""
+    """Dataclass holding designed primer pairs and quality parameters.
+
+    Attributes:
+        forward_seq (str): Sequence of the 5' forward primer.
+        forward_tm (float): Melting temperature (°C) of the forward primer.
+        forward_gc (float): GC content percentage of the forward primer.
+        forward_start (int): 1-based start position of the forward primer in sequence template.
+        forward_length (int): Length of the forward primer in bp.
+        reverse_seq (str): Sequence of the 3' reverse primer.
+        reverse_tm (float): Melting temperature (°C) of the reverse primer.
+        reverse_gc (float): GC content percentage of the reverse primer.
+        reverse_start (int): 1-based start position of the reverse primer in sequence template.
+        reverse_length (int): Length of the reverse primer in bp.
+        product_size (int): Size of the resulting PCR amplicon product (bp).
+        pair_penalty (float): Quality penalty score (lower is better).
+        status (str): Status of design ("OK" or "REJECTED").
+        error_reason (Optional[str]): Failure explanation if design was rejected.
+    """
 
     forward_seq: str
     forward_tm: float
@@ -70,7 +87,14 @@ class PrimerDesigner:
 
     @staticmethod
     def calculate_gc(seq: str) -> float:
-        """Calculate GC percentage of sequence including IUPAC degenerate bases."""
+        """Calculate GC percentage of sequence including IUPAC degenerate bases.
+
+        Args:
+            seq (str): Nucleotide sequence string.
+
+        Returns:
+            float: GC percentage rounded to 2 decimal places.
+        """
         if not seq:
             return 0.0
         gc_val = 0.0
@@ -83,7 +107,14 @@ class PrimerDesigner:
 
     @staticmethod
     def calculate_tm(seq: str) -> float:
-        """Calculate Tm using nearest-neighbor thermodynamic formula for oligonucleotides."""
+        """Calculate Tm using nearest-neighbor thermodynamic formula for oligonucleotides.
+
+        Args:
+            seq (str): Oligonucleotide nucleotide sequence.
+
+        Returns:
+            float: Melting temperature in °C rounded to 2 decimal places.
+        """
         seq = seq.upper()
         if len(seq) < 14:
             w_tm = (sum(1 for b in seq if b in ("A", "T")) * 2) + (
@@ -128,7 +159,14 @@ class PrimerDesigner:
 
     @staticmethod
     def reverse_complement(seq: str) -> str:
-        """Return reverse complement of sequence supporting IUPAC degenerate bases."""
+        """Return reverse complement of sequence supporting IUPAC degenerate bases.
+
+        Args:
+            seq (str): Nucleotide sequence.
+
+        Returns:
+            str: Reverse complement sequence string.
+        """
         comp_map = {
             "A": "T",
             "T": "A",
@@ -154,7 +192,16 @@ class PrimerDesigner:
     def design_primers(
         self, flank_5p: str, target_seq: str, flank_3p: str
     ) -> PrimerPair:
-        """Design forward and reverse primers spanning across the target SSR."""
+        """Design forward and reverse primers spanning across the target SSR locus.
+
+        Args:
+            flank_5p (str): 5' flanking genomic sequence.
+            target_seq (str): SSR target core repeat sequence.
+            flank_3p (str): 3' flanking genomic sequence.
+
+        Returns:
+            PrimerPair: Designed primer pair object containing primer sequence and quality parameters.
+        """
         full_seq = (flank_5p + target_seq + flank_3p).upper()
         target_start_idx = len(flank_5p)
         target_end_idx = target_start_idx + len(target_seq)

@@ -56,6 +56,11 @@ dev = [
     "build",
     "twine"
 ]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/LaBiOmicS/nextSSR"

@@ -86,7 +86,12 @@ def _analyze_single_sequence_worker(
 
 
 class SSRFinder:
-    """Core SSR identification engine supporting Weber (1990) classification and Motif Size mapping."""
+    """Core SSR identification engine supporting Weber (1990) classification and Motif Size mapping.
+
+    Args:
+        config (SSRConfig): Configuration object controlling motif thresholds and parallel settings.
+        flank_len (int): Flanking region length (bp) to extract on 5' and 3' sides of identified SSRs.
+    """
 
     def __init__(self, config: SSRConfig, flank_len: int = 150):
         self.config = config
@@ -94,7 +99,15 @@ class SSRFinder:
         self.gpu_acc = GPUAccelerator(config.gpu_device_id) if config.use_gpu else None
 
     def analyze_sequence(self, seq_id: str, sequence: str) -> SequenceAnalysisResult:
-        """Single sequence analyzer."""
+        """Analyze a single nucleotide sequence for simple sequence repeats.
+
+        Args:
+            seq_id (str): Identifier header of the target sequence.
+            sequence (str): Raw FASTA nucleotide sequence.
+
+        Returns:
+            SequenceAnalysisResult: Result container containing detected SSR items and metadata.
+        """
         return _analyze_single_sequence_worker(
             (seq_id, sequence, self.config.unit_min_repeats, self.flank_len)
         )
@@ -102,7 +115,14 @@ class SSRFinder:
     def analyze_batch_parallel(
         self, sequence_generator: Generator[Tuple[str, str], None, None]
     ) -> Generator[SequenceAnalysisResult, None, None]:
-        """Stream sequences and process in parallel using multi-processing pool."""
+        """Stream sequences and process in parallel using a multi-processing execution pool.
+
+        Args:
+            sequence_generator (Generator[Tuple[str, str], None, None]): Stream of (seq_id, sequence) tuples.
+
+        Yields:
+            SequenceAnalysisResult: Sequence analysis result for each input sequence.
+        """
         # Buffer first items to check total sequence count
         first_batch = []
         for item in sequence_generator:
