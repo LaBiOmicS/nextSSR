@@ -99,3 +99,22 @@ def test_full_pipeline_end_to_end():
 
     finally:
         shutil.rmtree(tmp_dir)
+
+
+def test_fasta_gz_reading():
+    import gzip
+    from nextssr.utils import parse_fasta
+
+    tmp_dir = tempfile.mkdtemp()
+    try:
+        gz_path = os.path.join(tmp_dir, "test.fasta.gz")
+        with gzip.open(gz_path, "wt", encoding="utf-8") as f:
+            f.write(">seq_gz Compressed FASTA Test\nATCGATCGATCGATCGATCGATCGATCGATCG\n")
+
+        records = list(parse_fasta(gz_path))
+        assert len(records) == 1
+        assert records[0][0] == "seq_gz"
+        assert records[0][1] == "ATCGATCGATCGATCGATCGATCGATCGATCG"
+    finally:
+        shutil.rmtree(tmp_dir)
+
