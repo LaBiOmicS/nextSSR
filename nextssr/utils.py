@@ -1,10 +1,10 @@
-from typing import Generator, Tuple
+from typing import Generator, Tuple, List
 
 
 def parse_fasta(filepath: str) -> Generator[Tuple[str, str], None, None]:
     """Simple FASTA generator yielding (header_id, sequence)."""
     current_id = None
-    current_seq = []
+    current_seq: List[str] = []
 
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:

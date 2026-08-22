@@ -58,6 +58,6 @@ class GPUAccelerator:
             )
 
         # Example GPU kernel dispatcher logic for string batch scanning
-        results = []
+        results: List[dict] = []
         # Fallback to GPU batch execution engine
         return results
