@@ -3,34 +3,583 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>nextSSR — Pyodide Wasm Engine</title>
+  <title>nextSSR — In-Browser WebAssembly Microsatellite Engine</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#22c55e',
+              600: '#16a34a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Pyodide WebAssembly Engine CDN -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 </head>
-<body style="font-family: system-ui, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 2rem; max-width: 800px; margin: 0 auto;">
-  <h1 style="color: #22c55e;">nextSSR 🚀 Pyodide WebAssembly Engine</h1>
-  <div id="status-box" style="background-color: #1e293b; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #334155; margin-top: 1rem;">
-    <h3 style="margin-top: 0;">Engine Status:</h3>
-    <p id="status-text" style="font-family: monospace; color: #fbbf24;">Initializing Pyodide WebAssembly engine...</p>
-  </div>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl font-extrabold text-brand-500">nextSSR 🚀</span>
+      <span class="text-xs bg-brand-500/10 text-brand-500 px-2 py-0.5 rounded-full border border-brand-500/20">Pyodide Wasm v0.1.0 + IndexedDB</span>
+    </div>
+    <div class="flex items-center space-x-4 text-sm">
+      <a href="https://github.com/LaBiOmicS/nextSSR" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-github"></i> GitHub Repository</a>
+      <a href="https://pypi.org/project/nextssr/" target="_blank" class="hover:text-brand-500 transition"><i class="fab fa-python text-brand-500"></i> PyPI Package</a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
+
+    <!-- Status Banner -->
+    <div id="status-banner" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm">
+      <div class="flex items-center space-x-3">
+        <i id="status-icon" class="fas fa-spinner fa-spin text-amber-400 text-lg"></i>
+        <span id="status-text" class="text-amber-200 font-mono">Initializing Pyodide WebAssembly engine...</span>
+      </div>
+      <button onclick="main()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">
+        <i class="fas fa-sync-alt mr-1"></i> Reload Engine
+      </button>
+    </div>
+
+    <!-- Application Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Parameters Column -->
+      <div class="lg:col-span-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fas fa-sliders text-brand-500"></i> Parameters
+        </h3>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Flanking Window (bp)</label>
+          <input type="number" id="cfg-flank" value="100" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Optimal Primer Tm (°C)</label>
+          <input type="number" id="cfg-tm" value="58.0" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Min Amplicon</label>
+            <input type="number" id="cfg-min-prod" value="80" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Max Amplicon</label>
+            <input type="number" id="cfg-max-prod" value="250" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-slate-200">
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="cfg-design-primers" checked class="rounded bg-slate-950 border-slate-800 text-brand-500">
+            <span>Design PCR Primers Automatically</span>
+          </label>
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="cfg-save-db" checked class="rounded bg-slate-950 border-slate-800 text-amber-500">
+            <span class="text-amber-400 font-semibold">Auto-save run to local IndexedDB</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- FASTA Input Column -->
+      <div class="lg:col-span-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fas fa-dna text-brand-500"></i> FASTA Input Sequence
+          </label>
+          <button onclick="loadSampleFasta()" class="text-xs text-brand-400 hover:underline">Load Sample Yeast Sequence</button>
+        </div>
+
+        <textarea id="fasta-input" rows="8" placeholder=">sample_seq&#10;ATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+
+        <button id="btn-run" disabled onclick="runNextSSR()" class="w-full py-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fas fa-play"></i> Run nextSSR In-Browser
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Summary & Results Table -->
+    <div id="results-wrapper" class="hidden space-y-6">
+      
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+          <span class="text-xs text-slate-400">Total SSRs Found</span>
+          <p id="res-total-ssrs" class="text-2xl font-black text-brand-500 mt-1">0</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+          <span class="text-xs text-slate-400">Valid Primers OK</span>
+          <p id="res-primers" class="text-2xl font-black text-emerald-400 mt-1">0</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+          <span class="text-xs text-slate-400">Execution Time</span>
+          <p id="res-time" class="text-2xl font-black text-amber-400 mt-1">0ms</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+          <span class="text-xs text-slate-400">Engine Mode</span>
+          <p class="text-sm font-bold text-purple-400 mt-2">CPython 3.11 Wasm</p>
+        </div>
+      </div>
+
+      <!-- Results Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fas fa-table text-brand-500"></i> Identified Microsatellite Loci & PCR Primers
+          </h4>
+          <div class="space-x-2">
+            <button onclick="downloadFile('gff3')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-brand-400 rounded font-semibold">GFF3</button>
+            <button onclick="downloadFile('tsv')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-blue-400 rounded font-semibold">TSV</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="px-4 py-3">SSR ID</th>
+                <th class="px-4 py-3">Motif</th>
+                <th class="px-4 py-3">Repeats</th>
+                <th class="px-4 py-3">Start-End</th>
+                <th class="px-4 py-3">Forward Primer (5'->3')</th>
+                <th class="px-4 py-3">Reverse Primer (5'->3')</th>
+                <th class="px-4 py-3">Amplicon</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-800 font-mono"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- IndexedDB Run History -->
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fas fa-database text-amber-400"></i> IndexedDB History
+        </h3>
+        <button onclick="clearHistory()" class="text-xs text-rose-400 hover:underline">Clear History</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-300 font-mono">
+          <thead class="bg-slate-950 uppercase font-bold text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="px-4 py-2">Timestamp</th>
+              <th class="px-4 py-2">Header</th>
+              <th class="px-4 py-2">Total SSRs</th>
+              <th class="px-4 py-2">Primers OK</th>
+              <th class="px-4 py-2">Time</th>
+              <th class="px-4 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="db-table-body" class="divide-y divide-slate-800">
+            <tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-4 bg-slate-900 text-center text-xs text-slate-500 border-t border-slate-800">
+    © 2026 LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences
+  </footer>
+
+  <!-- Application Logic -->
   <script>
-    async function main() {
-      const statusText = document.getElementById("status-text");
-      try {
-        statusText.innerText = "Downloading Pyodide WebAssembly binaries (~6 MB)...";
-        let pyodide = await loadPyodide();
-        
-        statusText.innerText = "Pyodide Wasm Loaded! Compiling CPython test...";
-        let pyVersion = await pyodide.runPythonAsync("import sys; sys.version");
-        
-        statusText.style.color = "#22c55e";
-        statusText.innerHTML = "✓ <strong>Pyodide Engine Ready!</strong><br>Python Version: " + pyVersion;
-      } catch (err) {
-        statusText.style.color = "#f87171";
-        statusText.innerText = "❌ Pyodide Load Error: " + err.message;
+    let pyodide = null;
+    let db = null;
+    let artifacts = { gff3: '', tsv: '' };
+
+    // --- IndexedDB Storage ---
+    function initDB() {
+      const req = indexedDB.open("nextSSR_DB", 1);
+      req.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains("runs")) {
+          db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
+        }
+      };
+      req.onsuccess = (e) => {
+        db = e.target.result;
+        loadDBHistory();
+      };
+    }
+
+    function saveDBRun(runData) {
+      if (!db) return;
+      const tx = db.transaction(["runs"], "readwrite");
+      tx.objectStore("runs").add(runData);
+      tx.oncomplete = () => loadDBHistory();
+    }
+
+    function loadDBHistory() {
+      if (!db) return;
+      const tx = db.transaction(["runs"], "readonly");
+      const req = tx.objectStore("runs").getAll();
+      req.onsuccess = () => {
+        const tbody = document.getElementById('db-table-body');
+        tbody.innerHTML = '';
+        if (req.result.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>';
+          return;
+        }
+        req.result.reverse().forEach(run => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="px-4 py-2 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
+            <td class="px-4 py-2 font-bold text-white">${run.header}</td>
+            <td class="px-4 py-2 text-brand-500 font-bold">${run.total_ssrs}</td>
+            <td class="px-4 py-2 text-emerald-400">${run.total_primers_ok}</td>
+            <td class="px-4 py-2 text-amber-400">${run.exec_time}ms</td>
+            <td class="px-4 py-2 text-right">
+              <button onclick="restoreRun(${run.id})" class="px-2 py-1 bg-brand-900/60 text-brand-300 rounded font-sans text-xs">View</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+    }
+
+    function clearHistory() {
+      if (db && confirm("Clear all IndexedDB history?")) {
+        const tx = db.transaction(["runs"], "readwrite");
+        tx.objectStore("runs").clear();
+        tx.oncomplete = () => loadDBHistory();
       }
     }
 
+    function restoreRun(id) {
+      if (!db) return;
+      const tx = db.transaction(["runs"], "readonly");
+      const req = tx.objectStore("runs").get(id);
+      req.onsuccess = () => {
+        const run = req.result;
+        if (!run) return;
+        artifacts.gff3 = run.gff3;
+        artifacts.tsv = run.tsv;
+
+        document.getElementById('res-total-ssrs').innerText = run.total_ssrs;
+        document.getElementById('res-primers').innerText = run.total_primers_ok;
+        document.getElementById('res-time').innerText = `${run.exec_time}ms`;
+
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+        run.ssrs.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
+            <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
+            <td class="px-4 py-2">${item.repeats}x</td>
+            <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
+            <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
+            <td class="px-4 py-2 text-purple-400">${item.rev}</td>
+            <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('results-wrapper').classList.remove('hidden');
+      };
+    }
+
+    function loadSampleFasta() {
+      document.getElementById('fasta-input').value = `>chr1_sample_yeast\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC\n>chr2_sample_ecoli\nGATTACAAGCTACGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGCGATCGATCGATCGATCGATCGATCGAATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATACGTACGTACGT`;
+    }
+
+    // --- Pyodide WebAssembly Main Loader ---
+    async function main() {
+      const banner = document.getElementById('status-banner');
+      const icon = document.getElementById('status-icon');
+      const text = document.getElementById('status-text');
+      const btn = document.getElementById('btn-run');
+
+      banner.className = "bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+      icon.className = "fas fa-spinner fa-spin text-amber-400 text-lg";
+      text.innerText = "Downloading Pyodide WebAssembly binaries (~6 MB)...";
+      btn.disabled = true;
+
+      try {
+        initDB();
+        pyodide = await loadPyodide();
+
+        text.innerText = "Pyodide Wasm loaded! Compiling nextSSR Python engine...";
+
+        await pyodide.runPythonAsync(`
+import math, json, re
+
+MIN_REPEATS = {1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5}
+
+def calc_tm(seq):
+    seq = seq.upper()
+    if len(seq) < 14:
+        return float((sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4))
+    w_tm = (sum(1 for b in seq if b in ("A","T")) * 2) + (sum(1 for b in seq if b in ("G","C")) * 4)
+    return float(round(55.0 + (w_tm * 0.1), 2))
+
+def calc_gc(seq):
+    if not seq: return 0.0
+    return round((sum(1 for b in seq.upper() if b in ("G","C")) / len(seq)) * 100.0, 2)
+
+def rev_comp(seq):
+    comp = {"A":"T","T":"A","C":"G","G":"C","N":"N"}
+    return "".join(comp.get(b, b) for b in reversed(seq.upper()))
+
+def find_ssrs(seq_id, sequence, flank_len=100):
+    ssrs = []
+    seq_u = sequence.upper()
+    seq_len = len(seq_u)
+    count = 1
+
+    for motif_len in range(1, 7):
+        min_rep = MIN_REPEATS[motif_len]
+        pattern = re.compile(rf"(([ATCG]{{{motif_len}}})\2{{{min_rep - 1},}})")
+        for m in pattern.finditer(seq_u):
+            full_match = m.group(1)
+            unit_motif = m.group(2)
+            rep_count = len(full_match) // motif_len
+            start_idx = m.start()
+            end_idx = m.end()
+
+            flank_5p = seq_u[max(0, start_idx - flank_len):start_idx]
+            flank_3p = seq_u[end_idx:min(seq_len, end_idx + flank_len)]
+
+            ssrs.append({
+                "ssr_id": f"{seq_id}_SSR_{count:03d}",
+                "motif": unit_motif,
+                "repeats": rep_count,
+                "start": start_idx + 1,
+                "end": end_idx,
+                "sequence": full_match,
+                "flank_5p": flank_5p,
+                "flank_3p": flank_3p
+            })
+            count += 1
+    return ssrs
+
+def design_primer(flank_5p, target_seq, flank_3p, opt_tm=58.0, min_prod=80, max_prod=250):
+    full_seq = (flank_5p + target_seq + flank_3p).upper()
+    target_start = len(flank_5p)
+    target_end = target_start + len(target_seq)
+
+    if len(flank_5p) < 18 or len(flank_3p) < 18:
+        return {"status": "REJECTED"}
+
+    best_fwd, best_rev = None, None
+    min_penalty = 9999.0
+
+    for f_len in range(18, 26):
+        for i in range(0, target_start - f_len + 1):
+            f_seq = full_seq[i : i + f_len]
+            f_tm = calc_tm(f_seq)
+            f_gc = calc_gc(f_seq)
+            if 50.0 <= f_tm <= 65.0 and 35.0 <= f_gc <= 65.0:
+                for r_len in range(18, 26):
+                    for j in range(target_end, len(full_seq) - r_len + 1):
+                        prod_size = (j + r_len) - i
+                        if min_prod <= prod_size <= max_prod:
+                            r_template = full_seq[j : j + r_len]
+                            r_seq = rev_comp(r_template)
+                            r_tm = calc_tm(r_seq)
+                            r_gc = calc_gc(r_seq)
+                            if 50.0 <= r_tm <= 65.0 and 35.0 <= r_gc <= 65.0:
+                                penalty = abs(f_tm - opt_tm) + abs(r_tm - opt_tm)
+                                if penalty < min_penalty:
+                                    min_penalty = penalty
+                                    best_fwd = (f_seq, f_tm, f_gc, i + 1)
+                                    best_rev = (r_seq, r_tm, r_gc, j + 1, prod_size)
+
+    if best_fwd and best_rev:
+        return {
+            "status": "OK",
+            "fwd": best_fwd[0],
+            "rev": best_rev[0],
+            "product_size": f"{best_rev[4]} bp"
+        }
+    return {"status": "REJECTED"}
+        `);
+
+        banner.className = "bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        icon.className = "fas fa-check-circle text-emerald-400 text-lg";
+        text.innerText = "✓ Pyodide WebAssembly Engine Ready!";
+        btn.disabled = false;
+
+      } catch (err) {
+        console.error("Pyodide error:", err);
+        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
+        text.innerText = "❌ Engine Error: " + err.message;
+      }
+    }
+
+    async function runNextSSR() {
+      const fastaText = document.getElementById('fasta-input').value.trim();
+      const btn = document.getElementById('btn-run');
+
+      if (!fastaText) {
+        alert("Please enter or paste a FASTA sequence.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      const startTime = performance.now();
+
+      try {
+        pyodide.globals.set('fasta_content', fastaText);
+        pyodide.globals.set('cfg_flank', parseInt(document.getElementById('cfg-flank').value));
+        pyodide.globals.set('cfg_tm', parseFloat(document.getElementById('cfg-tm').value));
+        pyodide.globals.set('cfg_min_prod', parseInt(document.getElementById('cfg-min-prod').value));
+        pyodide.globals.set('cfg_max_prod', parseInt(document.getElementById('cfg-max-prod').value));
+        pyodide.globals.set('cfg_design_primers', document.getElementById('cfg-design-primers').checked);
+
+        const pyCode = `
+sequences = []
+cur_header = ""
+cur_seq = []
+
+for line in fasta_content.splitlines():
+    line = line.strip()
+    if line.startswith(">"):
+        if cur_header:
+            sequences.append((cur_header, "".join(cur_seq)))
+        cur_header = line[1:].split()[0]
+        cur_seq = []
+    elif line:
+        cur_seq.append(line)
+if cur_header:
+    sequences.append((cur_header, "".join(cur_seq)))
+
+total_ssrs = 0
+total_primers_ok = 0
+results_json = []
+
+for seq_id, seq in sequences:
+    ssrs = find_ssrs(seq_id, seq, cfg_flank)
+    total_ssrs += len(ssrs)
+    for ssr in ssrs:
+        f_seq, r_seq, prod_size = "N/A", "N/A", "N/A"
+        if cfg_design_primers:
+            pair = design_primer(ssr["flank_5p"], ssr["sequence"], ssr["flank_3p"], cfg_tm, cfg_min_prod, cfg_max_prod)
+            if pair["status"] == "OK":
+                total_primers_ok += 1
+                f_seq = pair["fwd"]
+                r_seq = pair["rev"]
+                prod_size = pair["product_size"]
+
+        results_json.append({
+            "ssr_id": ssr["ssr_id"],
+            "seq_id": seq_id,
+            "motif": ssr["motif"],
+            "repeats": ssr["repeats"],
+            "start": ssr["start"],
+            "end": ssr["end"],
+            "fwd": f_seq,
+            "rev": r_seq,
+            "product_size": prod_size
+        })
+
+out = {
+    "header": sequences[0][0] if sequences else "Seq",
+    "total_ssrs": total_ssrs,
+    "total_primers_ok": total_primers_ok,
+    "ssrs": results_json
+}
+json.dumps(out)
+        `;
+
+        const jsonStr = await pyodide.runPythonAsync(pyCode);
+        const data = JSON.parse(jsonStr);
+        const execTime = (performance.now() - startTime).toFixed(0);
+
+        document.getElementById('res-total-ssrs').innerText = data.total_ssrs;
+        document.getElementById('res-primers').innerText = data.total_primers_ok;
+        document.getElementById('res-time').innerText = `${execTime}ms`;
+
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        let gffLines = ["##gff-version 3"];
+        let tsvLines = ["SSR_ID\tSeq_ID\tMotif\tRepeats\tStart\tEnd\tForward_Primer\tReverse_Primer\tProduct_Size"];
+
+        data.ssrs.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-900/40 transition";
+          tr.innerHTML = `
+            <td class="px-4 py-2.5 font-bold text-brand-500">${item.ssr_id}</td>
+            <td class="px-4 py-2.5 text-white font-bold">${item.motif}</td>
+            <td class="px-4 py-2.5">${item.repeats}x</td>
+            <td class="px-4 py-2.5 text-slate-400">${item.start}-${item.end}</td>
+            <td class="px-4 py-2.5 text-blue-400">${item.fwd}</td>
+            <td class="px-4 py-2.5 text-purple-400">${item.rev}</td>
+            <td class="px-4 py-2.5 font-bold text-emerald-400">${item.product_size}</td>
+          `;
+          tbody.appendChild(tr);
+
+          gffLines.push(`${item.seq_id}\tnextSSR\tmicrosatellite\t${item.start}\t${item.end}\t.\t+\t.\tID=${item.ssr_id};Name=${item.motif}`);
+          tsvLines.push(`${item.ssr_id}\t${item.seq_id}\t${item.motif}\t${item.repeats}\t${item.start}\t${item.end}\t${item.fwd}\t${item.rev}\t${item.product_size}`);
+        });
+
+        artifacts.gff3 = gffLines.join("\n");
+        artifacts.tsv = tsvLines.join("\n");
+
+        if (document.getElementById('cfg-save-db').checked) {
+          saveDBRun({
+            timestamp: Date.now(),
+            header: data.header,
+            total_ssrs: data.total_ssrs,
+            total_primers_ok: data.total_primers_ok,
+            exec_time: execTime,
+            ssrs: data.ssrs,
+            gff3: artifacts.gff3,
+            tsv: artifacts.tsv
+          });
+        }
+
+        document.getElementById('results-wrapper').classList.remove('hidden');
+
+      } catch (err) {
+        alert("Execution Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play"></i> Run nextSSR In-Browser';
+      }
+    }
+
+    function downloadFile(type) {
+      const content = artifacts[type];
+      if (!content) return;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nextssr_results.${type}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Direct execution
     main();
   </script>
 </body>
