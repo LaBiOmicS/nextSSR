@@ -22,7 +22,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up QEMU (Multi-platform support)
         uses: docker/setup-qemu-action@v3
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Apptainer / Singularity
         uses: eWaterCycle/setup-apptainer@v2
