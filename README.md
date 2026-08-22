@@ -91,6 +91,18 @@ nextssr init-config -o nextssr.yaml
 nextssr genome.fasta -c nextssr.yaml -o results/
 ```
 
+### 🧬 In Silico e-PCR Simulation
+
+Validate PCR primers electronically against target genomes or transcriptomes with mismatch detection and amplicon sizing:
+
+```bash
+# Test a specific pair of Forward and Reverse primers against a target genome
+nextssr epcr -f genome.fasta -F GATTACAAGCTACG -R ACGTACGTACGT -o epcr_amplicons.tsv
+
+# Or test all primers designed in a nextSSR TSV report allowing up to 2 mismatches
+nextssr epcr -f genome.fasta -p results/primers/nextssr_primers.tsv -m 2 -o epcr_batch.tsv
+```
+
 ---
 
 ## 📂 Project Structure

@@ -21,6 +21,7 @@ from nextssr.utils import parse_fasta
 from nextssr.models import ExecutionProvenance
 from nextssr.provenance import FAIRProvenanceManager
 from nextssr.artifacts import ArtifactManager
+from nextssr.epcr import EPCRSimulator
 
 console = Console()
 
@@ -163,27 +164,26 @@ def run_analysis(
         )
     )
 
+    # Initialize modules
     finder = SSRFinder(cfg, flank_len=cfg.flank_len)
-    compound_proc = CompoundSSRProcessor(cfg)
-    primer_designer = (
-        PrimerDesigner(
+    compound_processor = CompoundSSRProcessor(cfg)
+
+    primer_designer = None
+    if cfg.design_primers:
+        primer_designer = PrimerDesigner(
             opt_tm=cfg.opt_tm,
             min_tm=cfg.min_tm,
             max_tm=cfg.max_tm,
             min_product_size=cfg.min_product_size,
             max_product_size=cfg.max_product_size,
         )
-        if cfg.design_primers
-        else None
-    )
 
-    # Multi-parallel streaming batch execution with Rich progress bar
     results = []
-    fasta_stream = parse_fasta(fasta_file)
-
     total_ssrs = 0
     total_compounds = 0
     total_primers_designed = 0
+
+    console.print(f"[bold green]▶ Analyzing FASTA sequence:[bold green] {fasta_file}")
 
     with Progress(
         SpinnerColumn(),
@@ -192,10 +192,13 @@ def run_analysis(
         TimeRemainingColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("[cyan]Processing FASTA sequences...", total=None)
+        task = progress.add_task(
+            "[cyan]Streaming FASTA & identifying SSRs...", total=None
+        )
 
-        for res in finder.analyze_batch_parallel(fasta_stream):
-            res = compound_proc.process(res)
+        for seq_id, sequence in parse_fasta(fasta_file):
+            res = finder.analyze_sequence(seq_id, sequence)
+            res = compound_processor.process(res)
 
             if primer_designer:
                 for ssr in res.ssrs:
@@ -216,7 +219,6 @@ def run_analysis(
 
     exec_time = f"{time.time() - start_time:.2f}s"
 
-    # Save artifacts using ArtifactManager
     file_hash = FAIRProvenanceManager.compute_file_sha256(fasta_file)
     prov = ExecutionProvenance(
         threads_used=cfg.threads,
@@ -233,7 +235,6 @@ def run_analysis(
     art_mgr = ArtifactManager(output_dir)
     artifacts = art_mgr.save_artifacts(results, cfg, prov, fasta_file)
 
-    # Summary Results Table
     summary_table = Table(title="Execution Summary & Metrics", box=box.ROUNDED)
     summary_table.add_column("Metric", style="cyan", no_wrap=True)
     summary_table.add_column("Value", style="bold green")
@@ -248,7 +249,6 @@ def run_analysis(
 
     console.print(summary_table)
 
-    # Artifacts panel
     art_table = Table(show_header=False, box=box.SIMPLE)
     art_table.add_row(
         "[bold]GFF3 Sequence Ontology Annotation:[/bold]", artifacts["gff"]
@@ -277,6 +277,110 @@ def init_config(output: str):
     console.print(
         f"[green]✓ Created default nextSSR configuration file at:[/green] [bold]{config_path}[/bold]"
     )
+
+
+@main.command(name="epcr")
+@click.option(
+    "--fasta",
+    "-f",
+    required=True,
+    type=click.Path(exists=True),
+    help="Path to template FASTA genome file",
+)
+@click.option("--forward", "-F", help="Forward primer sequence (5' -> 3')")
+@click.option("--reverse", "-R", help="Reverse primer sequence (5' -> 3')")
+@click.option(
+    "--primers-tsv",
+    "-p",
+    type=click.Path(exists=True),
+    help="Path to nextSSR primers TSV file",
+)
+@click.option(
+    "--max-mismatches",
+    "-m",
+    default=2,
+    help="Maximum allowed primer mismatches (default: 2)",
+)
+@click.option(
+    "--min-size", default=50, help="Minimum amplicon size in bp (default: 50)"
+)
+@click.option(
+    "--max-size", default=1000, help="Maximum amplicon size in bp (default: 1000)"
+)
+@click.option("--output", "-o", help="Output TSV file path for e-PCR amplicons")
+def epcr_command(
+    fasta: str,
+    forward: str,
+    reverse: str,
+    primers_tsv: str,
+    max_mismatches: int,
+    min_size: int,
+    max_size: int,
+    output: str,
+):
+    """Run in silico e-PCR to test PCR primer pairs against a target FASTA genome."""
+    console.print(BANNER)
+
+    if not primers_tsv and (not forward or not reverse):
+        console.print(
+            "[bold red]Error:[/bold red] You must specify either --forward and --reverse primers "
+            "OR a --primers-tsv file."
+        )
+        return
+
+    simulator = EPCRSimulator(
+        max_mismatches=max_mismatches,
+        min_product_size=min_size,
+        max_product_size=max_size,
+    )
+
+    console.print(
+        f"[bold green]▶ Running in silico e-PCR simulation on:[bold green] {fasta}"
+    )
+
+    all_amplicons = []
+
+    if primers_tsv:
+        tsv_results = simulator.run_primers_tsv(fasta, primers_tsv)
+        for pair_name, amps in tsv_results.items():
+            all_amplicons.extend(amps)
+    else:
+        all_amplicons = simulator.run_fasta(fasta, forward, reverse)
+
+    table = Table(title="in silico e-PCR Amplification Results", box=box.ROUNDED)
+    table.add_column("Seq ID", style="cyan", no_wrap=True)
+    table.add_column("Amplicon Size", style="bold green")
+    table.add_column("Fwd Mismatches", style="yellow")
+    table.add_column("Rev Mismatches", style="yellow")
+    table.add_column("Status", style="bold magenta")
+
+    for amp in all_amplicons:
+        table.add_row(
+            amp.seq_id,
+            f"{amp.product_size} bp",
+            str(amp.forward_mismatches),
+            str(amp.reverse_mismatches),
+            amp.status,
+        )
+
+    console.print(table)
+
+    if output:
+        with open(output, "w", encoding="utf-8") as f:
+            f.write(
+                "Seq_ID\tForward_Primer\tReverse_Primer\tProduct_Size_bp\tFwd_Start\tFwd_End\t"
+                "Fwd_Mismatches\tRev_Start\tRev_End\tRev_Mismatches\tStatus\tAmplicon_Seq\n"
+            )
+            for amp in all_amplicons:
+                f.write(
+                    f"{amp.seq_id}\t{amp.forward_primer}\t{amp.reverse_primer}\t{amp.product_size}\t"
+                    f"{amp.forward_start}\t{amp.forward_end}\t{amp.forward_mismatches}\t"
+                    f"{amp.reverse_start}\t{amp.reverse_end}\t{amp.reverse_mismatches}\t"
+                    f"{amp.status}\t{amp.amplicon_sequence}\n"
+                )
+        console.print(
+            f"[green]✓ e-PCR amplicon results saved to:[/green] [bold]{output}[/bold]"
+        )
 
 
 if __name__ == "__main__":
