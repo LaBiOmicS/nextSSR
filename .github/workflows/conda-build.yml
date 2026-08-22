@@ -25,7 +25,6 @@ jobs:
             python=3.11
             conda-build
             anaconda-client
-            bioconda::bioconda-utils
           channels: conda-forge,bioconda,defaults
 
       - name: Build Conda Package

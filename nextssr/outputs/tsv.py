@@ -1,19 +1,34 @@
-import os
 from typing import List
 from nextssr.models import SequenceAnalysisResult
 
+
 class TSVExporter:
     """Tabular TSV exporter including Motif Class, Weber (1990) Class, and Primers."""
-    
+
     @staticmethod
     def export(results: List[SequenceAnalysisResult], output_path: str):
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             headers = [
-                "Seq_ID", "SSR_Nr", "Motif_Class", "Weber_Classification", "Motif", "Repeats", "Size_bp", "Start", "End",
-                "Forward_Primer", "Forward_Tm", "Forward_GC",
-                "Reverse_Primer", "Reverse_Tm", "Reverse_GC",
-                "Product_Size_bp", "Primer_Status",
-                "Flank_5p", "Flank_3p", "Sequence"
+                "Seq_ID",
+                "SSR_Nr",
+                "Motif_Class",
+                "Weber_Classification",
+                "Motif",
+                "Repeats",
+                "Size_bp",
+                "Start",
+                "End",
+                "Forward_Primer",
+                "Forward_Tm",
+                "Forward_GC",
+                "Reverse_Primer",
+                "Reverse_Tm",
+                "Reverse_GC",
+                "Product_Size_bp",
+                "Primer_Status",
+                "Flank_5p",
+                "Flank_3p",
+                "Sequence",
             ]
             f.write("\t".join(headers) + "\n")
 
@@ -40,12 +55,17 @@ class TSVExporter:
                         str(len(ssr.sequence)),
                         str(ssr.start),
                         str(ssr.end),
-                        f_seq, f_tm, f_gc,
-                        r_seq, r_tm, r_gc,
-                        p_size, p_status,
+                        f_seq,
+                        f_tm,
+                        f_gc,
+                        r_seq,
+                        r_tm,
+                        r_gc,
+                        p_size,
+                        p_status,
                         ssr.flank_5p,
                         ssr.flank_3p,
-                        ssr.sequence
+                        ssr.sequence,
                     ]
                     f.write("\t".join(row) + "\n")
                     idx += 1

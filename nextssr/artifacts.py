@@ -1,12 +1,13 @@
 import os
 import json
 import datetime
-from typing import Dict, Any
-from nextssr.models import SequenceAnalysisResult, ExecutionProvenance
+from typing import Dict
+from nextssr.models import ExecutionProvenance
 from nextssr.outputs.gff3 import GFF3Exporter
 from nextssr.outputs.tsv import TSVExporter
 from nextssr.provenance import FAIRProvenanceManager
 from nextssr.config import SSRConfig
+
 
 class ArtifactManager:
     """Manages structured output directories and artifacts for nextSSR execution runs."""
@@ -20,7 +21,12 @@ class ArtifactManager:
 
     def initialize_dirs(self):
         """Create directory structure for artifacts."""
-        for d in [self.annotations_dir, self.primers_dir, self.provenance_dir, self.summary_dir]:
+        for d in [
+            self.annotations_dir,
+            self.primers_dir,
+            self.provenance_dir,
+            self.summary_dir,
+        ]:
             os.makedirs(d, exist_ok=True)
 
     def save_artifacts(
@@ -28,7 +34,7 @@ class ArtifactManager:
         results: list,
         config: SSRConfig,
         provenance: ExecutionProvenance,
-        input_filepath: str
+        input_filepath: str,
     ) -> Dict[str, str]:
         """Save all run artifacts into structured directories."""
         self.initialize_dirs()
@@ -42,7 +48,9 @@ class ArtifactManager:
         TSVExporter.export(results, tsv_path)
 
         # 3. FAIR Provenance RO-Crate
-        crate_path = FAIRProvenanceManager.generate_ro_crate(provenance, config, input_filepath, self.provenance_dir)
+        crate_path = FAIRProvenanceManager.generate_ro_crate(
+            provenance, config, input_filepath, self.provenance_dir
+        )
 
         # 4. Summary statistics
         summary_path = os.path.join(self.summary_dir, "nextssr_summary_statistics.txt")
@@ -58,17 +66,17 @@ class ArtifactManager:
                 "gff3_annotation": os.path.relpath(gff_path, self.base_dir),
                 "tsv_primers": os.path.relpath(tsv_path, self.base_dir),
                 "ro_crate": os.path.relpath(crate_path, self.base_dir),
-                "summary": os.path.relpath(summary_path, self.base_dir)
+                "summary": os.path.relpath(summary_path, self.base_dir),
             },
             "metrics": {
                 "total_sequences": provenance.total_sequences,
                 "total_ssrs": provenance.total_ssrs,
                 "total_compounds": provenance.total_compounds,
                 "total_primers_designed": provenance.total_primers_designed,
-                "execution_time": provenance.execution_time
-            }
+                "execution_time": provenance.execution_time,
+            },
         }
-        with open(manifest_path, 'w', encoding='utf-8') as f:
+        with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=2)
 
         return {
@@ -76,15 +84,17 @@ class ArtifactManager:
             "tsv": tsv_path,
             "ro_crate": crate_path,
             "summary": summary_path,
-            "manifest": manifest_path
+            "manifest": manifest_path,
         }
 
     def _write_summary(self, filepath: str, prov: ExecutionProvenance):
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write("===============================================\n")
             f.write("        nextSSR EXECUTION SUMMARY REPORT        \n")
             f.write("===============================================\n\n")
-            f.write(f"Tool Version:              {prov.tool_name} {prov.tool_version}\n")
+            f.write(
+                f"Tool Version:              {prov.tool_name} {prov.tool_version}\n"
+            )
             f.write(f"Platform:                  {prov.platform_info}\n")
             f.write(f"Device Used:               {prov.device_used}\n")
             f.write(f"Threads Used:              {prov.threads_used}\n")
