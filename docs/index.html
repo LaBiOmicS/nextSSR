@@ -215,100 +215,112 @@
 
     // --- IndexedDB Storage ---
     function initDB() {
-      const req = indexedDB.open("nextSSR_DB", 1);
-      req.onupgradeneeded = (e) => {
-        db = e.target.result;
-        if (!db.objectStoreNames.contains("runs")) {
-          db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
-        }
-      };
-      req.onsuccess = (e) => {
-        db = e.target.result;
-        loadDBHistory();
-      };
+      try {
+        const req = indexedDB.open("nextSSR_DB", 1);
+        req.onupgradeneeded = (e) => {
+          db = e.target.result;
+          if (!db.objectStoreNames.contains("runs")) {
+            db.createObjectStore("runs", { keyPath: "id", autoIncrement: true });
+          }
+        };
+        req.onsuccess = (e) => {
+          db = e.target.result;
+          loadDBHistory();
+        };
+      } catch (err) {
+        console.warn("IndexedDB not supported or blocked:", err);
+      }
     }
 
     function saveDBRun(runData) {
       if (!db) return;
-      const tx = db.transaction(["runs"], "readwrite");
-      tx.objectStore("runs").add(runData);
-      tx.oncomplete = () => loadDBHistory();
+      try {
+        const tx = db.transaction(["runs"], "readwrite");
+        tx.objectStore("runs").add(runData);
+        tx.oncomplete = () => loadDBHistory();
+      } catch (err) { console.warn("Save run error:", err); }
     }
 
     function loadDBHistory() {
       if (!db) return;
-      const tx = db.transaction(["runs"], "readonly");
-      const req = tx.objectStore("runs").getAll();
-      req.onsuccess = () => {
-        const tbody = document.getElementById('db-table-body');
-        tbody.innerHTML = '';
-        if (req.result.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>';
-          return;
-        }
-        req.result.reverse().forEach(run => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="px-4 py-2 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
-            <td class="px-4 py-2 font-bold text-white">${run.header}</td>
-            <td class="px-4 py-2 text-brand-500 font-bold">${run.total_ssrs}</td>
-            <td class="px-4 py-2 text-emerald-400">${run.total_primers_ok}</td>
-            <td class="px-4 py-2 text-amber-400">${run.exec_time}ms</td>
-            <td class="px-4 py-2 text-right">
-              <button onclick="restoreRun(${run.id})" class="px-2 py-1 bg-brand-900/60 text-brand-300 rounded font-sans text-xs">View</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      };
+      try {
+        const tx = db.transaction(["runs"], "readonly");
+        const req = tx.objectStore("runs").getAll();
+        req.onsuccess = () => {
+          const tbody = document.getElementById('db-table-body');
+          tbody.innerHTML = '';
+          if (req.result.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500 font-sans">No saved runs in IndexedDB yet.</td></tr>';
+            return;
+          }
+          req.result.reverse().forEach(run => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-2 text-slate-400">${new Date(run.timestamp).toLocaleString()}</td>
+              <td class="px-4 py-2 font-bold text-white">${run.header}</td>
+              <td class="px-4 py-2 text-brand-500 font-bold">${run.total_ssrs}</td>
+              <td class="px-4 py-2 text-emerald-400">${run.total_primers_ok}</td>
+              <td class="px-4 py-2 text-amber-400">${run.exec_time}ms</td>
+              <td class="px-4 py-2 text-right">
+                <button onclick="restoreRun(${run.id})" class="px-2 py-1 bg-brand-900/60 text-brand-300 rounded font-sans text-xs">View</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        };
+      } catch (err) { console.warn("Load DB error:", err); }
     }
 
     function clearHistory() {
       if (db && confirm("Clear all IndexedDB history?")) {
-        const tx = db.transaction(["runs"], "readwrite");
-        tx.objectStore("runs").clear();
-        tx.oncomplete = () => loadDBHistory();
+        try {
+          const tx = db.transaction(["runs"], "readwrite");
+          tx.objectStore("runs").clear();
+          tx.oncomplete = () => loadDBHistory();
+        } catch (err) { console.warn("Clear DB error:", err); }
       }
     }
 
     function restoreRun(id) {
       if (!db) return;
-      const tx = db.transaction(["runs"], "readonly");
-      const req = tx.objectStore("runs").get(id);
-      req.onsuccess = () => {
-        const run = req.result;
-        if (!run) return;
-        artifacts.gff3 = run.gff3;
-        artifacts.tsv = run.tsv;
+      try {
+        const tx = db.transaction(["runs"], "readonly");
+        const req = tx.objectStore("runs").get(id);
+        req.onsuccess = () => {
+          const run = req.result;
+          if (!run) return;
+          artifacts.gff3 = run.gff3;
+          artifacts.tsv = run.tsv;
 
-        document.getElementById('res-total-ssrs').innerText = run.total_ssrs;
-        document.getElementById('res-primers').innerText = run.total_primers_ok;
-        document.getElementById('res-time').innerText = `${run.exec_time}ms`;
+          document.getElementById('res-total-ssrs').innerText = run.total_ssrs;
+          document.getElementById('res-primers').innerText = run.total_primers_ok;
+          document.getElementById('res-time').innerText = `${run.exec_time}ms`;
 
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-        run.ssrs.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
-            <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
-            <td class="px-4 py-2">${item.repeats}x</td>
-            <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
-            <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
-            <td class="px-4 py-2 text-purple-400">${item.rev}</td>
-            <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-        document.getElementById('results-wrapper').classList.remove('hidden');
-      };
+          const tbody = document.getElementById('table-body');
+          tbody.innerHTML = '';
+          run.ssrs.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-2 font-bold text-brand-500">${item.ssr_id}</td>
+              <td class="px-4 py-2 text-white font-bold">${item.motif}</td>
+              <td class="px-4 py-2">${item.repeats}x</td>
+              <td class="px-4 py-2 text-slate-400">${item.start}-${item.end}</td>
+              <td class="px-4 py-2 text-blue-400">${item.fwd}</td>
+              <td class="px-4 py-2 text-purple-400">${item.rev}</td>
+              <td class="px-4 py-2 font-bold text-emerald-400">${item.product_size}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          document.getElementById('results-wrapper').classList.remove('hidden');
+        };
+      } catch (err) { console.warn("Restore run error:", err); }
     }
 
     function loadSampleFasta() {
       document.getElementById('fasta-input').value = `>chr1_sample_yeast\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC\n>chr2_sample_ecoli\nGATTACAAGCTACGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGCGATCGATCGATCGATCGATCGATCGAATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATATACGTACGTACGT`;
     }
 
-    // --- Pyodide WebAssembly Main Loader ---
+    // --- Pyodide WebAssembly Main Loader (Exactly matching cd6c633 architecture) ---
     async function main() {
       const banner = document.getElementById('status-banner');
       const icon = document.getElementById('status-icon');
@@ -321,7 +333,6 @@
       btn.disabled = true;
 
       try {
-        initDB();
         pyodide = await loadPyodide();
 
         text.innerText = "Pyodide Wasm loaded! Compiling nextSSR Python engine...";
@@ -424,6 +435,9 @@ def design_primer(flank_5p, target_seq, flank_3p, opt_tm=58.0, min_prod=80, max_
         icon.className = "fas fa-check-circle text-emerald-400 text-lg";
         text.innerText = "✓ Pyodide WebAssembly Engine Ready!";
         btn.disabled = false;
+
+        // Initialize IndexedDB in background without blocking Pyodide
+        initDB();
 
       } catch (err) {
         console.error("Pyodide error:", err);
@@ -579,7 +593,7 @@ json.dumps(out)
       URL.revokeObjectURL(url);
     }
 
-    // Direct execution
+    // Direct execution matching cd6c633 exactly
     main();
   </script>
 </body>
