@@ -1,5 +1,10 @@
 # nextSSR 🚀
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/LaBiOmicS/nextSSR/logo.jpeg" alt="nextSSR Logo" width="70%">
+</p>
+
+
 <!-- Institutional Badges -->
 [![University: UMC](https://img.shields.io/badge/University-UMC-0D47A1.svg)](https://www.umc.br/)
 [![Laboratory: LaBiOmicS](https://img.shields.io/badge/Laboratory-LaBiOmicS-7B1FA2.svg)](https://github.com/LaBiOmicS)
