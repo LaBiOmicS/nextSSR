@@ -549,7 +549,7 @@ designer = PrimerDesigner(opt_tm=58.0)
       <div class="text-center mb-16">
         <span class="text-xs font-bold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">Empirical Performance</span>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">Empirical Benchmarks across Real Genomes</h2>
-        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Evaluated against MISA across standard NCBI reference assemblies.</p>
+        <p class="mt-3 text-slate-400 text-base max-w-2xl mx-auto">Evaluated against MISA (Perl v2.1) across standard NCBI reference assemblies.</p>
       </div>
 
       <!-- Benchmarks Table -->
@@ -558,12 +558,14 @@ designer = PrimerDesigner(opt_tm=58.0)
           <thead class="bg-slate-950/80 uppercase font-bold text-slate-400 border-b border-slate-800">
             <tr>
               <th class="px-6 py-4">Accession</th>
-              <th class="px-6 py-4">Organism & Type</th>
-              <th class="px-6 py-4">Genome Size</th>
-              <th class="px-6 py-4">MISA (s)</th>
+              <th class="px-6 py-4">Organism & Genome Type</th>
+              <th class="px-6 py-4">Size (MB)</th>
+              <th class="px-6 py-4">MISA Perl (s)</th>
+              <th class="px-6 py-4 text-blue-400">nextSSR 1-Thread (s)</th>
               <th class="px-6 py-4 text-brand-400">nextSSR 8-Threads (s)</th>
-              <th class="px-6 py-4">SSR Concordance</th>
-              <th class="px-6 py-4">Valid Primers Designed</th>
+              <th class="px-6 py-4">Total SSRs</th>
+              <th class="px-6 py-4">PCR Primers OK</th>
+              <th class="px-6 py-4">Concordance</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/60 font-mono">
@@ -571,37 +573,45 @@ designer = PrimerDesigner(opt_tm=58.0)
               <td class="px-6 py-4 text-slate-400">NC_000932.1</td>
               <td class="px-6 py-4 font-sans font-semibold text-white">Arabidopsis thaliana (cp)</td>
               <td class="px-6 py-4">0.15 MB</td>
-              <td class="px-6 py-4">0.252s</td>
+              <td class="px-6 py-4 text-slate-400">0.252s</td>
+              <td class="px-6 py-4 text-blue-400">3.250s</td>
               <td class="px-6 py-4 font-bold text-brand-400">3.231s</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">77 / 77 (100%)</td>
-              <td class="px-6 py-4">22 Pairs</td>
+              <td class="px-6 py-4 font-bold text-white">77 == 77</td>
+              <td class="px-6 py-4 text-emerald-400">22 Pairs</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
               <td class="px-6 py-4 text-slate-400">NC_011033.1</td>
               <td class="px-6 py-4 font-sans font-semibold text-white">Oryza sativa (Rice mt)</td>
               <td class="px-6 py-4">0.47 MB</td>
-              <td class="px-6 py-4">0.775s</td>
+              <td class="px-6 py-4 text-slate-400">0.775s</td>
+              <td class="px-6 py-4 text-blue-400">1.798s</td>
               <td class="px-6 py-4 font-bold text-brand-400">1.924s</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">27 / 27 (100%)</td>
-              <td class="px-6 py-4">22 Pairs</td>
+              <td class="px-6 py-4 font-bold text-white">27 == 27</td>
+              <td class="px-6 py-4 text-emerald-400">22 Pairs</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
               <td class="px-6 py-4 text-slate-400">NC_000913.3</td>
               <td class="px-6 py-4 font-sans font-semibold text-white">E. coli K-12 MG1655</td>
               <td class="px-6 py-4">4.49 MB</td>
-              <td class="px-6 py-4">6.017s</td>
-              <td class="px-6 py-4 font-bold text-brand-400">3.312s (2x Speedup)</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">4 / 4 (100%)</td>
-              <td class="px-6 py-4">4 Pairs</td>
+              <td class="px-6 py-4 text-slate-400">6.017s</td>
+              <td class="px-6 py-4 text-blue-400 font-bold">3.260s</td>
+              <td class="px-6 py-4 font-bold text-brand-400">3.312s (2x Faster)</td>
+              <td class="px-6 py-4 font-bold text-white">4 == 4</td>
+              <td class="px-6 py-4 text-emerald-400">4 Pairs</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
             <tr class="hover:bg-slate-900/40 transition">
               <td class="px-6 py-4 text-slate-400">S_cerevisiae_16Chr</td>
               <td class="px-6 py-4 font-sans font-semibold text-white">Saccharomyces cerevisiae</td>
               <td class="px-6 py-4">11.68 MB</td>
-              <td class="px-6 py-4">16.169s</td>
+              <td class="px-6 py-4 text-slate-400">16.169s</td>
+              <td class="px-6 py-4 text-blue-400">126.143s</td>
               <td class="px-6 py-4 font-bold text-brand-400">120.395s</td>
-              <td class="px-6 py-4 text-emerald-400 font-bold">3,256 / 3,256 (100%)</td>
-              <td class="px-6 py-4">2,032 Pairs</td>
+              <td class="px-6 py-4 font-bold text-white">3,256 == 3,256</td>
+              <td class="px-6 py-4 text-emerald-400">2,032 Pairs</td>
+              <td class="px-6 py-4 text-emerald-400 font-bold">✅ 100% Match</td>
             </tr>
           </tbody>
         </table>
