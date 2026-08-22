@@ -1,7 +1,5 @@
 # nextSSR 🚀
 
-[![CI / Unit Tests](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml)
-[![Security Audit](https://github.com/LaBiOmicS/nextSSR/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/security.yml)
 [![PyPI Package](https://img.shields.io/badge/PyPI-v0.1.0-blue.svg)](https://pypi.org/project/nextssr/)
 [![Python Versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://pypi.org/project/nextssr/)
 [![Conda Package](https://img.shields.io/badge/bioconda-v0.1.0-green.svg)](https://anaconda.org/bioconda/nextssr)
