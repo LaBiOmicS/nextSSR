@@ -46,15 +46,22 @@
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
 
-    <!-- Status Banner -->
-    <div id="status-banner" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm">
-      <div class="flex items-center space-x-3">
-        <i id="status-icon" class="fas fa-spinner fa-spin text-amber-400 text-lg"></i>
-        <span id="status-text" class="text-amber-200 font-medium">Initializing Pyodide WebAssembly Engine (~6 MB)... Please wait.</span>
+    <!-- Real-time Progress Status Banner & Console Stream -->
+    <div id="status-banner" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl space-y-2 text-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <i id="status-icon" class="fas fa-spinner fa-spin text-amber-400 text-lg"></i>
+          <span id="status-title" class="font-bold text-amber-200">Initializing Pyodide WebAssembly Engine...</span>
+        </div>
+        <button onclick="initPyodide()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">
+          <i class="fas fa-sync-alt mr-1"></i> Reload Engine
+        </button>
       </div>
-      <button onclick="initPyodide()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">
-        <i class="fas fa-sync-alt mr-1"></i> Reload Engine
-      </button>
+
+      <!-- Real-time Stream Terminal Box -->
+      <div id="status-stream" class="bg-slate-950 p-3 rounded-lg font-mono text-xs text-slate-300 max-h-32 overflow-y-auto border border-slate-800/80 space-y-1">
+        <p class="text-amber-400">> Starting Pyodide bootstrapper...</p>
+      </div>
     </div>
 
     <!-- Web App Grid -->
@@ -188,6 +195,20 @@
     let db = null;
     let artifacts = { gff3: '', tsv: '' };
 
+    function appendStreamLog(msg, type = 'info') {
+      const stream = document.getElementById('status-stream');
+      if (!stream) return;
+      const p = document.createElement('p');
+      if (type === 'error') p.className = 'text-rose-400 font-bold';
+      else if (type === 'success') p.className = 'text-emerald-400 font-bold';
+      else p.className = 'text-slate-300';
+      
+      const time = new Date().toLocaleTimeString();
+      p.innerText = `[${time}] ${msg}`;
+      stream.appendChild(p);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
     // --- IndexedDB ---
     function initDB() {
       const req = indexedDB.open("nextSSR_DB", 1);
@@ -279,22 +300,40 @@
       document.getElementById('fasta-input').value = `>chr1_sample_yeast\nATCGATCGATCGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGATCGATCGATCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGCGC`;
     }
 
-    // --- Pyodide WebAssembly Engine Loader ---
+    // --- Pyodide Real-Time Loader with messageCallback Stream ---
     async function initPyodide() {
       const banner = document.getElementById('status-banner');
       const icon = document.getElementById('status-icon');
-      const text = document.getElementById('status-text');
+      const title = document.getElementById('status-title');
       const btn = document.getElementById('btn-run');
+      const stream = document.getElementById('status-stream');
 
-      banner.className = "bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+      stream.innerHTML = '';
+      banner.className = "bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl space-y-2 text-sm";
       icon.className = "fas fa-spinner fa-spin text-amber-400 text-lg";
-      text.innerText = "Initializing Pyodide WebAssembly Engine (~6 MB)... Please wait.";
+      title.innerText = "Initializing Pyodide WebAssembly Engine...";
       btn.disabled = true;
 
+      appendStreamLog("Checking Pyodide script availability in browser window...");
+
+      if (typeof window.loadPyodide !== 'function') {
+        appendStreamLog("window.loadPyodide function is not defined. Script not loaded yet.", "error");
+        title.innerText = "Pyodide Script Load Error";
+        icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
+        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl space-y-2 text-sm";
+        return;
+      }
+
       try {
-        console.log("Calling loadPyodide()...");
-        pyodide = await loadPyodide();
-        console.log("Pyodide loaded. Executing Python engine...");
+        appendStreamLog("Downloading Pyodide Wasm binaries & stdlib from CDN...");
+
+        pyodide = await loadPyodide({
+          messageCallback: (msg) => {
+            appendStreamLog(`[Pyodide Core] ${msg}`);
+          }
+        });
+
+        appendStreamLog("Pyodide Wasm binary loaded! Compiling CPython nextSSR engine...", "success");
 
         await pyodide.runPythonAsync(`
 import math, json, re
@@ -390,16 +429,18 @@ def design_primer(flank_5p, target_seq, flank_3p, opt_tm=58.0, min_prod=80, max_
     return {"status": "REJECTED"}
         `);
 
-        banner.className = "bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        appendStreamLog("✓ nextSSR CPython engine compiled successfully! Engine Ready.", "success");
+        banner.className = "bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl space-y-2 text-sm";
         icon.className = "fas fa-check-circle text-emerald-400 text-lg";
-        text.innerText = "Pyodide WebAssembly Engine Ready!";
+        title.innerText = "Pyodide WebAssembly Engine Ready!";
         btn.disabled = false;
 
       } catch (err) {
         console.error("Pyodide init error:", err);
-        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl flex items-center justify-between text-sm";
+        appendStreamLog(`Engine Failure: ${err.message}`, "error");
+        banner.className = "bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl space-y-2 text-sm";
         icon.className = "fas fa-exclamation-triangle text-rose-400 text-lg";
-        text.innerText = `Engine Initialization Failed: ${err.message}`;
+        title.innerText = "Engine Load Failed";
       }
     }
 
@@ -544,7 +585,6 @@ json.dumps(out)
       URL.revokeObjectURL(url);
     }
 
-    // Single clean entry point on window load
     window.addEventListener('load', () => {
       initDB();
       initPyodide();
