@@ -1,14 +1,17 @@
-name: Conda Package Verification
+name: Conda / Bioconda Package Pipeline
 
 on:
   push:
     branches: [ main, master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  conda-build:
-    name: Build & Test Conda Recipe
+  conda-build-test:
+    name: Build Conda Package & Verify Recipe
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +28,18 @@ jobs:
             bioconda::bioconda-utils
           channels: conda-forge,bioconda,defaults
 
-      - name: Test Conda Build
+      - name: Build Conda Package
         run: |
-          micromamba run -n conda-build-env conda-build recipe/
+          micromamba run -n conda-build-env conda-build recipe/ --output-folder conda-dist/
+
+      - name: Test Installed Conda Package
+        run: |
+          micromamba create -n test-env --use-local -c file://$(pwd)/conda-dist -c conda-forge -c bioconda nextssr
+          micromamba run -n test-env nextssr --help
+          micromamba run -n test-env nextssr init-config
+
+      - name: Upload Conda Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package
+          path: conda-dist/noarch/*.tar.bz2
