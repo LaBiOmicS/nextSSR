@@ -39,9 +39,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Pyodide WebAssembly Engine CDN -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-
   <style>
     body { font-family: 'Inter', sans-serif; }
     code, pre { font-family: 'Fira Code', monospace; }
@@ -147,7 +144,6 @@
           </button>
         </div>
         <div id="engine-steps-log" class="text-slate-400 space-y-1">
-          <p class="text-yellow-400 animate-pulse">> Initializing Pyodide WebAssembly Engine...</p>
         </div>
       </div>
 
@@ -651,7 +647,7 @@
       };
     }
 
-    // --- Standard Clean Pyodide Bootstrapper ---
+    // --- Fail-Safe Pyodide Bootstrapper ---
     function logMsg(msg) {
       const box = document.getElementById('log-box');
       box.classList.remove('hidden');
@@ -676,17 +672,29 @@
       btnEPCR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Engine...';
 
       try {
-        diagLog('Initializing Pyodide WebAssembly runtime...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> Loading Pyodide...';
+        diagLog('Step 1/3: Loading Pyodide script engine...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> [1/3] Loading Script...';
 
         if (typeof window.loadPyodide !== 'function') {
-          throw new Error('Pyodide script not loaded. Check window.loadPyodide availability.');
+          diagLog('Injecting Pyodide script tag dynamically...');
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js";
+            script.onload = resolve;
+            script.onerror = () => reject(new Error("Failed to load pyodide.js script from CDN"));
+            document.head.appendChild(script);
+          });
         }
 
-        pyodide = await window.loadPyodide();
+        diagLog('Step 2/3: Pyodide script ready. Downloading Wasm binaries (~6 MB)...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> [2/3] Downloading Wasm Binaries...';
 
-        diagLog('Pyodide runtime ready. Injecting nextSSR Python engine...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> Injecting Engine...';
+        pyodide = await window.loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+        });
+
+        diagLog('Step 3/3: Wasm binaries downloaded! Compiling nextSSR Python engine...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> [3/3] Compiling Engine...';
 
         await pyodide.runPythonAsync(`
 import math
@@ -1224,7 +1232,7 @@ json.dumps(results_list)
       URL.revokeObjectURL(url);
     }
 
-    // Standard clean window.onload trigger
+    // Auto-trigger Pyodide Engine Loader
     window.addEventListener('load', () => {
       initPyodideEngine();
     });
