@@ -1,9 +1,10 @@
 # nextSSR 🚀
 
-[![CI](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml/badge.svg)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/nextssr.svg)](https://pypi.org/project/nextssr/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/nextssr.svg)](https://pypi.org/project/nextssr/)
-[![Conda Version](https://img.shields.io/conda/vn/bioconda/nextssr.svg)](https://anaconda.org/bioconda/nextssr)
+[![CI / Unit Tests](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml/badge.svg)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml)
+[![Security Audit](https://github.com/LaBiOmicS/nextSSR/actions/workflows/security.yml/badge.svg)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/security.yml)
+[![PyPI version](https://img.shields.io/pypi/v/nextssr.svg?color=blue)](https://pypi.org/project/nextssr/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/nextssr.svg?color=blue)](https://pypi.org/project/nextssr/)
+[![Conda Version](https://img.shields.io/conda/vn/bioconda/nextssr.svg?color=green)](https://anaconda.org/bioconda/nextssr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **nextSSR** is a next-generation, high-performance, standalone Simple Sequence Repeat (SSR / microsatellite) identification and PCR primer design platform written in Python. It provides ultra-fast parallel CPU multi-processing, optional CUDA GPU hardware acceleration, low-memory streaming, automated PCR primer design, and complete **FAIR compliance** (W3C RO-Crate JSON-LD provenance and Sequence Ontology GFF3 annotations).
