@@ -200,12 +200,12 @@
 
             <!-- Execution Buttons -->
             <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <button id="btn-run-ssr" onclick="runNextSSRWasm()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
-                <i class="fas fa-play"></i> Run nextSSR In-Browser
+              <button id="btn-run-ssr" disabled onclick="runNextSSRWasm()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
+                <i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...
               </button>
               
               <div id="pyodide-status" class="text-xs font-mono text-slate-400 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Initializing Engine...
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Loading WebAssembly...
               </div>
             </div>
 
@@ -317,8 +317,8 @@
             <input type="number" id="epcr-max-mismatch" value="2" min="0" max="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-purple-500">
           </div>
           <div class="flex items-end">
-            <button onclick="runEPCRWasm()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 text-sm">
-              <i class="fas fa-vial"></i> Run In Silico e-PCR
+            <button id="btn-run-epcr" disabled onclick="runEPCRWasm()" class="w-full py-2.5 bg-purple-600 text-white font-bold rounded-lg transition shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 text-sm opacity-50 cursor-not-allowed">
+              <i class="fas fa-spinner fa-spin"></i> Initializing Wasm Engine...
             </button>
           </div>
         </div>
@@ -619,7 +619,7 @@
       };
     }
 
-    // --- Native Self-Contained Pyodide Engine Loader ---
+    // --- Pyodide Engine Loader ---
     function logMsg(msg) {
       const box = document.getElementById('log-box');
       box.classList.remove('hidden');
@@ -629,13 +629,18 @@
 
     async function initPyodideEngine() {
       const statusEl = document.getElementById('pyodide-status');
+      const btnSSR = document.getElementById('btn-run-ssr');
+      const btnEPCR = document.getElementById('btn-run-epcr');
+
       try {
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> Loading Wasm Runtime...';
-        pyodide = await loadPyodide();
         
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Loading Native Python Engine...';
+        pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+        });
         
-        // Define pure-Python nextSSR module directly into Pyodide virtual filesystem
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Injecting Engine Modules...';
+        
         await pyodide.runPythonAsync(`
 import math
 import json
@@ -883,9 +888,20 @@ class EPCRSimulator:
         `);
 
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-brand-500"></span> Pyodide Engine Ready (Wasm)';
+        
+        // UNLOCK FORM BUTTONS & INPUTS ONCE ENGINE IS FULLY READY!
+        btnSSR.disabled = false;
+        btnEPCR.disabled = false;
+        btnSSR.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnEPCR.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnSSR.innerHTML = '<i class="fas fa-play"></i> Run nextSSR In-Browser';
+        btnEPCR.innerHTML = '<i class="fas fa-vial"></i> Run In Silico e-PCR';
+
       } catch (err) {
         console.error(err);
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Engine Load Failed';
+        btnSSR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
+        btnEPCR.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Engine Load Failed';
       }
     }
 
@@ -1055,6 +1071,7 @@ json.dumps(out)
     }
 
     async function runEPCRWasm() {
+      const btn = document.getElementById('btn-run-epcr');
       const fastaText = document.getElementById('epcr-fasta').value.trim();
       const fwd = document.getElementById('epcr-fwd').value.trim();
       const rev = document.getElementById('epcr-rev').value.trim();
@@ -1069,6 +1086,9 @@ json.dumps(out)
         alert('Pyodide engine is still initializing...');
         return;
       }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running e-PCR...';
 
       try {
         pyodide.globals.set('epcr_fasta', fastaText);
@@ -1136,6 +1156,9 @@ json.dumps(results_list)
       } catch (err) {
         console.error(err);
         alert(`e-PCR Error: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-vial"></i> Run In Silico e-PCR';
       }
     }
 
