@@ -268,6 +268,22 @@ pytest -v
 
 ---
 
+## 📜 Citation
+
+If you use `nextSSR` in your research or software pipelines, please cite the repository:
+
+```bibtex
+@misc{menegidio2026nextssr,
+  author = {Menegidio, Fabiano},
+  title = {nextSSR: High-Performance & FAIR-Compliant Simple Sequence Repeat Mining Engine},
+  year = {2026},
+  publisher = {GitHub},
+  howpublished = {\url{https://github.com/LaBiOmicS/nextSSR}}
+}
+```
+
+---
+
 ## 📄 License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
