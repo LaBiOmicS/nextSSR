@@ -643,6 +643,17 @@ import re
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional, Set
 
+# --- CONFIG CLASS ---
+class SSRConfig:
+    @staticmethod
+    def get_default():
+        return SSRConfig()
+    def __init__(self):
+        self.flank_len = 100
+        self.primer_opt_tm = 58.0
+        self.primer_min_product_size = 80
+        self.primer_max_product_size = 250
+
 # --- IUPAC MAP ---
 IUPAC_MAP = {
     "A": {"A"}, "C": {"C"}, "G": {"G"}, "T": {"T"}, "U": {"T"},
