@@ -37,7 +37,7 @@ test:
     - nextssr init-config
 
 about:
-  home: https://github.com/fabianomenegidio/nextSSR
+  home: https://github.com/LaBiOmicS/nextSSR
   license: MIT
   license_file: LICENSE
   summary: "Next-generation High-Performance & FAIR-compliant Simple Sequence Repeat (SSR) platform"
@@ -45,9 +45,9 @@ about:
     nextSSR is a standalone, ultra-fast microsatellite identification engine and automated
     PCR primer design platform supporting Weber (1990) motif classifications, Sequence Ontology
     (SO:0000289) GFF3 exports, and W3C RO-Crate (JSON-LD) FAIR provenance metadata.
-  dev_url: https://github.com/fabianomenegidio/nextSSR
-  doc_url: https://github.com/fabianomenegidio/nextSSR#readme
+  dev_url: https://github.com/LaBiOmicS/nextSSR
+  doc_url: https://github.com/LaBiOmicS/nextSSR#readme
 
 extra:
   recipe-maintainers:
-    - fabianomenegidio
+    - LaBiOmicS

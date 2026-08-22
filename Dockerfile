@@ -3,7 +3,7 @@ FROM python:3.11-slim
 
 LABEL maintainer="Fabiano Menegidio"
 LABEL description="nextSSR: High-performance, FAIR-compliant SSR identification"
-LABEL org.opencontainers.image.source="https://github.com/fabianomenegidio/nextSSR"
+LABEL org.opencontainers.image.source="https://github.com/LaBiOmicS/nextSSR"
 
 WORKDIR /app
 

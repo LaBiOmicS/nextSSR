@@ -26,4 +26,4 @@ Thank you for considering contributing to **nextSSR**! We welcome contributions 
 
 - **Author**: Fabiano Menegidio
 - **Email**: labiomics@bioinformatica.com.br
-- **Repository**: [https://github.com/fabianomenegidio/nextSSR](https://github.com/fabianomenegidio/nextSSR)
+- **Repository**: [https://github.com/LaBiOmicS/nextSSR](https://github.com/LaBiOmicS/nextSSR)

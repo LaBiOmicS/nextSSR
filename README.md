@@ -1,6 +1,6 @@
 # nextSSR 🚀
 
-[![CI](https://github.com/fabianomenegidio/nextSSR/actions/workflows/ci.yml/badge.svg)](https://github.com/fabianomenegidio/nextSSR/actions/workflows/ci.yml)
+[![CI](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml/badge.svg)](https://github.com/LaBiOmicS/nextSSR/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/nextssr.svg)](https://pypi.org/project/nextssr/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/nextssr.svg)](https://pypi.org/project/nextssr/)
 [![Conda Version](https://img.shields.io/conda/vn/bioconda/nextssr.svg)](https://anaconda.org/bioconda/nextssr)
@@ -41,7 +41,7 @@ mamba install -c bioconda nextssr
 ### Option 3: From Source (GitHub)
 
 ```bash
-git clone https://github.com/fabianomenegidio/nextSSR.git
+git clone https://github.com/LaBiOmicS/nextSSR.git
 cd nextSSR
 
 # Install in editable mode
@@ -234,7 +234,7 @@ pytest -v
 
 - **Author**: Fabiano Menegidio
 - **Email**: [labiomics@bioinformatica.com.br](mailto:labiomics@bioinformatica.com.br)
-- **GitHub**: [https://github.com/fabianomenegidio/nextSSR](https://github.com/fabianomenegidio/nextSSR)
+- **GitHub**: [https://github.com/LaBiOmicS/nextSSR](https://github.com/LaBiOmicS/nextSSR)
 
 ---
 
