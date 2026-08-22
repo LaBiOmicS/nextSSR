@@ -39,9 +39,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Pyodide WebAssembly Engine CDN -->
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-
   <style>
     body { font-family: 'Inter', sans-serif; }
     code, pre { font-family: 'Fira Code', monospace; }
@@ -147,6 +144,7 @@
           </button>
         </div>
         <div id="engine-steps-log" class="text-slate-400 space-y-1">
+          <p class="text-yellow-400 animate-pulse">> Bootstrapping Pyodide WebAssembly Engine...</p>
         </div>
       </div>
 
@@ -513,6 +511,40 @@
       diagEl.scrollTop = diagEl.scrollHeight;
     }
 
+    // --- Dynamic Multi-CDN Script Loader Guard ---
+    function loadScript(url) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error(`Failed to load ${url}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadPyodideScriptWithFallback() {
+      if (typeof window.loadPyodide === 'function') return true;
+
+      const cdns = [
+        "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js",
+        "https://unpkg.com/pyodide@0.25.0/pyodide.js"
+      ];
+
+      for (const cdnUrl of cdns) {
+        try {
+          diagLog(`Fetching Pyodide script from CDN (${cdnUrl.split('/')[2]})...`);
+          await loadScript(cdnUrl);
+          if (typeof window.loadPyodide === 'function') {
+            diagLog(`Loaded Pyodide script from ${cdnUrl.split('/')[2]}`);
+            return true;
+          }
+        } catch (e) {
+          diagLog(`CDN ${cdnUrl.split('/')[2]} unavailable, trying fallback...`, true);
+        }
+      }
+      return false;
+    }
+
     // --- IndexedDB Storage Engine ---
     function initIndexedDB() {
       const request = indexedDB.open("nextSSR_DB", 1);
@@ -650,33 +682,6 @@
       };
     }
 
-    // --- Transparent Multi-CDN Guard Pyodide Engine Loader ---
-    function logMsg(msg) {
-      const box = document.getElementById('log-box');
-      box.classList.remove('hidden');
-      box.innerHTML += `<p>> ${msg}</p>`;
-      box.scrollTop = box.scrollHeight;
-    }
-
-    async function ensurePyodideScriptLoaded() {
-      if (typeof window.loadPyodide === 'function') return true;
-      
-      diagLog('Checking CDN script accessibility...');
-      return new Promise((resolve) => {
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts++;
-          if (typeof window.loadPyodide === 'function') {
-            clearInterval(interval);
-            resolve(true);
-          } else if (attempts >= 40) { // 8 seconds
-            clearInterval(interval);
-            resolve(false);
-          }
-        }, 200);
-      });
-    }
-
     async function initPyodideEngine() {
       const statusEl = document.getElementById('pyodide-status');
       const btnSSR = document.getElementById('btn-run-ssr');
@@ -684,6 +689,7 @@
       const diagEl = document.getElementById('engine-steps-log');
 
       if (diagEl) diagEl.innerHTML = '';
+      initIndexedDB();
 
       btnSSR.disabled = true;
       btnEPCR.disabled = true;
@@ -693,22 +699,22 @@
       btnEPCR.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing Engine...';
 
       try {
-        diagLog('[Step 1/3] Verifying Pyodide script availability...');
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> [1/3] Checking Script...';
+        diagLog('[1/3] Loading Pyodide script engine...');
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span> [1/3] Loading Script...';
 
-        const scriptReady = await ensurePyodideScriptLoaded();
+        const scriptReady = await loadPyodideScriptWithFallback();
         if (!scriptReady) {
-          throw new Error('Pyodide script failed to load from CDN. Please check your internet connection or ad-blocker.');
+          throw new Error('Could not load Pyodide script from any CDN. Please check network connection.');
         }
 
-        diagLog('[Step 2/3] Downloading WebAssembly binaries (~6 MB)...');
+        diagLog('[2/3] Downloading WebAssembly binaries (~6 MB)...');
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> [2/3] Downloading Wasm Binaries...';
 
         pyodide = await window.loadPyodide({
           indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
         });
 
-        diagLog('[Step 3/3] Compiling nextSSR Python Wasm engine...');
+        diagLog('[3/3] Compiling nextSSR Python Wasm engine...');
         statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> [3/3] Compiling Engine...';
 
         await pyodide.runPythonAsync(`
@@ -1247,9 +1253,8 @@ json.dumps(results_list)
       URL.revokeObjectURL(url);
     }
 
-    // Initialize on page load
+    // Auto-trigger Pyodide Engine Loader on load
     window.addEventListener('DOMContentLoaded', () => {
-      initIndexedDB();
       initPyodideEngine();
     });
   </script>
