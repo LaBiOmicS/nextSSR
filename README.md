@@ -9,7 +9,6 @@
 [![DOI](https://zenodo.org/badge/1342814779.svg)](https://doi.org/10.5281/zenodo.22059710)
 [![University: UMC](https://img.shields.io/badge/University-UMC-0D47A1.svg)](https://www.umc.br/)
 [![Laboratory: LaBiOmicS](https://img.shields.io/badge/Laboratory-LaBiOmicS-7B1FA2.svg)](https://github.com/LaBiOmicS)
-[![Bioinformatics](https://img.shields.io/badge/Bioinformatics-lncRNA-green.svg)](https://github.com/LaBiOmicS/nextssr)
 
 <!-- Open Science Badges -->
 [![Open Source](https://img.shields.io/badge/Open-Source-brightgreen.svg)](https://github.com/LaBiOmicS/nextssr)
