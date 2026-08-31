@@ -59,14 +59,14 @@ cd nextSSR
 pip install -e .
 ```
 
-### Option 4: Docker Container
+### Option 3: Docker Container
 
 ```bash
 docker build -t nextssr .
 docker run --rm -v $(pwd):/data nextssr /data/genome.fasta -o /data/results
 ```
 
-### Option 5: Apptainer / Singularity (HPC Environments)
+### Option 4: Apptainer / Singularity (HPC Environments)
 
 ```bash
 apptainer build nextssr.sif Apptainer.def
