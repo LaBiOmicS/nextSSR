@@ -49,15 +49,7 @@
 pip install nextssr
 ```
 
-### Option 2: Via Conda / Bioconda
-
-```bash
-conda install -c bioconda nextssr
-# or using mamba
-mamba install -c bioconda nextssr
-```
-
-### Option 3: From Source (GitHub)
+### Option 2: From Source (GitHub)
 
 ```bash
 git clone https://github.com/LaBiOmicS/nextSSR.git
