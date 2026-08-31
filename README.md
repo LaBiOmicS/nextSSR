@@ -15,7 +15,6 @@
 [![Open Science](https://img.shields.io/badge/Open-Science-blue.svg)](https://github.com/LaBiOmicS/nextssr)
 [![Open Data](https://img.shields.io/badge/Open-Data-brightgreen.svg)](https://github.com/LaBiOmicS/nextssr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![JOSS Status](https://img.shields.io/badge/JOSS-Pre--submission-brightgreen.svg)](https://joss.theoj.org/)
 
 <!-- Tech & Method Badges -->
 [![PyPI Package](https://img.shields.io/badge/PyPI-v0.1.1-blue.svg)](https://pypi.org/project/nextssr/)
