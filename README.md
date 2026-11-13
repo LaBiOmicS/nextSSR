@@ -18,7 +18,7 @@ data locally, without uploading anything.
 
 ## Why
 
-MISA is the de facto standard for SSR discovery, but `misa.pl`:
+MISA is the de facto standard for SSR discovery, but MISA:
 
 - scans with a regular expression that **consumes sequence when it rejects a redundant motif**, so an
   SSR starting inside a homopolymer is lost or truncated (`A×15` followed by `(AAG)5` → only `(A)15`;
@@ -29,9 +29,9 @@ MISA is the de facto standard for SSR discovery, but `misa.pl`:
 - is single-threaded, writes one GFF file per sequence, and needs extra scripts plus Primer3 for
   primers (with no check that they amplify a single locus).
 
-| | MISA (misa.pl 2.0) | nextSSR |
+| | MISA 2.0 | nextSSR |
 |---|---|---|
-| `.misa` / `.statistics` / `misa.ini` compatibility | ✓ | ✓ (byte-identical in `misa` mode) |
+| `.misa` / `.statistics` / `misa.ini` compatibility | ✓ | ✓ (byte-identical in MISA-compatible mode) |
 | SSRs masked by the regex scan | possible | none (native mode) |
 | Imperfect SSRs | ✗ | ✓ |
 | Valid single-file GFF3 | one file per sequence | ✓ |
@@ -57,7 +57,7 @@ cargo install --git https://github.com/LaBiOmicS/nextSSR nextssr
 # MISA drop-in: reads misa.ini (or ./misa.ini), writes genome.fa.misa and genome.fa.statistics
 nextssr misa genome.fa misa.ini
 
-# nextSSR mode: TSV, GFF3, .misa, HTML report and JSON summary next to the input
+# native mode: TSV, GFF3, .misa, HTML report and JSON summary next to the input
 nextssr run genome.fa.gz
 
 # imperfect SSRs, primers, 8 threads, all formats, custom prefix
@@ -86,10 +86,10 @@ product range, salt and oligo concentrations; flanking sequence; …).
 
 ### Detection modes
 
-- **native** (default): every maximal perfect repeat of a primitive motif with at least the
+- **native mode** (default): every maximal perfect repeat of a primitive motif with at least the
   required number of copies is reported, found by a linear-time scanner that is exact and
   parallel even within one chromosome.
-- **misa** (`nextssr misa`, or `nextssr run --mode misa`): exact `misa.pl` semantics, including
+- **MISA-compatible mode** (`nextssr misa`, or `nextssr run --mode misa`): exact MISA v2.0 rules, including
   its masking behaviour and compound notation.
 
 ### SSR types
@@ -98,11 +98,11 @@ product range, salt and oligo concentrations; flanking sequence; …).
 |---|---|
 | `p1`…`p6` | perfect SSR with a 1–6 nt motif |
 | `i1`…`i6` | imperfect SSR (`--imperfect`), e.g. `(AG)6t(AG)4` |
-| `c*` | contiguous compound: members that touch or overlap; nextSSR writes overlaps as `{-n}`, misa.pl appends `*` |
+| `c*` | contiguous compound: members that touch or overlap; nextSSR writes overlaps as `{-n}`, MISA appends `*` |
 | `c` | compound with a spacer, members separated by ≤ `-i` bases, e.g. `(AC)6ggtc(TG)6` |
 
 In native mode each SSR is its own record: only touching or overlapping SSRs are grouped
-(`c*`; default `-i 0`). misa.pl, and `nextssr misa` / `--mode misa`, join SSRs up to 100 bp
+(`c*`; default `-i 0`). MISA, and the MISA-compatible mode (`nextssr misa` / `--mode misa`), join SSRs up to 100 bp
 apart (`interruptions` in misa.ini), so two unrelated SSRs can become one `c` locus with the
 whole spacer inside the notation. Use `-i N` to get compounds with a spacer in native mode.
 
@@ -153,9 +153,9 @@ difference between primers to 3 °C, and primers are never placed over other SSR
 Tm and size plus the Tm difference). They appear in `.primers.tsv` and as `PCR_product` features
 with `rank=` in the GFF3; the `.tsv` table keeps the best pair.
 
-### In-silico PCR (e-PCR)
+### In-silico PCR
 
-The e-PCR engine finds every product a primer pair can amplify:
+The in-silico PCR engine finds every product a primer pair can amplify:
 
 - both strands are searched and each primer may act as forward or reverse, so single-primer
   products (`F/F`, `R/R`) are found as well as `F/R` and `R/F`;
@@ -193,9 +193,9 @@ the products (`.epcr.tsv`, `--sequence` adds their sequences) and a per-pair sum
 ## Verification
 
 - `cargo test --workspace` runs unit tests and end-to-end tests, including byte-for-byte comparison
-  of `nextssr misa` with reference outputs of `misa.pl` for a synthetic stress file (mixed case,
+  of `nextssr misa` with reference outputs of MISA for a synthetic stress file (mixed case,
   `N`, CRLF, overlaps, adjacency, homopolymer masking) and the *Arabidopsis* chloroplast genome.
-- `scripts/compare_misa.sh <fasta>...` downloads the original `misa.pl` from IPK and compares it
+- `scripts/compare_misa.sh <fasta>...` downloads the original MISA script (`misa.pl`) from IPK and compares it
   with `nextssr misa` on your own files.
 - CI checks that the WebAssembly build produces exactly the same files as the CLI.
 
@@ -214,7 +214,7 @@ The `pages.yml` workflow publishes it to GitHub Pages on every push to `main`
 ## Repository layout
 
 ```
-crates/nextssr-core   detection engine, primers, e-PCR, statistics, output formats (no I/O; compiles to WASM)
+crates/nextssr-core   detection engine, primers, in-silico PCR, statistics, output formats (no I/O; compiles to WASM)
 crates/nextssr-cli    `nextssr` binary
 crates/nextssr-wasm   WebAssembly bindings
 web/                  trilingual website + online tool

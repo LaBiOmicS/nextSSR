@@ -45,8 +45,8 @@ const D = {
     "app.privacy": "Your data never leave this computer.",
     "app.params": "2. Parameters",
     "app.mode": "Which rules to use",
-    "app.mode.native": "nextSSR (recommended)",
-    "app.mode.misa": "MISA-compatible (identical results)",
+    "app.mode.native": "Native mode (recommended)",
+    "app.mode.misa": "MISA-compatible mode (identical results)",
     "app.minrep": "Minimum number of repeats",
     "app.compound": "Compound SSRs",
     "app.maxint": "Join microsatellites closer than (bp)",
@@ -85,7 +85,7 @@ const D = {
     "install.lead": "Download a pre-built binary from the GitHub releases page, or build from source with Rust:",
     "install.usage": "Usage",
     "install.c1": "# MISA drop-in: writes genome.fa.misa and genome.fa.statistics",
-    "install.c2": "# nextSSR mode with imperfect SSRs and primers, 8 threads",
+    "install.c2": "# native mode with imperfect SSRs and primers, 8 threads",
     "install.c3": "# primer melting temperature",
     "cite.title": "How to cite",
     "cite.lead": "Until the accompanying article is published, please cite the software version you ran (metadata in CITATION.cff).",
@@ -113,8 +113,8 @@ const D = {
     "card.amplicons": "Amplicons",
     "card.locispec": "Loci with a specific pair",
     "dl.primers": "Primer table",
-    "dl.epcr": "e-PCR amplicons",
-    "dl.pairs": "e-PCR pairs",
+    "dl.epcr": "In-silico PCR amplicons",
+    "dl.pairs": "In-silico PCR pairs",
     "th.spec": "Specificity",
     "th.pair": "Pair",
     "th.status": "Status",
@@ -136,7 +136,7 @@ const D = {
     "l.stat1": "faster than MISA",
     "l.stat1n": "yeast genome, 12 Mb, identical output",
     "l.stat2": "byte-identical to MISA",
-    "l.stat2n": "in compatibility mode: .misa and .statistics",
+    "l.stat2n": "in MISA-compatible mode: .misa and .statistics",
     "l.stat3": "uploaded",
     "l.stat3n": "the online tool runs on your computer",
     "l.prob.kick": "The problem",
@@ -220,7 +220,7 @@ const D = {
     "foot.docs": "Documentation",
     "foot.mit": "MIT License",
     "cite.misa": "When you use the MISA-compatible mode or the primers, please also cite:",
-    "h.mode": "<b>nextSSR</b> finds every microsatellite and reports each one separately. Choose <b>MISA-compatible</b> only to reproduce or compare with results produced by the classic MISA program.",
+    "h.mode": "The <b>native mode</b> finds every microsatellite and reports each one separately. Choose the <b>MISA-compatible mode</b> only to reproduce or compare with results produced by the classic MISA program.",
     "h.minrep": "A stretch is called a microsatellite when its motif is repeated at least this many times in a row: for example, <code>AGAGAGAGAGAG</code> is AG repeated 6 times. Mono = 1-base motif (A), di = 2 bases (AG), tri = 3 (AAG), and so on. The values are the MISA defaults; use 0 to skip a motif size.",
     "h.imperfect": "Real repeats often contain a small error, such as <code>(AG)7 t (AG)4</code>. When checked, these are reported as a single microsatellite instead of being cut at the error.",
     "h.maxgap": "How many bases may interrupt the repeat and still count as one microsatellite.",
@@ -283,8 +283,8 @@ const D = {
     "app.privacy": "Seus dados nunca saem deste computador.",
     "app.params": "2. Parâmetros",
     "app.mode": "Quais regras usar",
-    "app.mode.native": "nextSSR (recomendado)",
-    "app.mode.misa": "Compatível com o MISA (resultados idênticos)",
+    "app.mode.native": "Modo nativo (recomendado)",
+    "app.mode.misa": "Modo compatível com o MISA (resultados idênticos)",
     "app.minrep": "Número mínimo de repetições",
     "app.compound": "SSRs compostos",
     "app.maxint": "Unir microssatélites a menos de (pb)",
@@ -323,7 +323,7 @@ const D = {
     "install.lead": "Baixe um binário pronto na página de releases do GitHub ou compile a partir do código-fonte com Rust:",
     "install.usage": "Uso",
     "install.c1": "# substituto do MISA: grava genoma.fa.misa e genoma.fa.statistics",
-    "install.c2": "# modo nextSSR com SSRs imperfeitos e primers, 8 threads",
+    "install.c2": "# modo nativo com SSRs imperfeitos e primers, 8 threads",
     "install.c3": "# temperatura de melting de primers",
     "cite.title": "Como citar",
     "cite.lead": "Até a publicação do artigo, cite a versão do software que você usou (metadados em CITATION.cff).",
@@ -351,8 +351,8 @@ const D = {
     "card.amplicons": "Amplicons",
     "card.locispec": "Loci com par específico",
     "dl.primers": "Tabela de primers",
-    "dl.epcr": "Amplicons (e-PCR)",
-    "dl.pairs": "Pares (e-PCR)",
+    "dl.epcr": "Amplicons da PCR in silico",
+    "dl.pairs": "Pares da PCR in silico",
     "th.spec": "Especificidade",
     "th.pair": "Par",
     "th.status": "Situação",
@@ -374,7 +374,7 @@ const D = {
     "l.stat1": "mais rápido que o MISA",
     "l.stat1n": "genoma de levedura, 12 Mb, saída idêntica",
     "l.stat2": "idêntico ao MISA byte a byte",
-    "l.stat2n": "no modo de compatibilidade: .misa e .statistics",
+    "l.stat2n": "no modo compatível com o MISA: .misa e .statistics",
     "l.stat3": "enviados",
     "l.stat3n": "a ferramenta online roda no seu computador",
     "l.prob.kick": "O problema",
@@ -458,7 +458,7 @@ const D = {
     "foot.docs": "Documentação",
     "foot.mit": "Licença MIT",
     "cite.misa": "Ao usar o modo compatível com o MISA ou os primers, cite também:",
-    "h.mode": "O <b>nextSSR</b> encontra todos os microssatélites e relata cada um separadamente. Escolha <b>compatível com o MISA</b> apenas para reproduzir ou comparar resultados gerados pelo programa MISA clássico.",
+    "h.mode": "O <b>modo nativo</b> encontra todos os microssatélites e relata cada um separadamente. Escolha o <b>modo compatível com o MISA</b> apenas para reproduzir ou comparar resultados gerados pelo programa MISA clássico.",
     "h.minrep": "Um trecho é chamado de microssatélite quando o motivo se repete pelo menos este número de vezes seguidas: por exemplo, <code>AGAGAGAGAGAG</code> é AG repetido 6 vezes. Mono = motivo de 1 base (A), di = 2 bases (AG), tri = 3 (AAG), e assim por diante. Os valores são os padrões do MISA; use 0 para ignorar um tamanho de motivo.",
     "h.imperfect": "Repetições reais muitas vezes têm um pequeno erro, como <code>(AG)7 t (AG)4</code>. Marcando esta opção, elas são relatadas como um único microssatélite, em vez de serem cortadas no erro.",
     "h.maxgap": "Quantas bases podem interromper a repetição e ela ainda contar como um único microssatélite.",
@@ -521,8 +521,8 @@ const D = {
     "app.privacy": "Sus datos nunca salen de este equipo.",
     "app.params": "2. Parámetros",
     "app.mode": "Qué reglas usar",
-    "app.mode.native": "nextSSR (recomendado)",
-    "app.mode.misa": "Compatible con MISA (resultados idénticos)",
+    "app.mode.native": "Modo nativo (recomendado)",
+    "app.mode.misa": "Modo compatible con MISA (resultados idénticos)",
     "app.minrep": "Número mínimo de repeticiones",
     "app.compound": "SSR compuestos",
     "app.maxint": "Unir microsatélites a menos de (pb)",
@@ -561,7 +561,7 @@ const D = {
     "install.lead": "Descargue un binario precompilado de la página de releases de GitHub o compile desde el código fuente con Rust:",
     "install.usage": "Uso",
     "install.c1": "# reemplazo de MISA: escribe genoma.fa.misa y genoma.fa.statistics",
-    "install.c2": "# modo nextSSR con SSR imperfectos y cebadores, 8 hilos",
+    "install.c2": "# modo nativo con SSR imperfectos y cebadores, 8 hilos",
     "install.c3": "# temperatura de fusión de cebadores",
     "cite.title": "Cómo citar",
     "cite.lead": "Hasta la publicación del artículo, cite la versión del software que utilizó (metadatos en CITATION.cff).",
@@ -589,8 +589,8 @@ const D = {
     "card.amplicons": "Amplicones",
     "card.locispec": "Loci con un par específico",
     "dl.primers": "Tabla de cebadores",
-    "dl.epcr": "Amplicones (e-PCR)",
-    "dl.pairs": "Pares (e-PCR)",
+    "dl.epcr": "Amplicones de la PCR in silico",
+    "dl.pairs": "Pares de la PCR in silico",
     "th.spec": "Especificidad",
     "th.pair": "Par",
     "th.status": "Estado",
@@ -612,7 +612,7 @@ const D = {
     "l.stat1": "más rápido que MISA",
     "l.stat1n": "genoma de levadura, 12 Mb, salida idéntica",
     "l.stat2": "idéntico a MISA byte a byte",
-    "l.stat2n": "en modo de compatibilidad: .misa y .statistics",
+    "l.stat2n": "en modo compatible con MISA: .misa y .statistics",
     "l.stat3": "subidos",
     "l.stat3n": "la herramienta en línea se ejecuta en su equipo",
     "l.prob.kick": "El problema",
@@ -696,7 +696,7 @@ const D = {
     "foot.docs": "Documentación",
     "foot.mit": "Licencia MIT",
     "cite.misa": "Si usa el modo compatible con MISA o los cebadores, cite también:",
-    "h.mode": "<b>nextSSR</b> encuentra todos los microsatélites e informa cada uno por separado. Elija <b>compatible con MISA</b> solo para reproducir o comparar resultados generados por el programa MISA clásico.",
+    "h.mode": "El <b>modo nativo</b> encuentra todos los microsatélites e informa cada uno por separado. Elija el <b>modo compatible con MISA</b> solo para reproducir o comparar resultados generados por el programa MISA clásico.",
     "h.minrep": "Un tramo se considera microsatélite cuando su motivo se repite al menos este número de veces seguidas: por ejemplo, <code>AGAGAGAGAGAG</code> es AG repetido 6 veces. Mono = motivo de 1 base (A), di = 2 bases (AG), tri = 3 (AAG), y así sucesivamente. Los valores son los de MISA por defecto; use 0 para omitir un tamaño de motivo.",
     "h.imperfect": "Las repeticiones reales suelen tener un pequeño error, como <code>(AG)7 t (AG)4</code>. Si marca esta opción, se informan como un único microsatélite en lugar de cortarse en el error.",
     "h.maxgap": "Cuántas bases pueden interrumpir la repetición y que siga contando como un único microsatélite.",
@@ -723,14 +723,10 @@ const D = {
 let current = "en";
 
 export function detectLang() {
+  // English is the default on every visit. Another language is used only
+  // when the address asks for it (?lang=pt / ?lang=es); nothing is stored.
   const q = new URLSearchParams(location.search).get("lang");
-  if (q && D[q]) return q;
-  try {
-    const saved = localStorage.getItem("nextssr-lang");
-    if (saved && D[saved]) return saved;
-  } catch (_) { /* storage unavailable */ }
-  // English is the original language; others only on explicit choice.
-  return "en";
+  return q && D[q] ? q : "en";
 }
 
 export function lang() {
@@ -742,9 +738,29 @@ export function t(key, vars = {}) {
   return s.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? vars[k] : `{${k}}`));
 }
 
+// Keep the chosen language in the address and in links between the
+// presentation page and the tool, so it carries over only while browsing.
+function withLang(href) {
+  const u = new URL(href, location.href);
+  if (u.origin !== location.origin) return href;
+  if (current === "en") u.searchParams.delete("lang");
+  else u.searchParams.set("lang", current);
+  const file = u.pathname.split("/").pop() || "./";
+  return file + u.search + u.hash;
+}
+function syncLangInUrl() {
+  try {
+    history.replaceState(null, "", withLang(location.href));
+  } catch (_) { /* file:// or sandboxed */ }
+  document.querySelectorAll("a[href]").forEach((a) => {
+    const h = a.getAttribute("href");
+    if (/^(app\.html|\.\/|index\.html)/.test(h)) a.setAttribute("href", withLang(h));
+  });
+}
+
 export function setLang(l) {
   current = D[l] ? l : "en";
-  try { localStorage.setItem("nextssr-lang", current); } catch (_) { /* ignore */ }
+  syncLangInUrl();
   document.documentElement.lang = current === "pt" ? "pt-BR" : current;
   document.title = t(document.body.dataset.title || "meta.title");
   document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));

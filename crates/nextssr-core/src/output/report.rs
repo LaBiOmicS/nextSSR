@@ -17,7 +17,7 @@ use crate::motif::{canonical, misa_class, unit_name};
 use crate::params::{Config, Mode};
 use crate::stats::Stats;
 
-/// e-PCR results to include.
+/// In-silico PCR results to include.
 #[derive(Debug, Clone)]
 pub struct EpcrInfo<'a> {
     pub params: &'a EpcrParams,

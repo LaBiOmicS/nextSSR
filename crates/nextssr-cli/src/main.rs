@@ -39,9 +39,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Find SSRs (nextSSR semantics by default) and write TSV/GFF3/BED/MISA/statistics/JSON outputs
+    /// Find SSRs (native mode by default) and write TSV/GFF3/BED/MISA/statistics/JSON outputs
     Run(Box<RunArgs>),
-    /// Drop-in replacement for `misa.pl <FASTA> [misa.ini]`: writes <FASTA>.misa and <FASTA>.statistics
+    /// Drop-in replacement for MISA (`misa.pl <FASTA> [misa.ini]`): writes <FASTA>.misa and <FASTA>.statistics
     Misa(MisaArgs),
     /// Print a default misa.ini
     InitIni,
@@ -53,9 +53,9 @@ enum Command {
 
 #[derive(Clone, Copy, ValueEnum)]
 enum ModeArg {
-    /// All maximal perfect repeats, correct compound notation
+    /// Native mode: every maximal perfect repeat, one record per SSR
     Native,
-    /// Exact misa.pl v2.0 semantics
+    /// MISA-compatible mode: exact MISA v2.0 rules
     Misa,
 }
 
@@ -64,7 +64,7 @@ struct RunArgs {
     /// Input FASTA (plain or gzip/bgzip); `-` reads standard input
     input: String,
 
-    /// Output prefix (default: the input path, as misa.pl does)
+    /// Output prefix (default: the input path, as MISA does)
     #[arg(short, long)]
     output: Option<String>,
 
@@ -84,7 +84,7 @@ struct RunArgs {
 
     /// Maximum number of bases between two SSRs reported as one compound SSR
     /// [default: 0 in native mode (only touching or overlapping SSRs),
-    /// 100 in MISA mode]
+    /// 100 in MISA-compatible mode]
     #[arg(short = 'i', long)]
     max_interruption: Option<i64>,
 
@@ -92,7 +92,7 @@ struct RunArgs {
     #[arg(long)]
     no_compound: bool,
 
-    /// Detection semantics
+    /// Detection mode
     #[arg(long, value_enum, default_value = "native")]
     mode: ModeArg,
 
@@ -206,19 +206,19 @@ impl ThermoArgs {
 
 #[derive(Args, Clone)]
 struct EpcrArgs {
-    /// e-PCR: maximum mismatches per primer binding site
+    /// In-silico PCR: maximum mismatches per primer binding site
     #[arg(long, default_value_t = 2)]
     mismatches: usize,
-    /// e-PCR: length of the primer 3'-end region
+    /// In-silico PCR: length of the primer 3'-end region
     #[arg(long, default_value_t = 5)]
     three_prime_len: usize,
-    /// e-PCR: maximum mismatches inside the 3'-end region
+    /// In-silico PCR: maximum mismatches inside the 3'-end region
     #[arg(long, default_value_t = 0)]
     three_prime_mismatches: usize,
-    /// e-PCR: product size range "min-max" (min 0 = longer primer)
+    /// In-silico PCR: product size range "min-max" (min 0 = longer primer)
     #[arg(long, default_value = "0-2000")]
     epcr_product: String,
-    /// e-PCR: amplicons listed per pair (all are counted)
+    /// In-silico PCR: amplicons listed per pair (all are counted)
     #[arg(long, default_value_t = 100)]
     max_amplicons: usize,
 }
@@ -651,7 +651,7 @@ fn run(a: RunArgs) -> Result<()> {
         w.flush()?;
     }
 
-    // e-PCR specificity of the designed pairs (second pass over the input)
+    // in-silico PCR specificity of the designed pairs (second pass over the input)
     let mut epcr_out: Option<(Epcr, EpcrReport)> = None;
     if let Some(ep) = epcr_params {
         let specs: Vec<PairSpec> = primer_rows.iter().map(|r| r.spec()).collect();
@@ -764,7 +764,7 @@ fn run(a: RunArgs) -> Result<()> {
         if let (Some((e, rep)), Some(n)) = (&epcr_out, loci_specific) {
             let c = rep.status_counts(e.pairs());
             eprintln!(
-                "  e-PCR: {} pairs: {} specific, {} nonspecific; {}/{} loci have a specific pair",
+                "  in-silico PCR: {} pairs: {} specific, {} nonspecific; {}/{} loci have a specific pair",
                 e.pairs().len(),
                 c.get("specific").copied().unwrap_or(0),
                 c.get("nonspecific").copied().unwrap_or(0),
@@ -854,7 +854,7 @@ fn run_epcr(a: EpcrCmdArgs) -> Result<()> {
         let c = report.status_counts(e.pairs());
         let total: u64 = report.results.iter().map(|r| r.amplicons).sum();
         eprintln!(
-            "nextSSR e-PCR: {} pairs vs {} sequences ({} bp): {} amplicons; {} pairs with one product, {} with several, {} with none; {:.2}s with {} threads",
+            "nextSSR in-silico PCR: {} pairs vs {} sequences ({} bp): {} amplicons; {} pairs with one amplicon, {} with several, {} with none; {:.2}s with {} threads",
             e.pairs().len(),
             report.sequences,
             report.bp,

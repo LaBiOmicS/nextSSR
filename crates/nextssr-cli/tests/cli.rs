@@ -302,7 +302,7 @@ fn primers_with_epcr_self_check() {
         seen.len() as u64
     );
 
-    // standalone e-PCR of the same table reproduces the counts
+    // standalone in-silico PCR of the same table reproduces the counts
     run_ok(bin().args([
         "epcr",
         "-p",

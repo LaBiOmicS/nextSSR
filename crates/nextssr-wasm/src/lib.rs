@@ -61,7 +61,7 @@ struct Options {
     preview_limit: Option<usize>,
     /// Keep the member SSRs of each locus in `preview()`.
     preview_members: bool,
-    // e-PCR
+    // in-silico PCR
     mismatches: Option<usize>,
     three_prime_len: Option<usize>,
     three_prime_mismatches: Option<usize>,
@@ -392,7 +392,7 @@ impl Analyzer {
         self.summary_json()
     }
 
-    /// e-PCR scanner for the designed pairs (call after `finish`); stream the
+    /// in-silico PCR scanner for the designed pairs (call after `finish`); stream the
     /// same input through it, then pass it to `set_epcr`.
     pub fn epcr_scanner(&self) -> Result<EpcrScanner, JsError> {
         let pmax = self.cfg.primers.as_ref().map_or(0, |p| p.product_max);
@@ -405,7 +405,7 @@ impl Analyzer {
     pub fn set_epcr(&mut self, scanner: &EpcrScanner) -> Result<(), JsError> {
         if scanner.report.results.len() != self.primer_rows.len() {
             return Err(JsError::new(
-                "e-PCR scanner does not belong to this analysis",
+                "in-silico PCR scanner does not belong to this analysis",
             ));
         }
         self.epcr = Some((
@@ -437,7 +437,7 @@ impl Analyzer {
                     epcr::write_amplicons(&mut s, rep, specs, params.with_sequence);
                     s
                 }
-                None => return Err(JsError::new("e-PCR has not been run")),
+                None => return Err(JsError::new("in-silico PCR has not been run")),
             },
             "statistics" | "stats" => misa_statistics(
                 &self.stats,
@@ -508,7 +508,7 @@ impl EpcrScanner {
 #[wasm_bindgen]
 impl EpcrScanner {
     /// Scanner for a primer list (see `nextssr epcr --primers` for the formats)
-    /// with e-PCR options (`mismatches`, `three_prime_len`,
+    /// with in-silico PCR options (`mismatches`, `three_prime_len`,
     /// `three_prime_mismatches`, `epcr_min_product`, `epcr_max_product`,
     /// `max_amplicons`, `amplicon_sequence`).
     pub fn from_list(primers_text: &str, options_json: &str) -> Result<EpcrScanner, JsError> {
@@ -591,7 +591,11 @@ impl EpcrScanner {
                 epcr::write_pairs(&mut s, &self.report, self.engine.pairs());
                 s
             }
-            other => return Err(JsError::new(&format!("unknown e-PCR output {other}"))),
+            other => {
+                return Err(JsError::new(&format!(
+                    "unknown in-silico PCR output {other}"
+                )))
+            }
         })
     }
 }

@@ -327,3 +327,11 @@ table.cmp { table-layout: fixed; }
 .tcard code.ex { align-self: flex-start; font-size: 14px; color: var(--ink); white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 760px) { .tgrid { grid-template-columns: 1fr; } }
 .top { background: var(--h-bg); }
+/* full-width text: paragraphs and headings span the content column */
+.hero h1, .hero .lead, .sec h2, .sec .lead2, .case-text p, .band h2, .band p { max-width: none; }
+.hero h1 { font-size: clamp(42px, 6.4vw, 84px); }
+.case-text { grid-template-columns: 1fr; }
+.case-text .verdict { justify-self: start; }
+#cite .refs { padding-left: 20px; }
+#install pre.code, #cite pre.code { max-width: 100%; }
+.band { flex-direction: column; align-items: flex-start; }

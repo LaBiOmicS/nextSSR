@@ -1,4 +1,4 @@
-//! In-silico PCR (e-PCR): find every product that a set of primer pairs can
+//! In-silico PCR: find every product that a set of primer pairs can
 //! amplify from a set of template sequences.
 //!
 //! * Both strands are searched and every primer can act as forward or reverse,
@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 use crate::motif::CODE;
 use crate::params::ParamError;
 
-/// e-PCR search parameters.
+/// in-silico PCR search parameters.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct EpcrParams {
@@ -64,19 +64,19 @@ impl EpcrParams {
     pub fn validate(&self) -> Result<(), ParamError> {
         let e = |m: &str| Err(ParamError(m.to_string()));
         if self.max_mismatches > 10 {
-            return e("e-PCR mismatches must be <= 10");
+            return e("in-silico PCR mismatches must be <= 10");
         }
         if self.max_three_prime_mismatches > self.max_mismatches {
-            return e("e-PCR 3' mismatches cannot exceed the total mismatches");
+            return e("in-silico PCR 3' mismatches cannot exceed the total mismatches");
         }
         if self.max_product == 0 || self.max_product > 1_000_000 {
-            return e("e-PCR maximum product size must be in 1..=1000000");
+            return e("in-silico PCR maximum product size must be in 1..=1000000");
         }
         if self.min_product > self.max_product {
-            return e("e-PCR product size must satisfy min <= max");
+            return e("in-silico PCR product size must satisfy min <= max");
         }
         if self.max_sites == 0 {
-            return e("e-PCR maximum sites must be >= 1");
+            return e("in-silico PCR maximum sites must be >= 1");
         }
         Ok(())
     }
@@ -349,7 +349,7 @@ impl Epcr {
                 let n: usize = prefix.iter().map(|m| m.count_ones() as usize).product();
                 if n > MAX_EXPANSION {
                     return Err(ParamError(format!(
-                        "pair {:?}: primer too degenerate for the e-PCR seed filter",
+                        "pair {:?}: primer too degenerate for the in-silico PCR seed filter",
                         pairs[pat.pair].id
                     )));
                 }
@@ -783,7 +783,7 @@ fn is_primer_like(s: &str) -> bool {
 ///   (`left_primer`/`right_primer`, `forward`/`reverse`, `fwd`/`rev`, …),
 ///   e.g. nextSSR `.tsv` or `.primers.tsv` files; the identifier is taken from
 ///   `pair_id`, `id`, `name` or `seq_id`+`ssr_nr`(+`pair_rank`), else the row number;
-/// * whitespace-separated lines `ID FORWARD REVERSE [...]` (e-PCR/me-PCR STS
+/// * whitespace-separated lines `ID FORWARD REVERSE [...]` (in-silico PCR/min-silico PCR STS
 ///   files) or `FORWARD REVERSE`.
 ///
 /// Empty lines, `#` comments and rows without both primers are skipped.

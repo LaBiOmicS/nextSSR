@@ -1,5 +1,5 @@
 //! Primer table (`.primers.tsv`): one row per designed pair, optionally with
-//! the e-PCR specificity of each pair.
+//! the in-silico PCR specificity of each pair.
 
 use std::fmt::Write;
 
@@ -28,7 +28,7 @@ impl PrimerRow {
         format!("{}_{}_{}", self.seq_id, self.nr, self.rank)
     }
 
-    /// e-PCR specification whose expected product is the designed one.
+    /// in-silico PCR specification whose expected product is the designed one.
     pub fn spec(&self) -> PairSpec {
         PairSpec {
             id: self.id(),

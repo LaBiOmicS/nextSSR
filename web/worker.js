@@ -3,7 +3,7 @@ import init, { Analyzer, EpcrScanner, version } from "./pkg/nextssr_wasm.js";
 
 const ready = init();
 let analyzer = null;
-let scanner = null; // standalone e-PCR
+let scanner = null; // standalone in-silico PCR
 
 self.onmessage = async (e) => {
   const msg = e.data;

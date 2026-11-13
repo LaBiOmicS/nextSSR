@@ -7,7 +7,7 @@ const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "modu
 const DEFAULT_REPEATS = { 1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5 };
 let input = null; // { file, name } | { text, name, labelKey }
 let last = null; // { summary, preview, pairs, seconds }
-let lastEpcr = null; // { summary, seconds } of the standalone e-PCR
+let lastEpcr = null; // { summary, seconds } of the standalone in-silico PCR
 let lastProgress = null;
 let tool = "ssr"; // "ssr" | "epcr"
 
@@ -306,7 +306,7 @@ function downloadButtons(el, fmts, from) {
   el.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => worker.postMessage({ type: "output", format: b.dataset.f, tool: from })));
 }
 
-// ---------- standalone e-PCR ----------
+// ---------- standalone in-silico PCR ----------
 function renderEpcr() {
   const { summary: sum, seconds } = lastEpcr;
   const c = sum.pairs_by_status;
