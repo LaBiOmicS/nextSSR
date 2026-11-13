@@ -82,9 +82,11 @@ struct RunArgs {
     #[arg(long)]
     ini: Option<PathBuf>,
 
-    /// Maximum number of bases between two SSRs of a compound SSR
-    #[arg(short = 'i', long, default_value_t = 100)]
-    max_interruption: i64,
+    /// Maximum number of bases between two SSRs reported as one compound SSR
+    /// [default: 0 in native mode (only touching or overlapping SSRs),
+    /// 100 in MISA mode]
+    #[arg(short = 'i', long)]
+    max_interruption: Option<i64>,
 
     /// Do not group SSRs into compound SSRs
     #[arg(long)]
@@ -350,7 +352,13 @@ fn build_config(a: &RunArgs) -> Result<Config> {
             let ini = MisaIni::parse(&text)?;
             (ini.definition, ini.max_interruption)
         }
-        None => (Definition::parse(&a.definition)?, a.max_interruption),
+        None => (
+            Definition::parse(&a.definition)?,
+            a.max_interruption.unwrap_or(match a.mode {
+                ModeArg::Native => nextssr_core::params::NATIVE_MAX_INTERRUPTION,
+                ModeArg::Misa => nextssr_core::params::MISA_MAX_INTERRUPTION,
+            }),
+        ),
     };
     let imperfect = if a.imperfect {
         let mut ip = ImperfectParams {

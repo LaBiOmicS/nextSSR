@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nextSSR · online tool · LaBiOmicS</title>
+  <meta name="description" content="Find microsatellites (SSRs), design primers and run in-silico PCR in your browser. Nothing is uploaded.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z' fill='%230f766e'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-page" data-title="meta.app">
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="./">
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="26" height="26"><path d="M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z" fill="currentColor"/></svg>
+        </span>
+        <b>nextSSR</b> <span class="ver" id="version"></span>
+      </a>
+      <nav class="links" aria-label="sections">
+        <a href="./" data-i18n="nav.home">About</a>
+        <a href="./#install" data-i18n="nav.install">Install</a>
+        <a href="./#cite" data-i18n="nav.cite">Cite</a>
+        <a href="https://github.com/LaBiOmicS/nextSSR" rel="noopener">GitHub</a>
+      </nav>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="pt">PT</button>
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="run-section" id="run">
+      <div class="wrap">
+        <h1 class="app-title" data-i18n="run.title">Run online</h1>
+        <p class="lead2" data-i18n="run.lead"></p>
+        <div class="grid">
+          <section class="panel" aria-labelledby="input-h">
+            <h3 id="input-h" data-i18n="app.seq">1. Sequences</h3>
+            <label class="drop" id="drop">
+              <input type="file" id="file" accept=".fa,.fasta,.fna,.ffn,.fas,.txt,.gz,.bgz">
+              <span class="drop-main" data-i18n-html="app.drop"></span>
+              <span class="drop-sub" data-i18n="app.dropsub"></span>
+              <span class="drop-file" id="file-name"></span>
+            </label>
+            <details class="paste">
+              <summary data-i18n="app.paste">…or paste sequences</summary>
+              <textarea id="paste" rows="6" spellcheck="false" placeholder=">seq1&#10;ACGT..."></textarea>
+            </details>
+            <button type="button" class="link" id="example" data-i18n="app.example"></button>
+            <p class="privacy"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" fill="currentColor"/></svg> <span data-i18n="app.privacy"></span></p>
+
+            <h3 data-i18n="app.params">2. Parameters</h3>
+            <div class="seg" role="group" aria-label="tool">
+              <button type="button" data-tool="ssr" class="on" data-i18n="app.tool.ssr">Find SSRs</button>
+              <button type="button" data-tool="epcr" data-i18n="app.tool.epcr">In-silico PCR</button>
+            </div>
+            <div id="ssr-params">
+            <div class="field">
+              <label for="mode" data-i18n="app.mode">Detection mode</label>
+              <select id="mode">
+                <option value="native" selected data-i18n="app.mode.native"></option>
+                <option value="misa" data-i18n="app.mode.misa"></option>
+              </select>
+            </div>
+            <fieldset>
+              <legend data-i18n="app.minrep"></legend>
+              <div class="units" id="units"></div>
+            </fieldset>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="compound" checked> <span data-i18n="app.compound"></span></label>
+              <div class="field inline"><label for="maxint" data-i18n="app.maxint"></label><input type="number" id="maxint" value="0" min="0"></div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="imperfect"> <span data-i18n="app.imperfect"></span></label>
+              <div class="field inline"><label for="maxgap" data-i18n="app.maxgap"></label><input type="number" id="maxgap" value="5" min="0"></div>
+              <div class="field inline"><label for="purity" data-i18n="app.purity"></label><input type="number" id="purity" value="0.85" min="0" max="1" step="0.01"></div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="primers"> <span data-i18n="app.primers"></span></label>
+            </div>
+            <div class="primer-opts" id="primer-opts" hidden>
+              <div class="field inline"><label data-i18n="app.product"></label><input type="number" id="pmin" value="100"><span>–</span><input type="number" id="pmax" value="300"></div>
+              <div class="field inline"><label data-i18n="app.tm"></label><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></div>
+              <div class="field inline"><label data-i18n="app.size"></label><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></div>
+              <div class="field inline"><label data-i18n="app.gc"></label><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></div>
+              <div class="field inline"><label for="npairs" data-i18n="app.npairs"></label><input type="number" id="npairs" value="1" min="1" max="20"></div>
+              <label class="check"><input type="checkbox" id="epcr"> <span data-i18n="app.epcr"></span></label>
+            </div>
+            <div class="field inline"><label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000"></div>
+            </div>
+            <div id="epcr-params" hidden>
+              <div class="field">
+                <label for="primer-list" data-i18n="app.plist">Primer pairs</label>
+                <textarea id="primer-list" rows="6" spellcheck="false" placeholder="marker1  ACGTGCTAGCTAGGATCGAT  GCTAGCTACGATCGATCGTA"></textarea>
+                <small class="hint" data-i18n="app.plist.hint"></small>
+              </div>
+            </div>
+            <div class="primer-opts" id="epcr-opts" hidden>
+              <div class="field inline"><label for="mm" data-i18n="app.epcr.mm"></label><input type="number" id="mm" value="2" min="0" max="10"></div>
+              <div class="field inline"><label for="mm3" data-i18n="app.epcr.mm3"></label><input type="number" id="mm3" value="0" min="0" max="10"></div>
+              <div class="field inline"><label for="len3" data-i18n="app.epcr.len3"></label><input type="number" id="len3" value="5" min="0" max="50"></div>
+              <div class="field inline"><label for="emax" data-i18n="app.epcr.maxp"></label><input type="number" id="emax" value="2000" min="1" max="1000000"></div>
+            </div>
+
+            <button type="button" class="run" id="run-btn" disabled data-i18n="app.run">Find SSRs</button>
+            <div class="progress" id="progress" hidden>
+              <div class="bar"><span id="bar"></span></div>
+              <p id="progress-text"></p>
+            </div>
+            <p class="error" id="error" hidden></p>
+          </section>
+
+          <section class="panel results" aria-labelledby="res-h">
+            <h3 id="res-h" data-i18n="app.results">3. Results</h3>
+            <p class="empty" id="empty" data-i18n="app.empty"></p>
+            <div id="results" hidden>
+              <div class="cards" id="cards"></div>
+              <div class="downloads" id="downloads"></div>
+              <div class="two">
+                <div>
+                  <h4 data-i18n="app.byunit">SSRs by unit size</h4>
+                  <div class="bars" id="unit-bars"></div>
+                </div>
+                <div>
+                  <h4 data-i18n="app.classes">Most frequent motif classes</h4>
+                  <table class="mini" id="classes"></table>
+                </div>
+              </div>
+              <h4><span data-i18n="app.loci">Loci</span> <small id="table-note"></small></h4>
+              <div class="filters">
+                <input type="search" id="filter" data-i18n-placeholder="app.filter">
+              </div>
+              <div class="table-wrap"><table class="loci" id="loci"></table></div>
+              <details class="types-legend">
+                <summary data-i18n="l.ty.title">SSR types and notation</summary>
+                <dl>
+                  <dt><code>p1</code>–<code>p6</code></dt><dd data-i18n-html="l.ty.p"></dd>
+                  <dt><code>i1</code>–<code>i6</code></dt><dd data-i18n-html="l.ty.i"></dd>
+                  <dt><code>c*</code></dt><dd data-i18n-html="l.ty.cs"></dd>
+                  <dt><code>c</code></dt><dd data-i18n-html="l.ty.c"></dd>
+                </dl>
+              </details>
+            </div>
+            <div id="epcr-results" hidden>
+              <div class="cards" id="ecards"></div>
+              <p class="warn" id="esat" hidden data-i18n="dyn.epcr.saturated"></p>
+              <div class="downloads" id="edownloads"></div>
+              <div class="filters">
+                <input type="search" id="efilter" data-i18n-placeholder="app.filter">
+              </div>
+              <div class="table-wrap"><table class="loci" id="epairs"></table></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <footer class="foot">
+    <div class="wrap">
+      <b>nextSSR</b> · <span data-i18n="foot.dev">Developed at LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences, University of Mogi das Cruzes.</span>
+      <span data-i18n="foot.lead">Lead</span>: Prof. Dr. Fabiano Bezerra Menegidio · <a href="mailto:fabianomenegidio@umc.br">fabianomenegidio@umc.br</a><br>
+      <a href="./" data-i18n="nav.home">About</a> · <a href="./#types" data-i18n="nav.types">SSR types</a> · <a href="https://github.com/LaBiOmicS/nextSSR">GitHub</a> · <a href="https://github.com/LaBiOmicS/nextSSR/blob/main/LICENSE" data-i18n="foot.mit">MIT License</a>
+    </div>
+  </footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

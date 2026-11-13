@@ -269,13 +269,20 @@ impl ImperfectParams {
     }
 }
 
+/// Default compound distance in native mode: join only adjacent or
+/// overlapping SSRs (misa.ini uses 100).
+pub const NATIVE_MAX_INTERRUPTION: i64 = 0;
+/// Default compound distance of misa.pl (`interruptions` in misa.ini).
+pub const MISA_MAX_INTERRUPTION: i64 = 100;
+
 /// Complete configuration of an analysis run.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     pub definition: Definition,
     pub mode: Mode,
     /// Maximum distance (bp) between two SSRs forming a compound SSR;
-    /// `None` disables compound formation.
+    /// `None` disables compound formation. MISA uses 100; the native default
+    /// is 0, so only SSRs that touch or overlap are reported together.
     pub max_interruption: Option<i64>,
     /// Imperfect SSR detection (native mode only).
     pub imperfect: Option<ImperfectParams>,
@@ -290,7 +297,7 @@ impl Default for Config {
         Self {
             definition: Definition::misa_default(),
             mode: Mode::Native,
-            max_interruption: Some(100),
+            max_interruption: Some(NATIVE_MAX_INTERRUPTION),
             imperfect: None,
             primers: None,
             flank: 0,

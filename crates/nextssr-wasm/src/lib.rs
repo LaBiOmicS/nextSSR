@@ -59,6 +59,8 @@ struct Options {
     num_pairs: Option<usize>,
     flank: Option<usize>,
     preview_limit: Option<usize>,
+    /// Keep the member SSRs of each locus in `preview()`.
+    preview_members: bool,
     // e-PCR
     mismatches: Option<usize>,
     three_prime_len: Option<usize>,
@@ -147,7 +149,10 @@ fn build_config(o: &Options) -> Result<Config, String> {
         max_interruption: if o.compound == Some(false) {
             None
         } else {
-            Some(o.max_interruption.unwrap_or(100))
+            Some(o.max_interruption.unwrap_or(match mode {
+                Mode::Misa => nextssr_core::params::MISA_MAX_INTERRUPTION,
+                Mode::Native => nextssr_core::params::NATIVE_MAX_INTERRUPTION,
+            }))
         },
         imperfect,
         primers,
@@ -303,7 +308,9 @@ impl Analyzer {
                 let mut v = serde_json::to_value(l).unwrap_or_default();
                 if let Some(obj) = v.as_object_mut() {
                     obj.insert("seq_id".into(), r.id.clone().into());
-                    obj.remove("members");
+                    if !self.opts.preview_members {
+                        obj.remove("members");
+                    }
                 }
                 self.preview.push(v);
             }
@@ -622,7 +629,8 @@ mod tests {
             serde_json::from_str::<Vec<serde_json::Value>>(&a.preview())
                 .unwrap()
                 .len(),
-            2
+            3,
+            "native mode does not join SSRs 4 bp apart"
         );
     }
 

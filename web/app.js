@@ -65,6 +65,8 @@ $("mode").addEventListener("change", () => {
   const misa = $("mode").value === "misa";
   $("imperfect").disabled = misa;
   if (misa) $("imperfect").checked = false;
+  // misa.pl joins SSRs up to 100 bp apart; native mode only touching/overlapping ones.
+  $("maxint").value = misa ? 100 : 0;
 });
 
 function num(id) {

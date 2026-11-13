@@ -6,7 +6,7 @@ The Python 0.1.x series is superseded by a from-scratch implementation.
 
 ### Added
 - `nextssr misa`: drop-in replacement for `misa.pl` v2.0 with byte-identical `.misa` and `.statistics` output.
-- `nextssr run`: native mode reporting every maximal perfect SSR (no regular-expression masking), compound SSRs with the real interrupting sequence, optional imperfect SSRs (`--imperfect`).
+- `nextssr run`: native mode reporting every maximal perfect SSR (no regular-expression masking), one record per SSR (only touching or overlapping SSRs are grouped, as `c*` with `{-n}` overlaps; `-i N` restores MISA-style compounds with a spacer), optional imperfect SSRs (`--imperfect`).
 - Built-in primer design (`--primers`) with SantaLucia (1998) nearest-neighbour Tm under Primer3 default conditions; primers avoid neighbouring SSRs; `--num-pairs` reports alternative pairs per locus; `.primers.tsv` lists every pair.
 - In-silico PCR: `nextssr run --primers --epcr` checks every designed pair against the input genome and marks the recommended (specific) pair of each locus; `nextssr epcr` tests any primer list against any FASTA files. Both strands, all primer orientations, IUPAC primers, mismatch limits overall and at the 3′ end, exact (lossless) seed filter.
 - HTML report (`.report.html`, default output; also downloadable from the website): relative abundance and density per Mb overall, per unit size and per motif class, length and repeat-number distributions, per-sequence figures, primer and e-PCR summaries, full provenance and a methods paragraph. MISA's `.statistics` remains available (`-f statistics`, `nextssr misa`).

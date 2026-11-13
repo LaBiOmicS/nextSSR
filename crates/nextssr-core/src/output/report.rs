@@ -378,6 +378,9 @@ fn methods(cfg: &Config, info: &ReportInfo) -> String {
         units_list(cfg)
     );
     match cfg.max_interruption {
+        Some(d) if d <= 0 => m.push_str(
+            " Each SSR was reported separately, except SSRs that were adjacent or overlapping, which were reported together as contiguous compound SSRs.",
+        ),
         Some(d) => {
             let _ = write!(
                 m,

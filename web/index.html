@@ -3,258 +3,336 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>nextSSR — fast, accurate microsatellite finder</title>
-  <meta name="description" content="nextSSR: fast, MISA-compatible microsatellite (SSR) finder with imperfect and compound SSRs and primer design. Runs in your browser (WebAssembly) or on the command line. Available in English, Português and Español.">
+  <title>nextSSR · LaBiOmicS</title>
+  <meta name="description" content="nextSSR: fast, exact microsatellite (SSR) finder, a drop-in replacement for MISA with imperfect and compound SSRs, primer design, in-silico PCR and publication-ready reports. Runs in your browser or on the command line.">
+  <meta property="og:title" content="nextSSR — find every microsatellite">
+  <meta property="og:description" content="MISA-compatible SSR finder in Rust and WebAssembly: no masked repeats, imperfect SSRs, verified primers, rich reports.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z' fill='%230f766e'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
-  <header class="top">
+  <header class="top" id="top">
     <div class="wrap top-inner">
       <a class="brand" href="#">
-        <span class="logo" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="26" height="26"><path d="M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z" fill="currentColor"/></svg>
-        </span>
+        <span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" width="24" height="24"><path d="M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z" fill="currentColor"/></svg></span>
         <b>nextSSR</b> <span class="ver" id="version"></span>
       </a>
       <nav class="links" aria-label="sections">
         <a href="#problem" data-i18n="nav.problem">The problem</a>
-        <a href="#features" data-i18n="nav.features">Features</a>
-        <a href="#compare" data-i18n="nav.compare">nextSSR × MISA</a>
+        <a href="#solution" data-i18n="nav.solution">How it works</a>
+        <a href="#types" data-i18n="nav.types">SSR types</a>
+        <a href="#performance" data-i18n="nav.performance">Performance</a>
         <a href="#install" data-i18n="nav.install">Install</a>
         <a href="#cite" data-i18n="nav.cite">Cite</a>
-        <a class="cta-small" href="#run" data-i18n="nav.run">Run online</a>
+        <a href="https://github.com/LaBiOmicS/nextSSR" rel="noopener">GitHub</a>
       </nav>
       <div class="lang" role="group" aria-label="Language">
         <button type="button" data-lang="pt">PT</button>
         <button type="button" data-lang="en">EN</button>
         <button type="button" data-lang="es">ES</button>
       </div>
+      <a class="cta-top" href="app.html" data-i18n="nav.app">Open the tool</a>
     </div>
   </header>
 
   <section class="hero">
     <div class="wrap">
-      <p class="kicker" data-i18n="hero.kicker">Open-source microsatellite (SSR) finder</p>
-      <h1 data-i18n="hero.title">Find microsatellites faster and more accurately, in your browser or on the command line</h1>
-      <p class="lead" data-i18n="hero.lead"></p>
-      <div class="hero-cta">
-        <a class="btn primary" href="#run" data-i18n="hero.run">Run online</a>
-        <a class="btn" href="https://github.com/LaBiOmicS/nextSSR" rel="noopener" data-i18n="hero.github">View on GitHub</a>
+      <p class="eyebrow"><span class="dot"></span><span data-i18n="l.hero.eyebrow">Open-source microsatellite finder · Rust + WebAssembly</span></p>
+      <h1 data-i18n-html="l.hero.title">Find <span class="grad">every</span> microsatellite.</h1>
+      <p class="lead" data-i18n-html="l.hero.lead"></p>
+      <div class="ctas">
+        <a class="btn primary" href="app.html"><span data-i18n="l.hero.cta">Open the online tool</span> <span class="arr">→</span></a>
+        <a class="btn ghost" href="#problem" data-i18n="l.hero.cta2">See the problem</a>
       </div>
-      <ul class="facts">
-        <li data-i18n-html="hero.f1"></li>
-        <li data-i18n-html="hero.f2"></li>
-        <li data-i18n-html="hero.f3"></li>
-      </ul>
+
+      <div class="scanner" id="scanner" aria-hidden="true">
+        <div class="rows" id="rows"></div>
+        <div class="beam" id="beam"></div>
+        <div class="hud"><span data-i18n="l.hero.hud">SSRs found</span>: <b id="hud-n">0</b></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b><em data-count="49">49</em>×</b><span data-i18n="l.stat1">faster than misa.pl</span><small data-i18n="l.stat1n">yeast genome, 12 Mb, identical output</small></div>
+        <div class="stat"><b><em data-count="100">100</em>%</b><span data-i18n="l.stat2">byte-identical to MISA</span><small data-i18n="l.stat2n">in compatibility mode: .misa and .statistics</small></div>
+        <div class="stat"><b><em data-count="0">0</em> bytes</b><span data-i18n="l.stat3">uploaded</span><small data-i18n="l.stat3n">the online tool runs on your computer</small></div>
+      </div>
     </div>
   </section>
 
   <main>
-    <section class="wrap block" id="problem">
-      <h2 data-i18n="problem.title">The problem</h2>
-      <p class="lead2" data-i18n="problem.lead"></p>
-      <div class="problems">
-        <div class="problem" data-i18n-html="problem.p1"></div>
-        <div class="problem" data-i18n-html="problem.p2"></div>
-        <div class="problem" data-i18n-html="problem.p3"></div>
-        <div class="problem" data-i18n-html="problem.p4"></div>
-      </div>
-      <figure class="masking" aria-label="example">
-        <pre><span class="dim">…CCCCG</span><span class="hl-a">AAAAAAAAAAAAA</span><span class="hl-b">AAGAAGAAGAAGAAG</span><span class="dim">CCTCG…</span></pre>
-        <figcaption>
-          <span><b>misa.pl</b>: <code>(A)15</code></span>
-          <span><b>nextSSR</b>: <code>(A)15{-2}(AAG)5</code> · <code>c*</code></span>
-        </figcaption>
-      </figure>
-    </section>
-
-    <section class="wrap block" id="features">
-      <h2 data-i18n="features.title">What nextSSR does</h2>
-      <div class="features">
-        <article><h3 data-i18n="features.f1t"></h3><p data-i18n-html="features.f1"></p></article>
-        <article><h3 data-i18n="features.f2t"></h3><p data-i18n-html="features.f2"></p></article>
-        <article><h3 data-i18n="features.f3t"></h3><p data-i18n-html="features.f3"></p></article>
-        <article><h3 data-i18n="features.f4t"></h3><p data-i18n-html="features.f4"></p></article>
-        <article><h3 data-i18n="features.f5t"></h3><p data-i18n-html="features.f5"></p></article>
-        <article><h3 data-i18n="features.f6t"></h3><p data-i18n-html="features.f6"></p></article>
-      </div>
-    </section>
-
-    <section class="wrap block" id="compare">
-      <h2 data-i18n="compare.title">nextSSR × MISA</h2>
-      <div class="table-scroll">
-        <table class="compare">
-          <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA (misa.pl 2.0)</th><th>nextSSR</th></tr></thead>
-          <tbody>
-            <tr><td data-i18n="compare.r1"></td><td class="ok" data-i18n="compare.yes"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r2"></td><td class="bad" data-i18n="compare.r2a"></td><td class="ok" data-i18n="compare.r2b"></td></tr>
-            <tr><td data-i18n="compare.r3"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r4"></td><td class="bad" data-i18n="compare.r4a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r5"></td><td class="mid" data-i18n="compare.r5a"></td><td class="ok" data-i18n="compare.r5b"></td></tr>
-            <tr><td data-i18n="compare.r6"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r7"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r8"></td><td class="mid" data-i18n="compare.r8a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-            <tr><td data-i18n="compare.r10"></td><td class="mid" data-i18n="compare.r10a"></td><td class="ok" data-i18n="compare.r10b"></td></tr>
-            <tr><td data-i18n="compare.r9"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="run-section" id="run">
+    <section class="sec" id="problem">
       <div class="wrap">
-        <h2 data-i18n="run.title">Run online</h2>
-        <p class="lead2" data-i18n="run.lead"></p>
-        <div class="grid">
-          <section class="panel" aria-labelledby="input-h">
-            <h3 id="input-h" data-i18n="app.seq">1. Sequences</h3>
-            <label class="drop" id="drop">
-              <input type="file" id="file" accept=".fa,.fasta,.fna,.ffn,.fas,.txt,.gz,.bgz">
-              <span class="drop-main" data-i18n-html="app.drop"></span>
-              <span class="drop-sub" data-i18n="app.dropsub"></span>
-              <span class="drop-file" id="file-name"></span>
-            </label>
-            <details class="paste">
-              <summary data-i18n="app.paste">…or paste sequences</summary>
-              <textarea id="paste" rows="6" spellcheck="false" placeholder=">seq1&#10;ACGT..."></textarea>
-            </details>
-            <button type="button" class="link" id="example" data-i18n="app.example"></button>
-            <p class="privacy"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" fill="currentColor"/></svg> <span data-i18n="app.privacy"></span></p>
+        <p class="kick" data-i18n="l.prob.kick">The problem</p>
+        <h2 class="reveal" data-i18n="l.prob.title">MISA is the standard. It also has blind spots.</h2>
+        <p class="lead2 reveal" data-i18n-html="l.prob.lead"></p>
 
-            <h3 data-i18n="app.params">2. Parameters</h3>
-            <div class="seg" role="group" aria-label="tool">
-              <button type="button" data-tool="ssr" class="on" data-i18n="app.tool.ssr">Find SSRs</button>
-              <button type="button" data-tool="epcr" data-i18n="app.tool.epcr">In-silico PCR</button>
-            </div>
-            <div id="ssr-params">
-            <div class="field">
-              <label for="mode" data-i18n="app.mode">Detection mode</label>
-              <select id="mode">
-                <option value="native" selected data-i18n="app.mode.native"></option>
-                <option value="misa" data-i18n="app.mode.misa"></option>
-              </select>
-            </div>
-            <fieldset>
-              <legend data-i18n="app.minrep"></legend>
-              <div class="units" id="units"></div>
-            </fieldset>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="compound" checked> <span data-i18n="app.compound"></span></label>
-              <div class="field inline"><label for="maxint" data-i18n="app.maxint"></label><input type="number" id="maxint" value="100" min="0"></div>
-            </div>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="imperfect"> <span data-i18n="app.imperfect"></span></label>
-              <div class="field inline"><label for="maxgap" data-i18n="app.maxgap"></label><input type="number" id="maxgap" value="5" min="0"></div>
-              <div class="field inline"><label for="purity" data-i18n="app.purity"></label><input type="number" id="purity" value="0.85" min="0" max="1" step="0.01"></div>
-            </div>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="primers"> <span data-i18n="app.primers"></span></label>
-            </div>
-            <div class="primer-opts" id="primer-opts" hidden>
-              <div class="field inline"><label data-i18n="app.product"></label><input type="number" id="pmin" value="100"><span>–</span><input type="number" id="pmax" value="300"></div>
-              <div class="field inline"><label data-i18n="app.tm"></label><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></div>
-              <div class="field inline"><label data-i18n="app.size"></label><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></div>
-              <div class="field inline"><label data-i18n="app.gc"></label><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></div>
-              <div class="field inline"><label for="npairs" data-i18n="app.npairs"></label><input type="number" id="npairs" value="1" min="1" max="20"></div>
-              <label class="check"><input type="checkbox" id="epcr"> <span data-i18n="app.epcr"></span></label>
-            </div>
-            <div class="field inline"><label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000"></div>
-            </div>
-            <div id="epcr-params" hidden>
-              <div class="field">
-                <label for="primer-list" data-i18n="app.plist">Primer pairs</label>
-                <textarea id="primer-list" rows="6" spellcheck="false" placeholder="marker1  ACGTGCTAGCTAGGATCGAT  GCTAGCTACGATCGATCGTA"></textarea>
-                <small class="hint" data-i18n="app.plist.hint"></small>
+        <div class="demo reveal" id="demo">
+          <div class="cases" role="tablist" id="cases">
+            <button type="button" data-case="masking" class="on" data-i18n="l.case.masking.t">Masked repeat</button>
+            <button type="button" data-case="overlap" data-i18n="l.case.overlap.t">Overlapping SSRs</button>
+            <button type="button" data-case="imperfect" data-i18n="l.case.imperfect.t">Interrupted repeat</button>
+            <button type="button" data-case="distant" data-i18n="l.case.distant.t">SSRs merged across 81 bp</button>
+            <button type="button" data-case="own" data-i18n="l.case.own.t">Your sequence</button>
+          </div>
+          <div class="demo-body">
+            <div class="case-text">
+              <div>
+                <h3 id="case-h"></h3>
+                <p id="case-p"></p>
               </div>
+              <span class="verdict" id="verdict"></span>
             </div>
-            <div class="primer-opts" id="epcr-opts" hidden>
-              <div class="field inline"><label for="mm" data-i18n="app.epcr.mm"></label><input type="number" id="mm" value="2" min="0" max="10"></div>
-              <div class="field inline"><label for="mm3" data-i18n="app.epcr.mm3"></label><input type="number" id="mm3" value="0" min="0" max="10"></div>
-              <div class="field inline"><label for="len3" data-i18n="app.epcr.len3"></label><input type="number" id="len3" value="5" min="0" max="50"></div>
-              <div class="field inline"><label for="emax" data-i18n="app.epcr.maxp"></label><input type="number" id="emax" value="2000" min="1" max="1000000"></div>
+            <div class="own" id="own">
+              <textarea id="own-seq" rows="2" spellcheck="false" maxlength="400">GATCACACACACACACACAAGTTTTTTTTTTTTCAGCATCATCATCATCATGAC</textarea>
+              <small data-i18n="l.case.own.hint">Up to 400 bases. Both engines run live in your browser.</small>
             </div>
+            <div class="viewer" id="viewer"></div>
+            <div class="calls">
+              <div class="call misa"><h4>misa.pl</h4><ul id="call-misa"></ul></div>
+              <div class="call nx"><h4>nextSSR</h4><ul id="call-nx"></ul></div>
+            </div>
+          </div>
+        </div>
 
-            <button type="button" class="run" id="run-btn" disabled data-i18n="app.run">Find SSRs</button>
-            <div class="progress" id="progress" hidden>
-              <div class="bar"><span id="bar"></span></div>
-              <p id="progress-text"></p>
-            </div>
-            <p class="error" id="error" hidden></p>
-          </section>
-
-          <section class="panel results" aria-labelledby="res-h">
-            <h3 id="res-h" data-i18n="app.results">3. Results</h3>
-            <p class="empty" id="empty" data-i18n="app.empty"></p>
-            <div id="results" hidden>
-              <div class="cards" id="cards"></div>
-              <div class="downloads" id="downloads"></div>
-              <div class="two">
-                <div>
-                  <h4 data-i18n="app.byunit">SSRs by unit size</h4>
-                  <div class="bars" id="unit-bars"></div>
-                </div>
-                <div>
-                  <h4 data-i18n="app.classes">Most frequent motif classes</h4>
-                  <table class="mini" id="classes"></table>
-                </div>
-              </div>
-              <h4><span data-i18n="app.loci">Loci</span> <small id="table-note"></small></h4>
-              <div class="filters">
-                <input type="search" id="filter" data-i18n-placeholder="app.filter">
-              </div>
-              <div class="table-wrap"><table class="loci" id="loci"></table></div>
-            </div>
-            <div id="epcr-results" hidden>
-              <div class="cards" id="ecards"></div>
-              <p class="warn" id="esat" hidden data-i18n="dyn.epcr.saturated"></p>
-              <div class="downloads" id="edownloads"></div>
-              <div class="filters">
-                <input type="search" id="efilter" data-i18n-placeholder="app.filter">
-              </div>
-              <div class="table-wrap"><table class="loci" id="epairs"></table></div>
-            </div>
-          </section>
+        <div class="problems">
+          <article class="prob reveal">
+            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 4.2A10 10 0 0122 12a10.5 10.5 0 01-2.4 3.4M6.6 6.6A10.5 10.5 0 002 12a10 10 0 0013.4 5.4"/></svg></div>
+            <h3 data-i18n="l.p1.t">Masked SSRs</h3><p data-i18n="l.p1"></p>
+          </article>
+          <article class="prob reveal">
+            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><path d="M17 4l3 3-3 3"/></svg></div>
+            <h3 data-i18n="l.p2.t">Merged and garbled compounds</h3><p data-i18n="l.p2"></p>
+          </article>
+          <article class="prob reveal">
+            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h5l2-3 2 6 2-3h5"/></svg></div>
+            <h3 data-i18n="l.p3.t">Perfect repeats only</h3><p data-i18n="l.p3"></p>
+          </article>
+          <article class="prob reveal">
+            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M10 6.5h4v11h-4"/></svg></div>
+            <h3 data-i18n="l.p4.t">A fragmented workflow</h3><p data-i18n="l.p4"></p>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="wrap block" id="install">
-      <h2 data-i18n="install.title">Install the command-line tool</h2>
-      <p data-i18n="install.lead"></p>
-<pre class="code"><code>cargo install --git https://github.com/LaBiOmicS/nextSSR nextssr</code></pre>
-      <h3 data-i18n="install.usage">Usage</h3>
-<pre class="code"><code><span class="c" data-i18n="install.c1"></span>
-nextssr misa genome.fa misa.ini
+    <section class="sec alt" id="solution">
+      <div class="wrap">
+        <p class="kick" data-i18n="l.sol.kick">How nextSSR solves it</p>
+        <h2 class="reveal" data-i18n="l.sol.title">One engine, from repeat to report.</h2>
+        <p class="lead2 reveal" data-i18n="l.sol.lead"></p>
+        <div class="steps" id="steps">
+          <button type="button" class="step on" data-step="0"><span class="n">1</span><b data-i18n="l.s1.t">Detect</b><span data-i18n="l.s1.s">every maximal repeat</span></button>
+          <button type="button" class="step" data-step="1"><span class="n">2</span><b data-i18n="l.s2.t">Classify</b><span data-i18n="l.s2.s">one record per SSR</span></button>
+          <button type="button" class="step" data-step="2"><span class="n">3</span><b data-i18n="l.s3.t">Design primers</b><span data-i18n="l.s3.s">SantaLucia thermodynamics</span></button>
+          <button type="button" class="step" data-step="3"><span class="n">4</span><b data-i18n="l.s4.t">Verify</b><span data-i18n="l.s4.s">in-silico PCR, both strands</span></button>
+          <button type="button" class="step" data-step="4"><span class="n">5</span><b data-i18n="l.s5.t">Report</b><span data-i18n="l.s5.s">ready for the manuscript</span></button>
+        </div>
 
-<span class="c" data-i18n="install.c2"></span>
-nextssr run genome.fa.gz -o results/genome --imperfect --primers -t 8 \
-    -f tsv,gff3,bed,misa,statistics,json
+        <div class="stage" data-stage="0">
+          <div><h3 data-i18n="l.s1.t">Detect</h3><p data-i18n-html="l.s1.p"></p></div>
+          <div class="vis"><pre><span class="c">misa.pl</span>  regex scan, left to right
+  …CCCCG<span class="c">AAAAAAAAAAAAAAA</span>GAAGAAGAAGAAGCC…
+  (A)15 ✓   (AAG)5 <span class="c">✗ consumed by the rejected match</span>
 
-<span class="c" data-i18n="install.c3"></span>
-nextssr tm AGCTGCATGCAGTCAGTCAG
-
-<span class="c" data-i18n="install.c4"></span>
-nextssr run genome.fa --primers --num-pairs 3 --epcr
-nextssr epcr -p genome.fa.primers.tsv other_genome.fa.gz -o transfer</code></pre>
+<span class="h">nextSSR</span>  maximal runs, every unit size
+  …CCCCG<span class="h">AAAAAAAAAAAAAAA</span>GAAGAAGAAGAAGCC…
+                <span class="a">AAGAAGAAGAAGAAG</span>
+  (A)15 ✓   (AAG)5 ✓   →  <span class="h">(A)15{-2}(AAG)5</span></pre></div>
+        </div>
+        <div class="stage" data-stage="1" hidden>
+          <div><h3 data-i18n="l.s2.t">Classify</h3><p data-i18n-html="l.s2.p"></p></div>
+          <div class="vis"><pre><span class="h">p2</span>   (CA)7                    <span class="c"># each SSR on its own</span>
+<span class="h">p2</span>   (TG)7                    <span class="c"># 5 bp later: not merged</span>
+<span class="h">c*</span>   (A)13<span class="a">{-1}</span>(AG)8           <span class="c"># sharing 1 base</span>
+<span class="h">i2</span>   (AG)7<span class="a">t</span>(AG)4    purity 0.957 <span class="c"># substitution</span>
+<span class="h">i3</span>   (CTT)6<span class="a">c</span>(TCT)5   purity 0.971 <span class="c"># deletion, phase shift</span></pre></div>
+        </div>
+        <div class="stage" data-stage="2" hidden>
+          <div><h3 data-i18n="l.s3.t">Design primers</h3><p data-i18n-html="l.s3.p"></p></div>
+          <div class="vis tmcalc">
+            <label for="tm-in" data-i18n="l.tm.label">Try a primer (melting temperature, live)</label>
+            <input id="tm-in" value="AGCTGCATGCAGTCAGTCAG" maxlength="40" spellcheck="false" autocomplete="off">
+            <div class="tmout">
+              <div><b id="tm-v">–</b><span>Tm (°C)</span></div>
+              <div><b id="tm-gc">–</b><span>GC</span></div>
+              <div><b id="tm-len">–</b><span data-i18n="l.tm.len">length (nt)</span></div>
+            </div>
+            <div class="gauge"><i id="tm-g"></i></div>
+            <div class="gauge-l"><span>45 °C</span><span data-i18n="l.tm.window">default window 57–63 °C</span><span>75 °C</span></div>
+          </div>
+        </div>
+        <div class="stage" data-stage="3" hidden>
+          <div><h3 data-i18n="l.s4.t">Verify</h3><p data-i18n-html="l.s4.p"></p></div>
+          <div class="vis">
+            <svg class="epcr" viewBox="0 0 420 200" role="img" aria-label="in-silico PCR">
+              <text x="0" y="30">5′</text><text x="404" y="30">3′</text>
+              <text x="0" y="74">3′</text><text x="404" y="74">5′</text>
+              <line x1="22" x2="398" y1="26" y2="26" stroke="var(--line)" stroke-width="3"/>
+              <line x1="22" x2="398" y1="70" y2="70" stroke="var(--line)" stroke-width="3"/>
+              <rect x="70" y="36" width="60" height="10" rx="3" fill="var(--teal)"/><path d="M130 41l10-0" stroke="var(--teal)" stroke-width="2"/><path d="M136 36l8 5-8 5" fill="var(--teal)"/>
+              <rect x="290" y="50" width="60" height="10" rx="3" fill="var(--violet)"/><path d="M284 50l-8 5 8 5" fill="var(--violet)"/>
+              <rect x="70" y="86" width="280" height="12" rx="4" fill="color-mix(in srgb, var(--teal) 25%, transparent)"/>
+              <text x="210" y="96" text-anchor="middle" style="fill:var(--ink)">designed product · 1 hit = specific</text>
+              <line x1="22" x2="398" y1="140" y2="140" stroke="var(--line)" stroke-width="3"/>
+              <rect x="110" y="150" width="60" height="10" rx="3" fill="var(--teal)"/>
+              <rect x="250" y="150" width="60" height="10" rx="3" fill="var(--teal)"/>
+              <text x="182" y="158" style="fill:var(--coral)">F…F</text>
+              <text x="210" y="186" text-anchor="middle" style="fill:var(--coral)">off-target · single-primer product</text>
+              <text x="20" y="130">≤ 2 mismatches · 0 in the last 5 bases (3′)</text>
+            </svg>
+          </div>
+        </div>
+        <div class="stage" data-stage="4" hidden>
+          <div><h3 data-i18n="l.s5.t">Report</h3><p data-i18n-html="l.s5.p"></p></div>
+          <div class="vis"><pre><span class="h">genome.fa.report.html</span>   abundance · density · charts · methods
+<span class="h">genome.fa.tsv</span>           one row per locus
+<span class="h">genome.fa.gff3</span>          Sequence Ontology features
+<span class="h">genome.fa.primers.tsv</span>   pairs + specificity + recommended
+<span class="h">genome.fa.epcr.tsv</span>      every predicted product
+<span class="h">genome.fa.summary.json</span>  parameters, SHA-256, runtime
+<span class="a">genome.fa.misa</span>          MISA format, when you need it</pre></div>
+        </div>
+      </div>
     </section>
 
-    <section class="wrap block" id="cite">
-      <h2 data-i18n="cite.title">How to cite</h2>
-      <p data-i18n="cite.lead"></p>
-      <ul class="refs">
-        <li>Menegidio, F. <i>nextSSR: fast, MISA-compatible microsatellite finder</i>. <a href="https://github.com/LaBiOmicS/nextSSR">https://github.com/LaBiOmicS/nextSSR</a></li>
-        <li>Thiel, T., Michalek, W., Varshney, R. K., Graner, A. (2003). Exploiting EST databases for the development and characterization of gene-derived SSR-markers in barley (<i>Hordeum vulgare</i> L.). <i>Theoretical and Applied Genetics</i>, 106, 411–422.</li>
-        <li>Beier, S., Thiel, T., Münch, T., Scholz, U., Mascher, M. (2017). MISA-web: a web server for microsatellite prediction. <i>Bioinformatics</i>, 33(16), 2583–2585.</li>
-        <li>SantaLucia, J. Jr. (1998). A unified view of polymer, dumbbell, and oligonucleotide DNA nearest-neighbor thermodynamics. <i>PNAS</i>, 95(4), 1460–1465.</li>
-      </ul>
+    <section class="sec" id="types">
+      <div class="wrap">
+        <p class="kick" data-i18n="l.ty.kick">Reading the output</p>
+        <h2 class="reveal" data-i18n="l.ty.title">SSR types and notation</h2>
+        <p class="lead2 reveal" data-i18n-html="l.ty.lead"></p>
+        <div class="table-scroll reveal">
+          <table class="compare types">
+            <thead><tr><th data-i18n="l.ty.h1">Type</th><th data-i18n="l.ty.h2">Example</th><th data-i18n="l.ty.h3">Meaning</th><th data-i18n="l.ty.h4">Reported by</th></tr></thead>
+            <tbody>
+              <tr><td><code>p1</code> … <code>p6</code></td><td><code>(A)15</code> · <code>(AG)8</code> · <code>(CTT)6</code></td><td data-i18n-html="l.ty.p"></td><td data-i18n="l.ty.both">MISA and nextSSR</td></tr>
+              <tr><td><code>i1</code> … <code>i6</code></td><td><code>(AG)7t(AG)4</code></td><td data-i18n-html="l.ty.i"></td><td data-i18n-html="l.ty.ionly"></td></tr>
+              <tr><td><code>c*</code></td><td><code>(A)15{-2}(AAG)5</code><br><code>(A)15(AAG)5*</code></td><td data-i18n-html="l.ty.cs"></td><td data-i18n="l.ty.both">MISA and nextSSR</td></tr>
+              <tr><td><code>c</code></td><td><code>(CA)7cggtc(TG)7</code></td><td data-i18n-html="l.ty.c"></td><td data-i18n-html="l.ty.conly"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" data-i18n-html="l.ty.note"></p>
+      </div>
+    </section>
+
+    <section class="sec alt" id="performance">
+      <div class="wrap perf">
+        <div>
+          <p class="kick" data-i18n="l.perf.kick">Performance</p>
+          <h2 class="reveal" data-i18n="l.perf.title">Seconds become milliseconds.</h2>
+          <p class="lead2 reveal" data-i18n="l.perf.lead"></p>
+          <div class="big" id="speedup">49×</div>
+        </div>
+        <div>
+          <div class="bars" id="bars">
+            <div class="bar-row"><div class="lab"><b>misa.pl 2.0 (Perl)</b><span>9.25 s</span></div><div class="bar-track"><div class="bar-fill slow" data-w="100"></div></div></div>
+            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b2">nextssr misa · identical output</b><span>0.19 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="2.05"></div></div></div>
+            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b3">nextssr run · native mode</b><span>0.17 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="1.84"></div></div></div>
+            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b4">+ imperfect SSRs, primers and in-silico PCR</b><span>2.4 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="25.9"></div></div></div>
+          </div>
+          <p class="note" data-i18n="l.perf.note">Saccharomyces cerevisiae S288C, 16 chromosomes, 12.1 Mb; 4 vCPUs (AMD EPYC 9354P), Perl 5.40; one run each.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="compare">
+      <div class="wrap">
+        <p class="kick">nextSSR × MISA</p>
+        <h2 class="reveal" data-i18n="l.cmp.title">Everything MISA does, and what it does not.</h2>
+        <div class="table-scroll reveal">
+          <table class="compare">
+            <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA (misa.pl 2.0)</th><th>nextSSR</th></tr></thead>
+            <tbody>
+              <tr><td data-i18n="compare.r1"></td><td class="ok" data-i18n="compare.yes"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r2"></td><td class="bad" data-i18n="compare.r2a"></td><td class="ok" data-i18n="compare.r2b"></td></tr>
+              <tr><td data-i18n="compare.r11"></td><td class="bad" data-i18n="compare.r11a"></td><td class="ok" data-i18n="compare.r11b"></td></tr>
+              <tr><td data-i18n="compare.r3"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r4"></td><td class="bad" data-i18n="compare.r4a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r5"></td><td class="mid" data-i18n="compare.r5a"></td><td class="ok" data-i18n="compare.r5b"></td></tr>
+              <tr><td data-i18n="compare.r9"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r10"></td><td class="mid" data-i18n="compare.r10a"></td><td class="ok" data-i18n="compare.r10b"></td></tr>
+              <tr><td data-i18n="compare.r6"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r7"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr><td data-i18n="compare.r8"></td><td class="mid" data-i18n="compare.r8a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="wrap">
+        <div class="band reveal">
+          <div>
+            <h2 data-i18n="l.band.title">Your genome, analysed in your browser.</h2>
+            <p data-i18n="l.band.p"></p>
+          </div>
+          <a class="btn primary" href="app.html"><span data-i18n="l.hero.cta">Open the online tool</span> <span class="arr">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec alt" id="install">
+      <div class="wrap two">
+        <div>
+          <p class="kick" data-i18n="nav.install">Install</p>
+          <h2 data-i18n="install.title">Install the command-line tool</h2>
+          <p class="lead2" data-i18n="install.lead"></p>
+<pre class="code"><code><span class="p">$ </span>cargo install --git https://github.com/LaBiOmicS/nextSSR nextssr
+
+<span class="c" data-i18n="install.c1"></span>
+<span class="p">$ </span>nextssr misa genome.fa misa.ini
+
+<span class="c" data-i18n="install.c2"></span>
+<span class="p">$ </span>nextssr run genome.fa.gz -o results/genome --imperfect --primers -t 8
+
+<span class="c" data-i18n="install.c4"></span>
+<span class="p">$ </span>nextssr run genome.fa --primers --num-pairs 3 --epcr
+<span class="p">$ </span>nextssr epcr -p genome.fa.primers.tsv other_genome.fa.gz -o transfer</code></pre>
+        </div>
+        <div id="cite">
+          <p class="kick" data-i18n="nav.cite">Cite</p>
+          <h2 data-i18n="cite.title">How to cite</h2>
+          <p class="lead2" data-i18n="cite.lead"></p>
+<pre class="code cite"><code>@software{nextssr,
+  author  = {Menegidio, Fabiano Bezerra and {LaBiOmicS}},
+  title   = {{nextSSR}: fast, MISA-compatible microsatellite finder},
+  version = {<span id="cite-ver">0.2.0</span>},
+  year    = {2026},
+  url     = {https://github.com/LaBiOmicS/nextSSR}
+}</code></pre>
+          <p class="note" data-i18n="cite.misa">MISA-compatible mode and primer design build on:</p>
+          <ul class="refs">
+            <li>Thiel, T., Michalek, W., Varshney, R. K., Graner, A. (2003). <i>Theoretical and Applied Genetics</i>, 106, 411–422.</li>
+            <li>Beier, S., Thiel, T., Münch, T., Scholz, U., Mascher, M. (2017). MISA-web. <i>Bioinformatics</i>, 33(16), 2583–2585.</li>
+            <li>SantaLucia, J. Jr. (1998). <i>PNAS</i>, 95(4), 1460–1465.</li>
+          </ul>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer class="foot">
-    <div class="wrap"><span data-i18n="foot"></span> · <a href="https://github.com/LaBiOmicS/nextSSR">GitHub</a></div>
+    <div class="wrap foot-grid">
+      <div>
+        <b>nextSSR</b><br>
+        <span data-i18n="foot.dev">Developed at LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences, University of Mogi das Cruzes.</span><br>
+        <span data-i18n="foot.lead">Lead</span>: Prof. Dr. Fabiano Bezerra Menegidio · <a href="mailto:fabianomenegidio@umc.br">fabianomenegidio@umc.br</a>
+      </div>
+      <div class="foot-links">
+        <a href="app.html" data-i18n="nav.app">Open the tool</a> ·
+        <a href="https://github.com/LaBiOmicS/nextSSR">GitHub</a> ·
+        <a href="https://github.com/LaBiOmicS/nextSSR/releases">Releases</a> ·
+        <a href="https://github.com/LaBiOmicS/nextSSR/blob/main/CHANGELOG.md">Changelog</a> ·
+        <a href="https://github.com/LaBiOmicS/nextSSR#readme" data-i18n="foot.docs">Documentation</a> ·
+        <a href="https://github.com/LaBiOmicS/nextSSR/blob/main/LICENSE" data-i18n="foot.mit">MIT License</a>
+      </div>
+    </div>
   </footer>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="landing.js"></script>
 </body>
 </html>

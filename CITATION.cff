@@ -4,7 +4,10 @@ title: "nextSSR: fast, MISA-compatible microsatellite finder"
 type: software
 authors:
   - family-names: Menegidio
-    given-names: Fabiano
+    given-names: Fabiano Bezerra
+    email: fabianomenegidio@umc.br
+    affiliation: "LaBiOmicS — Laboratory of Bioinformatics and Omics Sciences, University of Mogi das Cruzes"
+  - name: LaBiOmicS
 version: 0.2.0
 license: MIT
 repository-code: "https://github.com/LaBiOmicS/nextSSR"

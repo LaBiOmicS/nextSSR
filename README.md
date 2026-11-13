@@ -64,7 +64,7 @@ nextssr run genome.fa.gz
 nextssr run genome.fa.gz -o results/genome --imperfect --primers -t 8 \
     -f tsv,gff3,bed,misa,statistics,json,p3in
 
-# custom definition and compound distance (same meaning as misa.ini)
+# custom definition; join SSRs up to 50 bp apart into compounds (as misa.ini does)
 nextssr run genome.fa -d "1-12 2-7 3-5 4-4 5-4 6-4" -i 50
 
 # read from standard input
@@ -98,8 +98,13 @@ product range, salt and oligo concentrations; flanking sequence; …).
 |---|---|
 | `p1`…`p6` | perfect SSR with a 1–6 nt motif |
 | `i1`…`i6` | imperfect SSR (`--imperfect`), e.g. `(AG)6t(AG)4` |
-| `c` | compound SSR, members separated by ≤ `-i` bases, e.g. `(AC)6ggtc(TG)6` |
-| `c*` | compound SSR with adjacent (or, in native mode, overlapping) members; overlaps are written as `{-n}` |
+| `c*` | contiguous compound: members that touch or overlap; nextSSR writes overlaps as `{-n}`, misa.pl appends `*` |
+| `c` | compound with a spacer, members separated by ≤ `-i` bases, e.g. `(AC)6ggtc(TG)6` |
+
+In native mode each SSR is its own record: only touching or overlapping SSRs are grouped
+(`c*`; default `-i 0`). misa.pl, and `nextssr misa` / `--mode misa`, join SSRs up to 100 bp
+apart (`interruptions` in misa.ini), so two unrelated SSRs can become one `c` locus with the
+whole spacer inside the notation. Use `-i N` to get compounds with a spacer in native mode.
 
 Imperfect SSRs are built by chaining perfect seeds of the same motif family (≥ 2 copies and
 ≥ 8 bp by default) separated by at most `--max-gap` bases while the fraction of the span covered
