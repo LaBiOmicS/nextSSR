@@ -146,14 +146,19 @@ function analyze(seq, mode) {
   return loci;
 }
 
+// Positions are percentages of the lane, so every track lines up with the
+// bases whatever the font size of the labels inside it.
+const pct = (x, n) => `${(100 * x) / n}%`;
+
 function lane(loci, cls, n) {
-  if (!loci.length) return `<div class="lane feat-lane" style="width:${n}ch"><span class="feat-none">${t("l.demo.none")}</span></div>`;
-  let h = `<div class="lane feat-lane" style="width:${n}ch">`;
+  if (!loci.length) return `<div class="lane feat-lane"><span class="feat-none">${t("l.demo.none")}</span></div>`;
+  let h = `<div class="lane feat-lane">`;
   for (const l of loci) {
+    const len = l.end - l.start + 1;
     const mem = (l.members || []).length > 1
-      ? l.members.map((m) => `<span class="mem" style="left:calc(${m.start - l.start}ch + 1px);width:calc(${m.end - m.start + 1}ch - 2px)"></span>`).join("")
+      ? l.members.map((m) => `<span class="mem" style="left:${pct(m.start - l.start, len)};width:${pct(m.end - m.start + 1, len)}"></span>`).join("")
       : "";
-    h += `<div class="feat ${cls}" style="left:${l.start - 1}ch;width:${l.end - l.start + 1}ch" title="${esc(l.ssr_type)} ${esc(l.pattern)} · ${l.start}–${l.end}">${mem}<span class="lbl">${esc(l.pattern)}</span></div>`;
+    h += `<div class="feat ${cls}" style="left:${pct(l.start - 1, n)};width:${pct(len, n)}" title="${esc(l.ssr_type)} ${esc(l.pattern)} · ${l.start}–${l.end}">${mem}<span class="lbl">${esc(l.pattern)}</span></div>`;
   }
   return h + "</div>";
 }
@@ -175,23 +180,18 @@ function renderDemo() {
   const m = analyze(seq, "misa");
   const x = analyze(seq, "native");
   const n = seq.length;
-  const cover = (loci) => {
-    const c = new Uint8Array(n);
-    for (const l of loci) for (let i = l.start - 1; i < l.end; i++) c[i] = 1;
-    return c;
-  };
-  const cm = cover(m);
-  const cx = cover(x);
   let ruler = "";
-  for (let i = 10; i <= n; i += 10) ruler += `<i style="left:${i - 0.5}ch"></i><span style="left:${i - 0.5}ch">${i}</span>`;
+  for (let i = 10; i <= n; i += 10) ruler += `<i style="left:${pct(i - 0.5, n)}"></i><span style="left:${pct(i - 0.5, n)}">${i}</span>`;
   let bases = "";
-  for (let i = 0; i < n; i++) bases += `<b class="${seq[i]}${cm[i] ? " cov-misa" : ""}${cx[i] ? " cov-nx" : ""}">${seq[i]}</b>`;
-  $("viewer").innerHTML = `<div class="track-grid">
-    <div class="track-name"></div><div class="lane ruler" style="width:${n}ch">${ruler}</div>
+  for (let i = 0; i < n; i++) bases += `<b class="${seq[i]}">${seq[i]}</b>`;
+  const viewer = $("viewer");
+  viewer.innerHTML = `<div class="track-grid">
+    <div class="track-name"></div><div class="lane ruler">${ruler}</div>
     <div class="track-name">${t("l.demo.seq")}</div><div class="lane seq">${bases}</div>
     <div class="track-name misa">MISA</div>${lane(m, "misa", n)}
     <div class="track-name nx">nextSSR</div>${lane(x, "nx", n)}
   </div>`;
+  fitViewer(n);
   $("call-misa").innerHTML = callList(m);
   $("call-nx").innerHTML = callList(x);
   const same = JSON.stringify(m.map((l) => [l.start, l.end, l.pattern])) === JSON.stringify(x.map((l) => [l.start, l.end, l.pattern]));
@@ -209,6 +209,20 @@ let ownTimer = 0;
 $("own-seq").addEventListener("input", () => {
   clearTimeout(ownTimer);
   ownTimer = setTimeout(renderDemo, 150);
+});
+
+// Scale the sequence so it fills the demo width (scrolls only when even the
+// smallest readable size does not fit).
+function fitViewer(n) {
+  const viewer = $("viewer");
+  if (!n) return;
+  const avail = viewer.clientWidth - viewer.querySelector(".track-name").offsetWidth - 4;
+  const fs = Math.max(11, Math.min(30, avail / (n * 0.6)));
+  viewer.style.setProperty("--fs", `${fs.toFixed(2)}px`);
+}
+window.addEventListener("resize", () => {
+  const n = $("viewer").querySelectorAll(".seq b").length;
+  fitViewer(n);
 });
 
 // ---------- Tm calculator ----------

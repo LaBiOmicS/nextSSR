@@ -335,3 +335,19 @@ table.cmp { table-layout: fixed; }
 #cite .refs { padding-left: 20px; }
 #install pre.code, #cite pre.code { max-width: 100%; }
 .band { flex-direction: column; align-items: flex-start; }
+
+/* demo viewer: one font size drives every track (positions are % of the lane) */
+.case-text { grid-template-columns: 1fr auto; align-items: start; }
+.case-text .verdict { justify-self: end; }
+@media (max-width: 640px) { .case-text { grid-template-columns: 1fr; } .case-text .verdict { justify-self: start; } }
+.track-grid { grid-template-columns: 96px max-content; row-gap: 8px; }
+.track-name { padding-right: 12px; font-size: 12px; }
+.lane { font-size: var(--fs, 16px); width: max-content; }
+.lane.seq, .lane.ruler, .lane.feat-lane { width: auto; min-width: 0; }
+.seq { height: auto; padding: 4px 0; }
+.seq b { width: auto; letter-spacing: 0; }
+.ruler { height: 16px; }
+.ruler span { font-size: 11px; }
+.feat-lane { height: 34px; }
+.feat { top: 3px; height: 28px; font-size: 12px; padding: 0 6px; }
+.feat .mem { bottom: 2px; }
