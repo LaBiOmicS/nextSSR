@@ -351,3 +351,10 @@ table.cmp { table-layout: fixed; }
 .feat-lane { height: 34px; }
 .feat { top: 3px; height: 28px; font-size: 12px; padding: 0 6px; }
 .feat .mem { bottom: 2px; }
+[hidden] { display: none !important; }
+/* use the available width */
+.wrap { max-width: 1320px; padding: 0 28px; }
+.sec { padding: 64px 0; }
+.stage { grid-template-columns: 1fr 1fr; }
+@media (max-width: 900px) { .stage { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .wrap { padding: 0 16px; } }

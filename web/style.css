@@ -217,3 +217,5 @@ details.adv > summary { cursor: pointer; font-weight: 600; font-size: 14px; colo
 .pair.wide { grid-template-columns: 1fr; }
 .pair.wide .nums { justify-content: flex-start; }
 #primer-opts #epcr-opts { margin: 10px 0 6px 2px; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1320px; }

@@ -217,8 +217,15 @@ function fitViewer(n) {
   const viewer = $("viewer");
   if (!n) return;
   const avail = viewer.clientWidth - viewer.querySelector(".track-name").offsetWidth - 4;
-  const fs = Math.max(11, Math.min(30, avail / (n * 0.6)));
+  let fs = Math.max(11, Math.min(30, avail / (n * 0.6)));
   viewer.style.setProperty("--fs", `${fs.toFixed(2)}px`);
+  // correct the estimate with the real width of the rendered bases
+  const seq = viewer.querySelector(".seq");
+  const w = seq ? seq.scrollWidth : 0;
+  if (w > avail && fs > 11) {
+    fs = Math.max(11, (fs * avail) / w);
+    viewer.style.setProperty("--fs", `${fs.toFixed(2)}px`);
+  }
 }
 window.addEventListener("resize", () => {
   const n = $("viewer").querySelectorAll(".seq b").length;
