@@ -1,0 +1,26 @@
+[workspace]
+resolver = "2"
+members = ["crates/nextssr-core", "crates/nextssr-cli", "crates/nextssr-wasm"]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+authors = ["Fabiano Menegidio <labiomics@bioinformatica.com.br>"]
+repository = "https://github.com/LaBiOmicS/nextSSR"
+homepage = "https://github.com/LaBiOmicS/nextSSR"
+rust-version = "1.75"
+
+[workspace.dependencies]
+nextssr-core = { path = "crates/nextssr-core", version = "0.2.0", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+panic = "abort"
+
+[profile.release.package.nextssr-wasm]
+opt-level = "s"

@@ -1,0 +1,18 @@
+[package]
+name = "nextssr-core"
+description = "Core engine of nextSSR: fast, MISA-compatible microsatellite (SSR) detection and primer design"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["parallel"]
+parallel = ["dep:rayon"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+rayon = { version = "1.10", optional = true }

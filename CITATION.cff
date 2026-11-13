@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use nextSSR, please cite it as below. In MISA-compatible mode, please also cite MISA."
+title: "nextSSR: fast, MISA-compatible microsatellite finder"
+type: software
+authors:
+  - family-names: Menegidio
+    given-names: Fabiano
+version: 0.2.0
+license: MIT
+repository-code: "https://github.com/LaBiOmicS/nextSSR"
+url: "https://labiomics.github.io/nextSSR/"
+keywords: [microsatellite, SSR, MISA, primer design, bioinformatics, WebAssembly, Rust]
+references:
+  - type: article
+    title: "Exploiting EST databases for the development and characterization of gene-derived SSR-markers in barley (Hordeum vulgare L.)"
+    authors:
+      - family-names: Thiel
+        given-names: T.
+      - family-names: Michalek
+        given-names: W.
+      - family-names: Varshney
+        given-names: R. K.
+      - family-names: Graner
+        given-names: A.
+    journal: "Theoretical and Applied Genetics"
+    volume: 106
+    start: 411
+    end: 422
+    year: 2003
+  - type: article
+    title: "MISA-web: a web server for microsatellite prediction"
+    authors:
+      - family-names: Beier
+        given-names: S.
+      - family-names: Thiel
+        given-names: T.
+      - family-names: Münch
+        given-names: T.
+      - family-names: Scholz
+        given-names: U.
+      - family-names: Mascher
+        given-names: M.
+    journal: "Bioinformatics"
+    volume: 33
+    issue: 16
+    start: 2583
+    end: 2585
+    year: 2017

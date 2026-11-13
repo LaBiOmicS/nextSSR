@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>nextSSR — fast, accurate microsatellite finder</title>
+  <meta name="description" content="nextSSR: fast, MISA-compatible microsatellite (SSR) finder with imperfect and compound SSRs and primer design. Runs in your browser (WebAssembly) or on the command line. Available in English, Português and Español.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z' fill='%230f766e'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="#">
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="26" height="26"><path d="M4 8h6v4H4zM10 12h6v4h-6zM16 8h6v4h-6zM22 12h6v4h-6zM4 20h24v4H4z" fill="currentColor"/></svg>
+        </span>
+        <b>nextSSR</b> <span class="ver" id="version"></span>
+      </a>
+      <nav class="links" aria-label="sections">
+        <a href="#problem" data-i18n="nav.problem">The problem</a>
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#compare" data-i18n="nav.compare">nextSSR × MISA</a>
+        <a href="#install" data-i18n="nav.install">Install</a>
+        <a href="#cite" data-i18n="nav.cite">Cite</a>
+        <a class="cta-small" href="#run" data-i18n="nav.run">Run online</a>
+      </nav>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="pt">PT</button>
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker" data-i18n="hero.kicker">Open-source microsatellite (SSR) finder</p>
+      <h1 data-i18n="hero.title">Find microsatellites faster and more accurately, in your browser or on the command line</h1>
+      <p class="lead" data-i18n="hero.lead"></p>
+      <div class="hero-cta">
+        <a class="btn primary" href="#run" data-i18n="hero.run">Run online</a>
+        <a class="btn" href="https://github.com/LaBiOmicS/nextSSR" rel="noopener" data-i18n="hero.github">View on GitHub</a>
+      </div>
+      <ul class="facts">
+        <li data-i18n-html="hero.f1"></li>
+        <li data-i18n-html="hero.f2"></li>
+        <li data-i18n-html="hero.f3"></li>
+      </ul>
+    </div>
+  </section>
+
+  <main>
+    <section class="wrap block" id="problem">
+      <h2 data-i18n="problem.title">The problem</h2>
+      <p class="lead2" data-i18n="problem.lead"></p>
+      <div class="problems">
+        <div class="problem" data-i18n-html="problem.p1"></div>
+        <div class="problem" data-i18n-html="problem.p2"></div>
+        <div class="problem" data-i18n-html="problem.p3"></div>
+        <div class="problem" data-i18n-html="problem.p4"></div>
+      </div>
+      <figure class="masking" aria-label="example">
+        <pre><span class="dim">…CCCCG</span><span class="hl-a">AAAAAAAAAAAAA</span><span class="hl-b">AAGAAGAAGAAGAAG</span><span class="dim">CCTCG…</span></pre>
+        <figcaption>
+          <span><b>misa.pl</b>: <code>(A)15</code></span>
+          <span><b>nextSSR</b>: <code>(A)15{-2}(AAG)5</code> · <code>c*</code></span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="wrap block" id="features">
+      <h2 data-i18n="features.title">What nextSSR does</h2>
+      <div class="features">
+        <article><h3 data-i18n="features.f1t"></h3><p data-i18n-html="features.f1"></p></article>
+        <article><h3 data-i18n="features.f2t"></h3><p data-i18n-html="features.f2"></p></article>
+        <article><h3 data-i18n="features.f3t"></h3><p data-i18n-html="features.f3"></p></article>
+        <article><h3 data-i18n="features.f4t"></h3><p data-i18n-html="features.f4"></p></article>
+        <article><h3 data-i18n="features.f5t"></h3><p data-i18n-html="features.f5"></p></article>
+        <article><h3 data-i18n="features.f6t"></h3><p data-i18n-html="features.f6"></p></article>
+      </div>
+    </section>
+
+    <section class="wrap block" id="compare">
+      <h2 data-i18n="compare.title">nextSSR × MISA</h2>
+      <div class="table-scroll">
+        <table class="compare">
+          <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA (misa.pl 2.0)</th><th>nextSSR</th></tr></thead>
+          <tbody>
+            <tr><td data-i18n="compare.r1"></td><td class="ok" data-i18n="compare.yes"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r2"></td><td class="bad" data-i18n="compare.r2a"></td><td class="ok" data-i18n="compare.r2b"></td></tr>
+            <tr><td data-i18n="compare.r3"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r4"></td><td class="bad" data-i18n="compare.r4a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r5"></td><td class="mid" data-i18n="compare.r5a"></td><td class="ok" data-i18n="compare.r5b"></td></tr>
+            <tr><td data-i18n="compare.r6"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r7"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r8"></td><td class="mid" data-i18n="compare.r8a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="run-section" id="run">
+      <div class="wrap">
+        <h2 data-i18n="run.title">Run online</h2>
+        <p class="lead2" data-i18n="run.lead"></p>
+        <div class="grid">
+          <section class="panel" aria-labelledby="input-h">
+            <h3 id="input-h" data-i18n="app.seq">1. Sequences</h3>
+            <label class="drop" id="drop">
+              <input type="file" id="file" accept=".fa,.fasta,.fna,.ffn,.fas,.txt,.gz,.bgz">
+              <span class="drop-main" data-i18n-html="app.drop"></span>
+              <span class="drop-sub" data-i18n="app.dropsub"></span>
+              <span class="drop-file" id="file-name"></span>
+            </label>
+            <details class="paste">
+              <summary data-i18n="app.paste">…or paste sequences</summary>
+              <textarea id="paste" rows="6" spellcheck="false" placeholder=">seq1&#10;ACGT..."></textarea>
+            </details>
+            <button type="button" class="link" id="example" data-i18n="app.example"></button>
+            <p class="privacy"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" fill="currentColor"/></svg> <span data-i18n="app.privacy"></span></p>
+
+            <h3 data-i18n="app.params">2. Parameters</h3>
+            <div class="field">
+              <label for="mode" data-i18n="app.mode">Detection mode</label>
+              <select id="mode">
+                <option value="native" selected data-i18n="app.mode.native"></option>
+                <option value="misa" data-i18n="app.mode.misa"></option>
+              </select>
+            </div>
+            <fieldset>
+              <legend data-i18n="app.minrep"></legend>
+              <div class="units" id="units"></div>
+            </fieldset>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="compound" checked> <span data-i18n="app.compound"></span></label>
+              <div class="field inline"><label for="maxint" data-i18n="app.maxint"></label><input type="number" id="maxint" value="100" min="0"></div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="imperfect"> <span data-i18n="app.imperfect"></span></label>
+              <div class="field inline"><label for="maxgap" data-i18n="app.maxgap"></label><input type="number" id="maxgap" value="5" min="0"></div>
+              <div class="field inline"><label for="purity" data-i18n="app.purity"></label><input type="number" id="purity" value="0.85" min="0" max="1" step="0.01"></div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="primers"> <span data-i18n="app.primers"></span></label>
+            </div>
+            <div class="primer-opts" id="primer-opts" hidden>
+              <div class="field inline"><label data-i18n="app.product"></label><input type="number" id="pmin" value="100"><span>–</span><input type="number" id="pmax" value="300"></div>
+              <div class="field inline"><label data-i18n="app.tm"></label><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></div>
+              <div class="field inline"><label data-i18n="app.size"></label><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></div>
+              <div class="field inline"><label data-i18n="app.gc"></label><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></div>
+            </div>
+            <div class="field inline"><label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000"></div>
+
+            <button type="button" class="run" id="run-btn" disabled data-i18n="app.run">Find SSRs</button>
+            <div class="progress" id="progress" hidden>
+              <div class="bar"><span id="bar"></span></div>
+              <p id="progress-text"></p>
+            </div>
+            <p class="error" id="error" hidden></p>
+          </section>
+
+          <section class="panel results" aria-labelledby="res-h">
+            <h3 id="res-h" data-i18n="app.results">3. Results</h3>
+            <p class="empty" id="empty" data-i18n="app.empty"></p>
+            <div id="results" hidden>
+              <div class="cards" id="cards"></div>
+              <div class="downloads" id="downloads"></div>
+              <div class="two">
+                <div>
+                  <h4 data-i18n="app.byunit">SSRs by unit size</h4>
+                  <div class="bars" id="unit-bars"></div>
+                </div>
+                <div>
+                  <h4 data-i18n="app.classes">Most frequent motif classes</h4>
+                  <table class="mini" id="classes"></table>
+                </div>
+              </div>
+              <h4><span data-i18n="app.loci">Loci</span> <small id="table-note"></small></h4>
+              <div class="filters">
+                <input type="search" id="filter" data-i18n-placeholder="app.filter">
+              </div>
+              <div class="table-wrap"><table class="loci" id="loci"></table></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap block" id="install">
+      <h2 data-i18n="install.title">Install the command-line tool</h2>
+      <p data-i18n="install.lead"></p>
+<pre class="code"><code>cargo install --git https://github.com/LaBiOmicS/nextSSR nextssr</code></pre>
+      <h3 data-i18n="install.usage">Usage</h3>
+<pre class="code"><code><span class="c" data-i18n="install.c1"></span>
+nextssr misa genome.fa misa.ini
+
+<span class="c" data-i18n="install.c2"></span>
+nextssr run genome.fa.gz -o results/genome --imperfect --primers -t 8 \
+    -f tsv,gff3,bed,misa,statistics,json
+
+<span class="c" data-i18n="install.c3"></span>
+nextssr tm AGCTGCATGCAGTCAGTCAG</code></pre>
+    </section>
+
+    <section class="wrap block" id="cite">
+      <h2 data-i18n="cite.title">How to cite</h2>
+      <p data-i18n="cite.lead"></p>
+      <ul class="refs">
+        <li>Menegidio, F. <i>nextSSR: fast, MISA-compatible microsatellite finder</i>. <a href="https://github.com/LaBiOmicS/nextSSR">https://github.com/LaBiOmicS/nextSSR</a></li>
+        <li>Thiel, T., Michalek, W., Varshney, R. K., Graner, A. (2003). Exploiting EST databases for the development and characterization of gene-derived SSR-markers in barley (<i>Hordeum vulgare</i> L.). <i>Theoretical and Applied Genetics</i>, 106, 411–422.</li>
+        <li>Beier, S., Thiel, T., Münch, T., Scholz, U., Mascher, M. (2017). MISA-web: a web server for microsatellite prediction. <i>Bioinformatics</i>, 33(16), 2583–2585.</li>
+        <li>SantaLucia, J. Jr. (1998). A unified view of polymer, dumbbell, and oligonucleotide DNA nearest-neighbor thermodynamics. <i>PNAS</i>, 95(4), 1460–1465.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap"><span data-i18n="foot"></span> · <a href="https://github.com/LaBiOmicS/nextSSR">GitHub</a></div>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
