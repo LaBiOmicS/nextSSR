@@ -37,6 +37,7 @@ MISA is the de facto standard for SSR discovery, but `misa.pl`:
 | Valid single-file GFF3 | one file per sequence | ✓ |
 | Primer design | external scripts + Primer3 | built in, several pairs per locus |
 | Primer specificity (in-silico PCR) | ✗ | ✓ |
+| Analysis report | plain-text count tables | HTML report (abundance and density per Mb, distributions, per-sequence figures, primers, provenance, methods text) |
 | Multithreading | ✗ | ✓ (deterministic output) |
 | gzip / bgzip input | ✗ | ✓ |
 | In-browser, no upload | server upload (MISA-web) | ✓ |
@@ -56,7 +57,7 @@ cargo install --git https://github.com/LaBiOmicS/nextSSR nextssr
 # MISA drop-in: reads misa.ini (or ./misa.ini), writes genome.fa.misa and genome.fa.statistics
 nextssr misa genome.fa misa.ini
 
-# nextSSR mode: TSV, GFF3, .misa, .statistics and JSON summary next to the input
+# nextSSR mode: TSV, GFF3, .misa, HTML report and JSON summary next to the input
 nextssr run genome.fa.gz
 
 # imperfect SSRs, primers, 8 threads, all formats, custom prefix
@@ -112,11 +113,28 @@ insertions and deletions are all absorbed.
 | `.tsv` | one row per locus: type, pattern, motif(s), canonical motif, repeats, coordinates, purity, primers, flanks |
 | `.gff3` | GFF3 with Sequence Ontology types (`monomeric_repeat`, `dinucleotide_repeat_microsatellite_feature`, …, `microsatellite`, `repeat_region` for compounds, `PCR_product`/`primer_binding_site` for primers) |
 | `.bed` | BED6 intervals |
-| `.misa`, `.statistics` | MISA formats |
+| `.report.html` | self-contained report (see below) |
+| `.misa`, `.statistics` | MISA formats (`.statistics` with `-f statistics`; always written by `nextssr misa`) |
 | `.summary.json` | parameters, statistics, runtime, input SHA-256 |
 | `.primers.tsv` | one row per designed pair (`--primers`); with `--epcr` also its specificity and the recommended pair of each locus |
 | `.epcr.tsv` | every product predicted by the in-silico PCR (`--epcr`, `nextssr epcr`) |
 | `.p3in` | Primer3 (`primer3_core`) Boulder-IO input, the successor of MISA's `p3_in.pl`, with the same settings as the built-in designer and the other SSRs as excluded regions |
+
+### Report
+
+`.report.html` is a single self-contained file (no internet needed, light/dark themes, printable)
+with what an SSR survey usually needs and MISA's `.statistics` does not give:
+
+- overview: sequences, size, GC content, SSRs and loci, **relative abundance** (SSRs/Mb),
+  **relative density** (SSR bp/Mb), fraction of the sequence in SSR loci;
+- per unit size and per motif class (motif, rotations and reverse complement, e.g. `AG/CT`):
+  counts, shares, abundance, density, mean/median length, length range, repeats;
+- distributions of SSR length and of the number of repeats per unit size (charts plus the full
+  class × repeats table);
+- per-sequence figures (all sequences, or the 40 longest), compound and imperfect summaries;
+- primer design success, failure reasons, product sizes and, with `--epcr`, specificity;
+- every parameter, the command, input SHA-256, versions, run time, and a **methods paragraph**
+  ready to adapt for a manuscript.
 
 ### Primer design
 

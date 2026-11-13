@@ -96,6 +96,7 @@ function options() {
     ...epcrOptions(),
     flank: num("flank") || 0,
     preview_limit: 5000,
+    generated: new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC",
   };
 }
 
@@ -234,7 +235,7 @@ function render() {
   cards.push(["card.time", `${fmtD(seconds, 2)} s`]);
   $("cards").innerHTML = cards.map(([k, v]) => `<div class="card"><b>${v}</b><span>${t(k)}</span></div>`).join("");
 
-  const fmts = ["tsv", "gff3", "bed", "misa", "statistics", "json", "p3in"];
+  const fmts = ["report", "tsv", "gff3", "bed", "misa", "statistics", "json", "p3in"];
   if (sum.config.primers) fmts.push("primers");
   if (sum.epcr) fmts.push("epcr");
   downloadButtons($("downloads"), fmts, "ssr");
@@ -332,9 +333,9 @@ function renderPairs() {
 $("efilter").addEventListener("input", renderPairs);
 
 function download(text, format, from) {
-  const ext = { json: "summary.json", primers: "primers.tsv", epcr: "epcr.tsv", pairs: "epcr_pairs.tsv" }[format] || format;
+  const ext = { json: "summary.json", primers: "primers.tsv", epcr: "epcr.tsv", pairs: "epcr_pairs.tsv", report: "report.html" }[format] || format;
   const base = (input && input.name ? input.name : "nextssr").replace(/\.(gz|bgz)$/i, "");
-  const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  const url = URL.createObjectURL(new Blob([text], { type: format === "report" ? "text/html" : "text/plain" }));
   const a = Object.assign(document.createElement("a"), { href: url, download: `${base}.${ext}` });
   document.body.appendChild(a);
   a.click();

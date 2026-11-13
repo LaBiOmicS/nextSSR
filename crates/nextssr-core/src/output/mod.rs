@@ -8,6 +8,7 @@ pub mod gff3;
 pub mod misa;
 pub mod p3in;
 pub mod primers;
+pub mod report;
 pub mod tsv;
 
 /// Output formats supported by nextSSR.
@@ -29,10 +30,12 @@ pub enum Format {
     P3in,
     /// One row per designed primer pair (`.primers.tsv`).
     Primers,
+    /// Self-contained HTML report (`.report.html`).
+    Report,
 }
 
 impl Format {
-    pub const ALL: [Format; 8] = [
+    pub const ALL: [Format; 9] = [
         Format::Tsv,
         Format::Gff3,
         Format::Bed,
@@ -41,6 +44,7 @@ impl Format {
         Format::Json,
         Format::P3in,
         Format::Primers,
+        Format::Report,
     ];
 
     pub fn name(self) -> &'static str {
@@ -53,6 +57,7 @@ impl Format {
             Format::Json => "json",
             Format::P3in => "p3in",
             Format::Primers => "primers",
+            Format::Report => "report",
         }
     }
 
@@ -60,6 +65,7 @@ impl Format {
         match self {
             Format::Json => "summary.json",
             Format::Primers => "primers.tsv",
+            Format::Report => "report.html",
             other => other.name(),
         }
     }
@@ -69,6 +75,7 @@ impl Format {
             f.name().eq_ignore_ascii_case(s.trim())
                 || (s.trim() == "gff" && *f == Format::Gff3)
                 || (s.trim() == "stats" && *f == Format::Statistics)
+                || (s.trim() == "html" && *f == Format::Report)
         })
     }
 }

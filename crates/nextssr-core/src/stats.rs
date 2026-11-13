@@ -42,6 +42,42 @@ pub struct Stats {
     pub primers_designed: u64,
     /// Primer design failure reason -> count
     pub primer_failures: BTreeMap<String, u64>,
+    /// Base counts of the examined sequences: A, C, G, T, other.
+    pub composition: [u64; 5],
+    /// unit size -> total length of SSRs (bp)
+    pub per_unit_bp: BTreeMap<usize, u64>,
+    /// unit size -> SSR length (bp) -> count
+    pub per_unit_len: BTreeMap<usize, BTreeMap<usize, u64>>,
+    /// motif -> total length of SSRs (bp)
+    pub per_motif_bp: BTreeMap<String, u64>,
+    /// Total length of all reported loci (bp).
+    pub loci_bp: u64,
+    /// Compound SSRs with adjacent or overlapping members (`c*`).
+    pub compounds_contiguous: u64,
+    /// Sum of the purity of imperfect SSRs.
+    pub imperfect_purity_sum: f64,
+    /// Best-pair product size (bp) -> count.
+    pub primer_products: BTreeMap<usize, u64>,
+    /// Sum of the Tm of designed primers (both primers of the best pair).
+    pub primer_tm_sum: f64,
+    /// Per-sequence figures, in input order (the first [`MAX_PER_SEQUENCE`]).
+    #[serde(skip)]
+    pub per_sequence: Vec<SeqStat>,
+}
+
+/// Sequences kept in [`Stats::per_sequence`].
+pub const MAX_PER_SEQUENCE: usize = 100_000;
+
+/// Figures of one sequence.
+#[derive(Debug, Clone, Default, Serialize, PartialEq)]
+pub struct SeqStat {
+    pub id: String,
+    pub length: u64,
+    /// G+C over A+C+G+T (%).
+    pub gc: f64,
+    pub ssrs: u64,
+    pub loci: u64,
+    pub ssr_bp: u64,
 }
 
 impl Stats {
@@ -53,20 +89,37 @@ impl Stats {
     }
 
     /// Account for one analysed sequence.
-    pub fn add_record(&mut self, seq_len: usize, loci: &[Locus]) {
+    pub fn add_record(&mut self, id: &str, seq: &[u8], loci: &[Locus]) {
         self.sequences += 1;
-        self.total_bp += seq_len as u64;
+        self.total_bp += seq.len() as u64;
+        let mut comp = [0u64; 5];
+        for &b in seq {
+            comp[crate::motif::CODE[b as usize] as usize] += 1;
+        }
+        for (a, c) in self.composition.iter_mut().zip(comp) {
+            *a += c;
+        }
         let mut n_ssr = 0u64;
+        let mut ssr_bp = 0u64;
         for l in loci {
             self.loci += 1;
+            self.loci_bp += l.size().max(0) as u64;
             if l.is_compound() {
                 self.compounds += 1;
+                if l.ssr_type == "c*" {
+                    self.compounds_contiguous += 1;
+                }
                 self.ssrs_in_compounds += l.members.len() as u64;
                 self.misa_ssr_in_compound += l.members.len() as u64 - 1;
             }
             if let Some(p) = &l.primers {
                 match p {
-                    crate::primer::PrimerOutcome::Designed { .. } => self.primers_designed += 1,
+                    crate::primer::PrimerOutcome::Designed { pairs } => {
+                        self.primers_designed += 1;
+                        let b = &pairs[0];
+                        *self.primer_products.entry(b.product_size).or_default() += 1;
+                        self.primer_tm_sum += b.left.tm + b.right.tm;
+                    }
                     crate::primer::PrimerOutcome::Failed { reason } => {
                         *self.primer_failures.entry(reason.clone()).or_default() += 1
                     }
@@ -74,10 +127,21 @@ impl Stats {
             }
             for s in &l.members {
                 n_ssr += 1;
-                if s.imperfect.is_some() {
+                let len = s.len();
+                ssr_bp += len as u64;
+                if let Some(i) = &s.imperfect {
                     self.imperfect += 1;
+                    self.imperfect_purity_sum += i.purity;
                 }
                 *self.per_unit.entry(s.unit).or_default() += 1;
+                *self.per_unit_bp.entry(s.unit).or_default() += len as u64;
+                *self
+                    .per_unit_len
+                    .entry(s.unit)
+                    .or_default()
+                    .entry(len)
+                    .or_default() += 1;
+                *self.per_motif_bp.entry(s.motif.clone()).or_default() += len as u64;
                 *self
                     .per_motif
                     .entry(s.motif.clone())
@@ -88,6 +152,21 @@ impl Stats {
             }
         }
         self.ssrs += n_ssr;
+        if self.per_sequence.len() < MAX_PER_SEQUENCE {
+            let acgt = comp[..4].iter().sum::<u64>();
+            self.per_sequence.push(SeqStat {
+                id: id.to_string(),
+                length: seq.len() as u64,
+                gc: if acgt > 0 {
+                    100.0 * (comp[1] + comp[2]) as f64 / acgt as f64
+                } else {
+                    0.0
+                },
+                ssrs: n_ssr,
+                loci: loci.len() as u64,
+                ssr_bp,
+            });
+        }
         if n_ssr > 0 {
             self.seqs_with_ssr += 1;
             if n_ssr == 1 {
@@ -121,6 +200,42 @@ impl Stats {
         self.primers_designed += o.primers_designed;
         for (k, v) in &o.primer_failures {
             *self.primer_failures.entry(k.clone()).or_default() += v;
+        }
+        for (a, c) in self.composition.iter_mut().zip(o.composition) {
+            *a += c;
+        }
+        for (k, v) in &o.per_unit_bp {
+            *self.per_unit_bp.entry(*k).or_default() += v;
+        }
+        for (u, lens) in &o.per_unit_len {
+            let e = self.per_unit_len.entry(*u).or_default();
+            for (l, c) in lens {
+                *e.entry(*l).or_default() += c;
+            }
+        }
+        for (k, v) in &o.per_motif_bp {
+            *self.per_motif_bp.entry(k.clone()).or_default() += v;
+        }
+        self.loci_bp += o.loci_bp;
+        self.compounds_contiguous += o.compounds_contiguous;
+        self.imperfect_purity_sum += o.imperfect_purity_sum;
+        for (k, v) in &o.primer_products {
+            *self.primer_products.entry(*k).or_default() += v;
+        }
+        self.primer_tm_sum += o.primer_tm_sum;
+        let room = MAX_PER_SEQUENCE.saturating_sub(self.per_sequence.len());
+        self.per_sequence
+            .extend(o.per_sequence.iter().take(room).cloned());
+    }
+
+    /// G+C content over A+C+G+T (%).
+    pub fn gc_percent(&self) -> f64 {
+        let c = &self.composition;
+        let acgt = c[0] + c[1] + c[2] + c[3];
+        if acgt == 0 {
+            0.0
+        } else {
+            100.0 * (c[1] + c[2]) as f64 / acgt as f64
         }
     }
 

@@ -24,7 +24,7 @@ use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 use nextssr_core::epcr::{self, Epcr, EpcrParams, EpcrReport, PairSpec, Status};
-use nextssr_core::output::{bed, gff3, misa, p3in, primers, tsv};
+use nextssr_core::output::{bed, gff3, misa, p3in, primers, report, tsv};
 use nextssr_core::primer::PrimerParams;
 use nextssr_core::stats::misa_statistics;
 use nextssr_core::thermo::ThermoParams;
@@ -67,6 +67,8 @@ struct Options {
     epcr_max_product: Option<usize>,
     max_amplicons: Option<usize>,
     amplicon_sequence: bool,
+    /// Date/time shown in the HTML report (formatted by the caller).
+    generated: Option<String>,
 }
 
 fn epcr_params(o: &Options, min_max_product: usize) -> Result<EpcrParams, String> {
@@ -285,7 +287,7 @@ impl Analyzer {
         let p3 = self.cfg.primers.clone().unwrap_or_default();
         for rec in std::mem::take(&mut self.records) {
             let r: RecordResult = analyze_record(&rec, &self.cfg);
-            self.stats.add_record(r.length, &r.loci);
+            self.stats.add_record(&r.id, &rec.seq, &r.loci);
             tsv::write_record(&mut self.tsv, &r, cols);
             gff3::write_record(&mut self.gff3, &r);
             bed::write_record(&mut self.bed, &r);
@@ -438,6 +440,25 @@ impl Analyzer {
                 self.cfg.mode,
             ),
             "json" => self.summary_json(),
+            "report" | "html" => {
+                let epcr = self
+                    .epcr
+                    .as_ref()
+                    .map(|(specs, params, rep)| report::EpcrInfo {
+                        params,
+                        pairs: specs.len(),
+                        by_status: rep.status_counts(specs),
+                        loci_with_specific_pair: self.loci_with_specific_pair(rep),
+                    });
+                let info = report::ReportInfo {
+                    source: &self.source,
+                    runtime: "web browser (WebAssembly)",
+                    generated: self.opts.generated.as_deref(),
+                    epcr,
+                    ..report::ReportInfo::default()
+                };
+                report::html(&self.stats, &self.cfg, &info)
+            }
             other => return Err(JsError::new(&format!("unknown format {other}"))),
         })
     }
@@ -632,6 +653,8 @@ mod tests {
         assert!(a.output("epcr").ok().unwrap().lines().count() > 50);
         let summary: serde_json::Value = serde_json::from_str(&a.summary()).unwrap();
         assert!(summary["epcr"]["loci_with_specific_pair"].as_u64().unwrap() > 40);
+        let html = a.output("report").ok().unwrap();
+        assert!(html.contains("In-silico PCR against the input"));
 
         // standalone list against the same sequence
         let mut e = EpcrScanner::from_list(&t, r#"{"mismatches": 1}"#)

@@ -11,7 +11,7 @@ use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 
 use nextssr_core::epcr::{self, Epcr, EpcrParams, EpcrReport, PairSpec};
-use nextssr_core::output::{bed, gff3, misa, p3in, primers, tsv, Format};
+use nextssr_core::output::{bed, gff3, misa, p3in, primers, report, tsv, Format};
 use nextssr_core::primer::PrimerParams;
 use nextssr_core::stats::misa_statistics;
 use nextssr_core::thermo::{tm, ThermoParams};
@@ -68,9 +68,10 @@ struct RunArgs {
     #[arg(short, long)]
     output: Option<String>,
 
-    /// Comma-separated output formats: tsv,gff3,bed,misa,statistics,json,p3in,primers
-    /// (`primers` is added automatically with --primers)
-    #[arg(short, long, default_value = "tsv,gff3,misa,statistics,json")]
+    /// Comma-separated output formats: tsv,gff3,bed,misa,statistics,json,p3in,primers,report
+    /// (`report` = HTML report; `statistics` = MISA-format statistics;
+    /// `primers` is added automatically with --primers)
+    #[arg(short, long, default_value = "tsv,gff3,misa,report,json")]
     formats: String,
 
     /// SSR definition "unit-min_repeats" pairs
@@ -559,7 +560,7 @@ fn run(a: RunArgs) -> Result<()> {
         match Format::parse(f) {
             Some(fm) => formats.push(fm),
             None => bail!(
-                "unknown format {f:?} (expected tsv,gff3,bed,misa,statistics,json,p3in,primers)"
+                "unknown format {f:?} (expected tsv,gff3,bed,misa,statistics,json,p3in,primers,report)"
             ),
         }
     }
@@ -598,7 +599,10 @@ fn run(a: RunArgs) -> Result<()> {
     let source = open_input(&a.input)?;
     let mut writers: Vec<(Format, BufWriter<File>)> = Vec::new();
     for &f in &formats {
-        if matches!(f, Format::Statistics | Format::Json | Format::Primers) {
+        if matches!(
+            f,
+            Format::Statistics | Format::Json | Format::Primers | Format::Report
+        ) {
             continue;
         }
         let mut w = create(&out_path(&prefix, f))?;
@@ -616,7 +620,7 @@ fn run(a: RunArgs) -> Result<()> {
     let info = stream_records(source, !a.no_hash, |batch| {
         let results = analyze_batch(&batch, &cfg);
         for (rec, r) in batch.iter().zip(&results) {
-            stats.add_record(r.length, &r.loci);
+            stats.add_record(&r.id, &rec.seq, &r.loci);
             if cfg.primers.is_some() {
                 primer_rows.extend(primers::rows(r));
             }
@@ -682,6 +686,30 @@ fn run(a: RunArgs) -> Result<()> {
         std::fs::write(out_path(&prefix, Format::Statistics), text)?;
     }
     let elapsed = t0.elapsed().as_secs_f64();
+    if formats.contains(&Format::Report) {
+        let command = std::env::args().collect::<Vec<_>>().join(" ");
+        let generated = utc_now();
+        let info = report::ReportInfo {
+            source: &a.input,
+            sha256: info.sha256.as_deref(),
+            bytes: Some(info.bytes),
+            command: Some(&command),
+            runtime: "command line",
+            threads: Some(rayon::current_num_threads()),
+            seconds: Some(elapsed),
+            generated: Some(&generated),
+            epcr: epcr_out.as_ref().map(|(e, rep)| report::EpcrInfo {
+                params: e.params(),
+                pairs: e.pairs().len(),
+                by_status: rep.status_counts(e.pairs()),
+                loci_with_specific_pair: loci_specific.unwrap_or(0),
+            }),
+        };
+        std::fs::write(
+            out_path(&prefix, Format::Report),
+            report::html(&stats, &cfg, &info),
+        )?;
+    }
     if formats.contains(&Format::Json) {
         let mut summary = serde_json::json!({
             "tool": "nextSSR",
@@ -744,6 +772,29 @@ fn run(a: RunArgs) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Current UTC time as `YYYY-MM-DD HH:MM UTC`.
+fn utc_now() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs()) as i64;
+    let (days, rem) = (secs.div_euclid(86_400), secs.rem_euclid(86_400));
+    // civil-from-days (H. Hinnant)
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = yoe + era * 400 + i64::from(m <= 2);
+    format!(
+        "{y:04}-{m:02}-{d:02} {:02}:{:02} UTC",
+        rem / 3600,
+        rem % 3600 / 60
+    )
 }
 
 fn run_epcr(a: EpcrCmdArgs) -> Result<()> {
@@ -851,8 +902,8 @@ fn run_misa(a: MisaArgs) -> Result<()> {
     };
     let mut stats = Stats::new();
     stream_records(source, false, |batch| {
-        for r in analyze_batch(&batch, &cfg) {
-            stats.add_record(r.length, &r.loci);
+        for (rec, r) in batch.iter().zip(analyze_batch(&batch, &cfg)) {
+            stats.add_record(&r.id, &rec.seq, &r.loci);
             let mut s = String::new();
             misa::write_record(&mut s, &r);
             w.write_all(s.as_bytes())?;

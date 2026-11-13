@@ -387,3 +387,27 @@ fn epcr_rejects_bad_usage() {
         assert!(!out.status.success(), "{args:?} should fail");
     }
 }
+
+#[test]
+fn default_outputs_include_html_report() {
+    let dir = tempfile::tempdir().unwrap();
+    let prefix = dir.path().join("t");
+    let p = prefix.to_str().unwrap();
+    run_ok(bin().args(["run", data("tricky.fasta").to_str().unwrap(), "-o", p, "-q"]));
+    let html = fs::read_to_string(format!("{p}.report.html")).unwrap();
+    assert!(html.starts_with("<!doctype html>"));
+    assert!(html.contains("SSRs per Mb") && html.contains("Methods text"));
+    assert!(html.contains("Input SHA-256"));
+    // the MISA statistics file is opt-in in `run`
+    assert!(!Path::new(&format!("{p}.statistics")).exists());
+    run_ok(bin().args([
+        "run",
+        data("tricky.fasta").to_str().unwrap(),
+        "-o",
+        p,
+        "-q",
+        "-f",
+        "statistics",
+    ]));
+    assert!(Path::new(&format!("{p}.statistics")).exists());
+}
