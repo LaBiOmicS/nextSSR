@@ -196,21 +196,45 @@
     </section>
 
     <section class="sec alt" id="performance">
-      <div class="wrap perf">
-        <div>
-          <p class="kick" data-i18n="l.perf.kick">Performance</p>
-          <h2 class="reveal" data-i18n="l.perf.title">Seconds become milliseconds.</h2>
-          <p class="lead2 reveal" data-i18n="l.perf.lead"></p>
-        </div>
-        <div>
-          <div class="bars" id="bars">
-            <div class="bar-row"><div class="lab"><b>MISA 2.0 (Perl)</b><span>9.25 s</span></div><div class="bar-track"><div class="bar-fill slow" data-w="100"></div></div></div>
-            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b2">nextssr misa · identical output</b><span>0.19 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="2.05"></div></div></div>
-            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b3">nextssr run · native mode</b><span>0.17 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="1.84"></div></div></div>
-            <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b4">+ imperfect SSRs, primers and in-silico PCR</b><span>2.4 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="25.9"></div></div></div>
+      <div class="wrap">
+        <p class="kick" data-i18n="l.perf.kick">Performance</p>
+        <h2 class="reveal" data-i18n="l.perf.title">Seconds become milliseconds.</h2>
+        <p class="lead2 reveal" data-i18n="l.perf.lead"></p>
+        <figure class="perf-card reveal" id="bars">
+          <figcaption>
+            <b data-i18n="l.perf.chart">Time to analyse the yeast genome</b>
+            <span data-i18n="l.perf.axis">seconds · shorter is better</span>
+          </figcaption>
+          <div class="pc-grid">
+            <div class="pc-row" data-s="9.25">
+              <div class="pc-lab"><b>MISA 2.0</b><small data-i18n="l.perf.b1s">reference (Perl)</small></div>
+              <div class="pc-track"><div class="bar-fill slow"></div></div>
+              <div class="pc-val"></div>
+              <div class="pc-x"></div>
+            </div>
+            <div class="pc-row" data-s="0.19">
+              <div class="pc-lab"><b data-i18n="l.perf.b2">MISA-compatible mode</b><small data-i18n="l.perf.b2s">identical .misa and .statistics files</small></div>
+              <div class="pc-track"><div class="bar-fill fast"></div></div>
+              <div class="pc-val"></div>
+              <div class="pc-x"></div>
+            </div>
+            <div class="pc-row" data-s="0.17">
+              <div class="pc-lab"><b data-i18n="l.perf.b3">Native mode</b><small data-i18n="l.perf.b3s">every SSR, no masking</small></div>
+              <div class="pc-track"><div class="bar-fill fast"></div></div>
+              <div class="pc-val"></div>
+              <div class="pc-x"></div>
+            </div>
+            <div class="pc-row" data-s="2.4">
+              <div class="pc-lab"><b data-i18n="l.perf.b4">Complete analysis</b><small data-i18n="l.perf.b4s">+ imperfect SSRs, primers and in-silico PCR</small></div>
+              <div class="pc-track"><div class="bar-fill fast"></div></div>
+              <div class="pc-val"></div>
+              <div class="pc-x"></div>
+            </div>
+            <div class="pc-axis-spacer"></div>
+            <div class="pc-axis" id="pc-axis"></div>
           </div>
-          <p class="note" data-i18n="l.perf.note">Saccharomyces cerevisiae S288C, 16 chromosomes, 12.1 Mb; 4 vCPUs (AMD EPYC 9354P), Perl 5.40; one run each.</p>
-        </div>
+          <p class="note" data-i18n="l.perf.note"></p>
+        </figure>
       </div>
     </section>
 

@@ -358,3 +358,38 @@ table.cmp { table-layout: fixed; }
 .stage { grid-template-columns: 1fr 1fr; }
 @media (max-width: 900px) { .stage { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .wrap { padding: 0 16px; } }
+
+/* ---- performance chart ---- */
+.perf-card { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 24px 28px 18px; }
+.perf-card figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.perf-card figcaption b { font-size: 18px; }
+.perf-card figcaption span { font: 13px var(--mono); color: var(--muted); }
+.pc-grid { display: grid; grid-template-columns: minmax(180px, 26%) 1fr 76px 150px; column-gap: 16px; row-gap: 14px; align-items: center; }
+.pc-row { display: contents; }
+.pc-lab b { display: block; font-size: 15.5px; font-weight: 600; }
+.pc-lab small { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; }
+.pc-track { position: relative; height: 30px; background-image: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 20%); background-size: 100% 100%; border-left: 1px solid var(--muted); }
+.pc-track .bar-fill { height: 100%; width: 0; min-width: 0; border-radius: 0 6px 6px 0; transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+#bars.grown .bar-fill { width: var(--w); min-width: 4px; }
+.bar-fill.slow { background: #8a94a6; }
+.bar-fill.fast { background: var(--teal); }
+.pc-val { font: 600 15px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.pc-x .chip { display: inline-block; font: 600 13px var(--sans); color: var(--teal); background: var(--teal-soft); padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.pc-x .chip.ref { color: var(--muted); background: var(--bg-2); }
+.pc-axis-spacer { grid-column: 1; }
+.pc-axis { grid-column: 2; position: relative; height: 18px; font: 12px var(--mono); color: var(--muted); }
+.pc-axis span { position: absolute; top: 0; transform: translateX(-50%); }
+.pc-axis span:first-child { transform: none; }
+.perf-card .note { margin: 14px 0 0; }
+@media (prefers-reduced-motion: reduce) { .pc-track .bar-fill { transition: none; } }
+@media (max-width: 760px) {
+  .perf-card { padding: 18px 16px 14px; }
+  .pc-grid { grid-template-columns: 1fr auto; row-gap: 6px; }
+  .pc-lab { grid-column: 1 / -1; margin-top: 10px; }
+  .pc-track { grid-column: 1 / -1; height: 22px; }
+  .pc-val { grid-column: 1; text-align: left; }
+  .pc-x { grid-column: 2; text-align: right; }
+  .pc-axis-spacer { display: none; }
+  .pc-axis { grid-column: 1 / -1; }
+}
+.pc-x .chip { color: var(--ink); }

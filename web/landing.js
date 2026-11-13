@@ -111,7 +111,7 @@ const io = new IntersectionObserver((entries) => {
     if (!e.isIntersecting) continue;
     e.target.classList.add("in");
     if (e.target.dataset.count !== undefined) countUp(e.target);
-    if (e.target.id === "bars") e.target.querySelectorAll(".bar-fill").forEach((b) => (b.style.width = `${Math.max(0.8, b.dataset.w)}%`));
+    if (e.target.id === "bars") e.target.classList.add("grown");
     io.unobserve(e.target);
   }
 }, { threshold: 0.2 });
@@ -232,6 +232,29 @@ window.addEventListener("resize", () => {
   fitViewer(n);
 });
 
+// ---------- performance chart ----------
+const PERF_MAX = 10; // seconds on the axis
+function renderPerf() {
+  const L = lang();
+  const fmt = (x) => x.toLocaleString(L, { maximumFractionDigits: 2 });
+  const rows = [...document.querySelectorAll(".pc-row")];
+  const base = Number(rows[0].dataset.s);
+  for (const r of rows) {
+    const v = Number(r.dataset.s);
+    r.querySelector(".bar-fill").style.setProperty("--w", `${(100 * v) / PERF_MAX}%`);
+    r.querySelector(".pc-val").textContent = `${fmt(v)} s`;
+    r.title = `${r.querySelector(".pc-lab b").textContent}: ${fmt(v)} s`;
+    const x = r.querySelector(".pc-x");
+    if (v < base) {
+      const k = base / v;
+      x.innerHTML = `<span class="chip">${t("l.perf.faster", { x: k.toLocaleString(L, { maximumFractionDigits: k < 10 ? 1 : 0 }) })}</span>`;
+    } else x.innerHTML = `<span class="chip ref">${t("l.perf.ref")}</span>`;
+  }
+  let ax = "";
+  for (let s = 0; s <= PERF_MAX; s += 2) ax += `<span style="left:${(100 * s) / PERF_MAX}%">${s}</span>`;
+  $("pc-axis").innerHTML = ax;
+}
+
 // ---------- Tm calculator ----------
 function renderTm() {
   if (!wasmReady) return;
@@ -253,6 +276,7 @@ function applyLang(l) {
   document.querySelectorAll(".lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang()));
   renderDemo();
   renderTm();
+  renderPerf();
 }
 document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
 
