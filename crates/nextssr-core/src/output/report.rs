@@ -369,7 +369,7 @@ fn methods(cfg: &Config, info: &ReportInfo) -> String {
             "in native mode, which reports every maximal perfect repeat of a primitive motif",
         ),
         Mode::Misa => m.push_str(
-            "in MISA-compatible mode, which reproduces misa.pl v2.0 (Thiel et al. 2003; Beier et al. 2017)",
+            "in MISA-compatible mode, which reproduces MISA v2.0 (Thiel et al. 2003; Beier et al. 2017)",
         ),
     }
     let _ = write!(
@@ -953,7 +953,7 @@ pub fn html(st: &Stats, cfg: &Config, info: &ReportInfo) -> String {
         "Detection mode",
         match cfg.mode {
             Mode::Native => "native (every maximal perfect repeat)".into(),
-            Mode::Misa => "MISA-compatible (misa.pl v2.0 semantics)".into(),
+            Mode::Misa => "MISA-compatible (MISA v2.0 rules)".into(),
         },
     );
     kv(

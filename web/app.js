@@ -38,13 +38,21 @@ function renderUnitLabels() {
   }
 }
 function syncEpcrOpts() {
-  $("epcr-opts").hidden = !(tool === "epcr" || ($("primers").checked && $("epcr").checked));
+  const box = $("epcr-opts");
+  // In "Find SSRs" the search rules belong with the specificity check; in the
+  // in-silico PCR tool they follow the primer list.
+  if (tool === "epcr") $("epcr-params").after(box);
+  else $("epcr-help").after(box);
+  box.hidden = !(tool === "epcr" || ($("primers").checked && $("epcr").checked));
 }
 $("primers").addEventListener("change", () => {
   $("primer-opts").hidden = !$("primers").checked;
   syncEpcrOpts();
 });
 $("epcr").addEventListener("change", syncEpcrOpts);
+$("imperfect").addEventListener("change", () => {
+  $("imperfect-opts").hidden = !$("imperfect").checked;
+});
 
 // ---------- tool ----------
 function setTool(v) {
@@ -65,7 +73,8 @@ $("mode").addEventListener("change", () => {
   const misa = $("mode").value === "misa";
   $("imperfect").disabled = misa;
   if (misa) $("imperfect").checked = false;
-  // misa.pl joins SSRs up to 100 bp apart; native mode only touching/overlapping ones.
+  $("imperfect-opts").hidden = !$("imperfect").checked;
+  // MISA joins SSRs up to 100 bp apart; native mode only touching/overlapping ones.
   $("maxint").value = misa ? 100 : 0;
 });
 

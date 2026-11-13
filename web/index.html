@@ -55,7 +55,7 @@
       </div>
 
       <div class="stats">
-        <div class="stat"><b><em data-count="49">49</em>×</b><span data-i18n="l.stat1">faster than misa.pl</span><small data-i18n="l.stat1n">yeast genome, 12 Mb, identical output</small></div>
+        <div class="stat"><b><em data-count="49">49</em>×</b><span data-i18n="l.stat1">faster than MISA</span><small data-i18n="l.stat1n">yeast genome, 12 Mb, identical output</small></div>
         <div class="stat"><b><em data-count="100">100</em>%</b><span data-i18n="l.stat2">byte-identical to MISA</span><small data-i18n="l.stat2n">in compatibility mode: .misa and .statistics</small></div>
         <div class="stat"><b><em data-count="0">0</em> bytes</b><span data-i18n="l.stat3">uploaded</span><small data-i18n="l.stat3n">the online tool runs on your computer</small></div>
       </div>
@@ -91,30 +91,12 @@
             </div>
             <div class="viewer" id="viewer"></div>
             <div class="calls">
-              <div class="call misa"><h4>misa.pl</h4><ul id="call-misa"></ul></div>
+              <div class="call misa"><h4>MISA</h4><ul id="call-misa"></ul></div>
               <div class="call nx"><h4>nextSSR</h4><ul id="call-nx"></ul></div>
             </div>
           </div>
         </div>
 
-        <div class="problems">
-          <article class="prob reveal">
-            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 4.2A10 10 0 0122 12a10.5 10.5 0 01-2.4 3.4M6.6 6.6A10.5 10.5 0 002 12a10 10 0 0013.4 5.4"/></svg></div>
-            <h3 data-i18n="l.p1.t">Masked SSRs</h3><p data-i18n="l.p1"></p>
-          </article>
-          <article class="prob reveal">
-            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><path d="M17 4l3 3-3 3"/></svg></div>
-            <h3 data-i18n="l.p2.t">Merged and garbled compounds</h3><p data-i18n="l.p2"></p>
-          </article>
-          <article class="prob reveal">
-            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h5l2-3 2 6 2-3h5"/></svg></div>
-            <h3 data-i18n="l.p3.t">Perfect repeats only</h3><p data-i18n="l.p3"></p>
-          </article>
-          <article class="prob reveal">
-            <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M10 6.5h4v11h-4"/></svg></div>
-            <h3 data-i18n="l.p4.t">A fragmented workflow</h3><p data-i18n="l.p4"></p>
-          </article>
-        </div>
       </div>
     </section>
 
@@ -133,7 +115,7 @@
 
         <div class="stage" data-stage="0">
           <div><h3 data-i18n="l.s1.t">Detect</h3><p data-i18n-html="l.s1.p"></p></div>
-          <div class="vis"><pre><span class="c">misa.pl</span>  regex scan, left to right
+          <div class="vis"><pre><span class="c">MISA</span>     regex scan, left to right
   …CCCCG<span class="c">AAAAAAAAAAAAAAA</span>GAAGAAGAAGAAGCC…
   (A)15 ✓   (AAG)5 <span class="c">✗ consumed by the rejected match</span>
 
@@ -203,16 +185,11 @@
         <p class="kick" data-i18n="l.ty.kick">Reading the output</p>
         <h2 class="reveal" data-i18n="l.ty.title">SSR types and notation</h2>
         <p class="lead2 reveal" data-i18n-html="l.ty.lead"></p>
-        <div class="table-scroll reveal">
-          <table class="compare types">
-            <thead><tr><th data-i18n="l.ty.h1">Type</th><th data-i18n="l.ty.h2">Example</th><th data-i18n="l.ty.h3">Meaning</th><th data-i18n="l.ty.h4">Reported by</th></tr></thead>
-            <tbody>
-              <tr><td><code>p1</code> … <code>p6</code></td><td><code>(A)15</code> · <code>(AG)8</code> · <code>(CTT)6</code></td><td data-i18n-html="l.ty.p"></td><td data-i18n="l.ty.both">MISA and nextSSR</td></tr>
-              <tr><td><code>i1</code> … <code>i6</code></td><td><code>(AG)7t(AG)4</code></td><td data-i18n-html="l.ty.i"></td><td data-i18n-html="l.ty.ionly"></td></tr>
-              <tr><td><code>c*</code></td><td><code>(A)15{-2}(AAG)5</code><br><code>(A)15(AAG)5*</code></td><td data-i18n-html="l.ty.cs"></td><td data-i18n="l.ty.both">MISA and nextSSR</td></tr>
-              <tr><td><code>c</code></td><td><code>(CA)7cggtc(TG)7</code></td><td data-i18n-html="l.ty.c"></td><td data-i18n-html="l.ty.conly"></td></tr>
-            </tbody>
-          </table>
+        <div class="tgrid reveal">
+          <article class="tcard"><div class="tc-h"><code class="tb">p1 – p6</code><span class="tby" data-i18n="l.ty.both">MISA and nextSSR</span></div><p data-i18n-html="l.ty.p"></p><code class="ex">(A)15 · (AG)8 · (CTT)6</code></article>
+          <article class="tcard"><div class="tc-h"><code class="tb">i1 – i6</code><span class="tby" data-i18n-html="l.ty.ionly"></span></div><p data-i18n-html="l.ty.i"></p><code class="ex">(AG)7t(AG)4</code></article>
+          <article class="tcard"><div class="tc-h"><code class="tb">c*</code><span class="tby" data-i18n="l.ty.both">MISA and nextSSR</span></div><p data-i18n-html="l.ty.cs"></p><code class="ex">(A)15{-2}(AAG)5</code></article>
+          <article class="tcard"><div class="tc-h"><code class="tb">c</code><span class="tby" data-i18n-html="l.ty.conly"></span></div><p data-i18n-html="l.ty.c"></p><code class="ex">(CA)7cggtc(TG)7</code></article>
         </div>
         <p class="note" data-i18n-html="l.ty.note"></p>
       </div>
@@ -224,11 +201,10 @@
           <p class="kick" data-i18n="l.perf.kick">Performance</p>
           <h2 class="reveal" data-i18n="l.perf.title">Seconds become milliseconds.</h2>
           <p class="lead2 reveal" data-i18n="l.perf.lead"></p>
-          <div class="big" id="speedup">49×</div>
         </div>
         <div>
           <div class="bars" id="bars">
-            <div class="bar-row"><div class="lab"><b>misa.pl 2.0 (Perl)</b><span>9.25 s</span></div><div class="bar-track"><div class="bar-fill slow" data-w="100"></div></div></div>
+            <div class="bar-row"><div class="lab"><b>MISA 2.0 (Perl)</b><span>9.25 s</span></div><div class="bar-track"><div class="bar-fill slow" data-w="100"></div></div></div>
             <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b2">nextssr misa · identical output</b><span>0.19 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="2.05"></div></div></div>
             <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b3">nextssr run · native mode</b><span>0.17 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="1.84"></div></div></div>
             <div class="bar-row"><div class="lab"><b data-i18n="l.perf.b4">+ imperfect SSRs, primers and in-silico PCR</b><span>2.4 s</span></div><div class="bar-track"><div class="bar-fill fast" data-w="25.9"></div></div></div>
@@ -243,8 +219,9 @@
         <p class="kick">nextSSR × MISA</p>
         <h2 class="reveal" data-i18n="l.cmp.title">Everything MISA does, and what it does not.</h2>
         <div class="table-scroll reveal">
-          <table class="compare">
-            <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA (misa.pl 2.0)</th><th>nextSSR</th></tr></thead>
+          <table class="compare cmp">
+            <colgroup><col style="width:40%"><col style="width:27%"><col style="width:33%"></colgroup>
+            <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA 2.0</th><th>nextSSR</th></tr></thead>
             <tbody>
               <tr><td data-i18n="compare.r1"></td><td class="ok" data-i18n="compare.yes"></td><td class="ok" data-i18n="compare.yes"></td></tr>
               <tr><td data-i18n="compare.r2"></td><td class="bad" data-i18n="compare.r2a"></td><td class="ok" data-i18n="compare.r2b"></td></tr>

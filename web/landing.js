@@ -1,4 +1,4 @@
-// nextSSR presentation page: hero scanner, live misa.pl × nextSSR demo, pipeline, Tm calculator.
+// nextSSR presentation page: hero scanner, live MISA × nextSSR demo, pipeline, Tm calculator.
 import { detectLang, setLang, t, lang } from "./i18n.js";
 import init, { Analyzer, melting_temperature, version } from "./pkg/nextssr_wasm.js";
 
@@ -28,7 +28,7 @@ function buildScanner() {
   const rows = $("rows");
   const r = rng(20261113);
   const base = () => "ACGT"[Math.floor(r() * 4)];
-  const nRows = 7;
+  const nRows = 5;
   let k = 0;
   let html = "";
   for (let i = 0; i < nRows; i++) {
@@ -189,7 +189,7 @@ function renderDemo() {
   $("viewer").innerHTML = `<div class="track-grid">
     <div class="track-name"></div><div class="lane ruler" style="width:${n}ch">${ruler}</div>
     <div class="track-name">${t("l.demo.seq")}</div><div class="lane seq">${bases}</div>
-    <div class="track-name misa">misa.pl</div>${lane(m, "misa", n)}
+    <div class="track-name misa">MISA</div>${lane(m, "misa", n)}
     <div class="track-name nx">nextSSR</div>${lane(x, "nx", n)}
   </div>`;
   $("call-misa").innerHTML = callList(m);

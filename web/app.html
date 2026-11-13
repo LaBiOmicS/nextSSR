@@ -60,51 +60,107 @@
               <button type="button" data-tool="epcr" data-i18n="app.tool.epcr">In-silico PCR</button>
             </div>
             <div id="ssr-params">
-            <div class="field">
-              <label for="mode" data-i18n="app.mode">Detection mode</label>
-              <select id="mode">
-                <option value="native" selected data-i18n="app.mode.native"></option>
-                <option value="misa" data-i18n="app.mode.misa"></option>
-              </select>
+              <div class="opt">
+                <label for="mode" class="opt-t" data-i18n="app.mode">Detection mode</label>
+                <select id="mode">
+                  <option value="native" selected data-i18n="app.mode.native"></option>
+                  <option value="misa" data-i18n="app.mode.misa"></option>
+                </select>
+                <small class="help" data-i18n-html="h.mode"></small>
+              </div>
+
+              <div class="opt">
+                <span class="opt-t" data-i18n="app.minrep">Minimum number of repeats</span>
+                <div class="units" id="units"></div>
+                <small class="help" data-i18n-html="h.minrep"></small>
+              </div>
+
+              <div class="opt">
+                <label class="check"><input type="checkbox" id="imperfect"> <span data-i18n="app.imperfect"></span></label>
+                <small class="help" data-i18n-html="h.imperfect"></small>
+                <div class="sub" id="imperfect-opts" hidden>
+                  <div class="pair">
+                    <label for="maxgap" data-i18n="app.maxgap"></label><input type="number" id="maxgap" value="5" min="0">
+                    <small class="help" data-i18n="h.maxgap"></small>
+                  </div>
+                  <div class="pair">
+                    <label for="purity" data-i18n="app.purity"></label><input type="number" id="purity" value="0.85" min="0" max="1" step="0.01">
+                    <small class="help" data-i18n="h.purity"></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="opt">
+                <label class="check"><input type="checkbox" id="primers"> <span data-i18n="app.primers"></span></label>
+                <small class="help" data-i18n-html="h.primers"></small>
+                <div class="sub" id="primer-opts" hidden>
+                  <label class="check"><input type="checkbox" id="epcr" checked> <span data-i18n="app.epcr"></span></label>
+                  <small class="help" id="epcr-help" data-i18n="h.epcr"></small>
+                  <div class="pair wide">
+                    <label data-i18n="app.product"></label><span class="nums"><input type="number" id="pmin" value="100"><span>–</span><input type="number" id="pmax" value="300"></span>
+                    <small class="help" data-i18n="h.product"></small>
+                  </div>
+                  <div class="pair">
+                    <label for="npairs" data-i18n="app.npairs"></label><input type="number" id="npairs" value="1" min="1" max="20">
+                    <small class="help" data-i18n="h.npairs"></small>
+                  </div>
+                  <details class="adv">
+                    <summary data-i18n="app.primeradv">Primer properties</summary>
+                    <div class="pair wide">
+                      <label data-i18n="app.tm"></label><span class="nums"><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></span>
+                      <small class="help" data-i18n="h.tm"></small>
+                    </div>
+                    <div class="pair wide">
+                      <label data-i18n="app.size"></label><span class="nums"><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></span>
+                      <small class="help" data-i18n="h.size"></small>
+                    </div>
+                    <div class="pair wide">
+                      <label data-i18n="app.gc"></label><span class="nums"><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></span>
+                      <small class="help" data-i18n="h.gc"></small>
+                    </div>
+                  </details>
+                </div>
+              </div>
+
+              <details class="adv">
+                <summary data-i18n="app.advanced">Advanced options</summary>
+                <input type="checkbox" id="compound" checked hidden>
+                <div class="pair">
+                  <label for="maxint" data-i18n="app.maxint"></label><input type="number" id="maxint" value="0" min="0">
+                  <small class="help" data-i18n-html="h.maxint"></small>
+                </div>
+                <div class="pair">
+                  <label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000">
+                  <small class="help" data-i18n="h.flank"></small>
+                </div>
+              </details>
             </div>
-            <fieldset>
-              <legend data-i18n="app.minrep"></legend>
-              <div class="units" id="units"></div>
-            </fieldset>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="compound" checked> <span data-i18n="app.compound"></span></label>
-              <div class="field inline"><label for="maxint" data-i18n="app.maxint"></label><input type="number" id="maxint" value="0" min="0"></div>
-            </div>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="imperfect"> <span data-i18n="app.imperfect"></span></label>
-              <div class="field inline"><label for="maxgap" data-i18n="app.maxgap"></label><input type="number" id="maxgap" value="5" min="0"></div>
-              <div class="field inline"><label for="purity" data-i18n="app.purity"></label><input type="number" id="purity" value="0.85" min="0" max="1" step="0.01"></div>
-            </div>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="primers"> <span data-i18n="app.primers"></span></label>
-            </div>
-            <div class="primer-opts" id="primer-opts" hidden>
-              <div class="field inline"><label data-i18n="app.product"></label><input type="number" id="pmin" value="100"><span>–</span><input type="number" id="pmax" value="300"></div>
-              <div class="field inline"><label data-i18n="app.tm"></label><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></div>
-              <div class="field inline"><label data-i18n="app.size"></label><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></div>
-              <div class="field inline"><label data-i18n="app.gc"></label><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></div>
-              <div class="field inline"><label for="npairs" data-i18n="app.npairs"></label><input type="number" id="npairs" value="1" min="1" max="20"></div>
-              <label class="check"><input type="checkbox" id="epcr"> <span data-i18n="app.epcr"></span></label>
-            </div>
-            <div class="field inline"><label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000"></div>
-            </div>
+
             <div id="epcr-params" hidden>
-              <div class="field">
-                <label for="primer-list" data-i18n="app.plist">Primer pairs</label>
+              <div class="opt">
+                <label for="primer-list" class="opt-t" data-i18n="app.plist">Primer pairs</label>
                 <textarea id="primer-list" rows="6" spellcheck="false" placeholder="marker1  ACGTGCTAGCTAGGATCGAT  GCTAGCTACGATCGATCGTA"></textarea>
-                <small class="hint" data-i18n="app.plist.hint"></small>
+                <small class="help" data-i18n="app.plist.hint"></small>
               </div>
             </div>
-            <div class="primer-opts" id="epcr-opts" hidden>
-              <div class="field inline"><label for="mm" data-i18n="app.epcr.mm"></label><input type="number" id="mm" value="2" min="0" max="10"></div>
-              <div class="field inline"><label for="mm3" data-i18n="app.epcr.mm3"></label><input type="number" id="mm3" value="0" min="0" max="10"></div>
-              <div class="field inline"><label for="len3" data-i18n="app.epcr.len3"></label><input type="number" id="len3" value="5" min="0" max="50"></div>
-              <div class="field inline"><label for="emax" data-i18n="app.epcr.maxp"></label><input type="number" id="emax" value="2000" min="1" max="1000000"></div>
+            <div class="sub" id="epcr-opts" hidden>
+              <span class="opt-t" data-i18n="app.epcrrules">How strict the search is</span>
+              <div class="pair">
+                <label for="mm" data-i18n="app.epcr.mm"></label><input type="number" id="mm" value="2" min="0" max="10">
+                <small class="help" data-i18n="h.mm"></small>
+              </div>
+              <div class="pair">
+                <label for="mm3" data-i18n="app.epcr.mm3"></label><input type="number" id="mm3" value="0" min="0" max="10">
+                <small class="help" data-i18n="h.mm3"></small>
+              </div>
+              <div class="pair">
+                <label for="len3" data-i18n="app.epcr.len3"></label><input type="number" id="len3" value="5" min="0" max="50">
+                <small class="help" data-i18n="h.len3"></small>
+              </div>
+              <div class="pair">
+                <label for="emax" data-i18n="app.epcr.maxp"></label><input type="number" id="emax" value="2000" min="1" max="1000000">
+                <small class="help" data-i18n="h.emax"></small>
+              </div>
             </div>
 
             <button type="button" class="run" id="run-btn" disabled data-i18n="app.run">Find SSRs</button>
