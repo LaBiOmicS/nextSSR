@@ -242,25 +242,30 @@
       <div class="wrap">
         <p class="kick">nextSSR × MISA</p>
         <h2 class="reveal" data-i18n="l.cmp.title">Everything MISA does, and what it does not.</h2>
-        <div class="table-scroll reveal">
-          <table class="compare cmp">
-            <colgroup><col style="width:40%"><col style="width:27%"><col style="width:33%"></colgroup>
-            <thead><tr><th data-i18n="compare.feature">Feature</th><th>MISA 2.0</th><th>nextSSR</th></tr></thead>
+        <div class="cmp-wrap reveal">
+          <table class="cmp2">
+            <colgroup><col class="c-f"><col class="c-m"><col class="c-n"></colgroup>
+            <thead><tr><th scope="col" data-i18n="compare.feature">Feature</th><th scope="col">MISA 2.0</th><th scope="col" class="nx">nextSSR</th></tr></thead>
             <tbody>
-              <tr><td data-i18n="compare.r1"></td><td class="ok" data-i18n="compare.yes"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r2"></td><td class="bad" data-i18n="compare.r2a"></td><td class="ok" data-i18n="compare.r2b"></td></tr>
-              <tr><td data-i18n="compare.r11"></td><td class="bad" data-i18n="compare.r11a"></td><td class="ok" data-i18n="compare.r11b"></td></tr>
-              <tr><td data-i18n="compare.r3"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r4"></td><td class="bad" data-i18n="compare.r4a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r5"></td><td class="mid" data-i18n="compare.r5a"></td><td class="ok" data-i18n="compare.r5b"></td></tr>
-              <tr><td data-i18n="compare.r9"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r10"></td><td class="mid" data-i18n="compare.r10a"></td><td class="ok" data-i18n="compare.r10b"></td></tr>
-              <tr><td data-i18n="compare.r6"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r7"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
-              <tr><td data-i18n="compare.r8"></td><td class="mid" data-i18n="compare.r8a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+              <tr class="grp"><th colspan="3" scope="colgroup" data-i18n="compare.g1"></th></tr>
+              <tr><th scope="row" data-i18n="compare.r2"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.r2a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r11"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.r11a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r3"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.no"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr class="grp"><th colspan="3" scope="colgroup" data-i18n="compare.g2"></th></tr>
+              <tr><th scope="row" data-i18n="compare.r1"></th><td class="v ok" data-label="MISA 2.0"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r4"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.r4a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r10"></th><td class="v mid" data-label="MISA 2.0"><i aria-hidden="true">~</i><span data-i18n="compare.r10a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.r10b"></span></td></tr>
+              <tr class="grp"><th colspan="3" scope="colgroup" data-i18n="compare.g3"></th></tr>
+              <tr><th scope="row" data-i18n="compare.r5"></th><td class="v mid" data-label="MISA 2.0"><i aria-hidden="true">~</i><span data-i18n="compare.r5a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.r5b"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r9"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.no"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr class="grp"><th colspan="3" scope="colgroup" data-i18n="compare.g4"></th></tr>
+              <tr><th scope="row" data-i18n="compare.r6"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.no"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r7"></th><td class="v bad" data-label="MISA 2.0"><i aria-hidden="true">✗</i><span data-i18n="compare.no"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
+              <tr><th scope="row" data-i18n="compare.r8"></th><td class="v mid" data-label="MISA 2.0"><i aria-hidden="true">~</i><span data-i18n="compare.r8a"></span></td><td class="v nx ok" data-label="nextSSR"><i aria-hidden="true">✓</i><span data-i18n="compare.yes"></span></td></tr>
             </tbody>
           </table>
         </div>
+        <p class="cmp-legend"><span class="v ok"><i>✓</i><span data-i18n="compare.lok">available</span></span><span class="v mid"><i>~</i><span data-i18n="compare.lmid">partial or with extra tools</span></span><span class="v bad"><i>✗</i><span data-i18n="compare.lbad">not available</span></span></p>
       </div>
     </section>
 
