@@ -66,7 +66,7 @@ impl Stats {
             }
             if let Some(p) = &l.primers {
                 match p {
-                    crate::primer::PrimerOutcome::Designed(_) => self.primers_designed += 1,
+                    crate::primer::PrimerOutcome::Designed { .. } => self.primers_designed += 1,
                     crate::primer::PrimerOutcome::Failed { reason } => {
                         *self.primer_failures.entry(reason.clone()).or_default() += 1
                     }

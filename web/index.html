@@ -95,6 +95,7 @@
             <tr><td data-i18n="compare.r6"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
             <tr><td data-i18n="compare.r7"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
             <tr><td data-i18n="compare.r8"></td><td class="mid" data-i18n="compare.r8a"></td><td class="ok" data-i18n="compare.yes"></td></tr>
+            <tr><td data-i18n="compare.r9"></td><td class="bad" data-i18n="compare.no"></td><td class="ok" data-i18n="compare.yes"></td></tr>
           </tbody>
         </table>
       </div>
@@ -121,6 +122,11 @@
             <p class="privacy"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" fill="currentColor"/></svg> <span data-i18n="app.privacy"></span></p>
 
             <h3 data-i18n="app.params">2. Parameters</h3>
+            <div class="seg" role="group" aria-label="tool">
+              <button type="button" data-tool="ssr" class="on" data-i18n="app.tool.ssr">Find SSRs</button>
+              <button type="button" data-tool="epcr" data-i18n="app.tool.epcr">In-silico PCR</button>
+            </div>
+            <div id="ssr-params">
             <div class="field">
               <label for="mode" data-i18n="app.mode">Detection mode</label>
               <select id="mode">
@@ -149,8 +155,24 @@
               <div class="field inline"><label data-i18n="app.tm"></label><input type="number" id="tmin" value="57" step="0.5"><input type="number" id="topt" value="60" step="0.5"><input type="number" id="tmax" value="63" step="0.5"></div>
               <div class="field inline"><label data-i18n="app.size"></label><input type="number" id="smin" value="18"><input type="number" id="sopt" value="20"><input type="number" id="smax" value="27"></div>
               <div class="field inline"><label data-i18n="app.gc"></label><input type="number" id="gmin" value="30"><input type="number" id="gmax" value="70"></div>
+              <div class="field inline"><label for="npairs" data-i18n="app.npairs"></label><input type="number" id="npairs" value="1" min="1" max="20"></div>
+              <label class="check"><input type="checkbox" id="epcr"> <span data-i18n="app.epcr"></span></label>
             </div>
             <div class="field inline"><label for="flank" data-i18n="app.flank"></label><input type="number" id="flank" value="0" min="0" max="10000"></div>
+            </div>
+            <div id="epcr-params" hidden>
+              <div class="field">
+                <label for="primer-list" data-i18n="app.plist">Primer pairs</label>
+                <textarea id="primer-list" rows="6" spellcheck="false" placeholder="marker1  ACGTGCTAGCTAGGATCGAT  GCTAGCTACGATCGATCGTA"></textarea>
+                <small class="hint" data-i18n="app.plist.hint"></small>
+              </div>
+            </div>
+            <div class="primer-opts" id="epcr-opts" hidden>
+              <div class="field inline"><label for="mm" data-i18n="app.epcr.mm"></label><input type="number" id="mm" value="2" min="0" max="10"></div>
+              <div class="field inline"><label for="mm3" data-i18n="app.epcr.mm3"></label><input type="number" id="mm3" value="0" min="0" max="10"></div>
+              <div class="field inline"><label for="len3" data-i18n="app.epcr.len3"></label><input type="number" id="len3" value="5" min="0" max="50"></div>
+              <div class="field inline"><label for="emax" data-i18n="app.epcr.maxp"></label><input type="number" id="emax" value="2000" min="1" max="1000000"></div>
+            </div>
 
             <button type="button" class="run" id="run-btn" disabled data-i18n="app.run">Find SSRs</button>
             <div class="progress" id="progress" hidden>
@@ -182,6 +204,15 @@
               </div>
               <div class="table-wrap"><table class="loci" id="loci"></table></div>
             </div>
+            <div id="epcr-results" hidden>
+              <div class="cards" id="ecards"></div>
+              <p class="warn" id="esat" hidden data-i18n="dyn.epcr.saturated"></p>
+              <div class="downloads" id="edownloads"></div>
+              <div class="filters">
+                <input type="search" id="efilter" data-i18n-placeholder="app.filter">
+              </div>
+              <div class="table-wrap"><table class="loci" id="epairs"></table></div>
+            </div>
           </section>
         </div>
       </div>
@@ -200,7 +231,11 @@ nextssr run genome.fa.gz -o results/genome --imperfect --primers -t 8 \
     -f tsv,gff3,bed,misa,statistics,json
 
 <span class="c" data-i18n="install.c3"></span>
-nextssr tm AGCTGCATGCAGTCAGTCAG</code></pre>
+nextssr tm AGCTGCATGCAGTCAGTCAG
+
+<span class="c" data-i18n="install.c4"></span>
+nextssr run genome.fa --primers --num-pairs 3 --epcr
+nextssr epcr -p genome.fa.primers.tsv other_genome.fa.gz -o transfer</code></pre>
     </section>
 
     <section class="wrap block" id="cite">

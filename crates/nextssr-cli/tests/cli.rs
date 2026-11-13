@@ -253,3 +253,137 @@ fn tm_subcommand() {
     assert!((55.0..65.0).contains(&t));
     assert!(lines.next().unwrap().ends_with("NA"));
 }
+
+#[test]
+fn primers_with_epcr_self_check() {
+    let dir = tempfile::tempdir().unwrap();
+    let prefix = dir.path().join("cp");
+    let p = prefix.to_str().unwrap();
+    run_ok(bin().args([
+        "run",
+        data("NC_000932.1_Arabidopsis_cp.fasta").to_str().unwrap(),
+        "-o",
+        p,
+        "--primers",
+        "--num-pairs",
+        "3",
+        "--epcr",
+        "-q",
+    ]));
+    let table = fs::read_to_string(format!("{p}.primers.tsv")).unwrap();
+    let mut lines = table.lines();
+    let head: Vec<&str> = lines.next().unwrap().split('\t').collect();
+    let col = |n: &str| head.iter().position(|h| *h == n).unwrap();
+    let rows: Vec<Vec<&str>> = lines.map(|l| l.split('\t').collect()).collect();
+    assert!(rows.len() > 100);
+    // every designed pair amplifies at least its own product, which is found
+    for r in &rows {
+        assert_ne!(r[col("epcr_status")], "no_product");
+        assert_ne!(r[col("epcr_amplicons")], "0");
+    }
+    // at most one recommended pair per locus, and it is specific
+    let mut seen = std::collections::HashSet::new();
+    for r in rows.iter().filter(|r| r[col("recommended")] == "yes") {
+        assert_eq!(r[col("epcr_status")], "specific");
+        assert!(seen.insert((r[col("seq_id")], r[col("ssr_nr")])));
+    }
+    // the chloroplast inverted repeats make some pairs amplify twice
+    assert!(rows.iter().any(|r| r[col("epcr_status")] == "nonspecific"));
+    let amplicons = fs::read_to_string(format!("{p}.epcr.tsv")).unwrap();
+    assert!(amplicons.lines().any(|l| l.ends_with("\tyes")));
+    let summary: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(format!("{p}.summary.json")).unwrap()).unwrap();
+    assert_eq!(
+        summary["epcr"]["pairs"].as_u64().unwrap(),
+        rows.len() as u64
+    );
+    assert_eq!(
+        summary["epcr"]["loci_with_specific_pair"].as_u64().unwrap(),
+        seen.len() as u64
+    );
+
+    // standalone e-PCR of the same table reproduces the counts
+    run_ok(bin().args([
+        "epcr",
+        "-p",
+        &format!("{p}.primers.tsv"),
+        data("NC_000932.1_Arabidopsis_cp.fasta").to_str().unwrap(),
+        "-o",
+        p,
+        "-q",
+    ]));
+    let pairs = fs::read_to_string(format!("{p}.epcr_pairs.tsv")).unwrap();
+    let counts: Vec<&str> = pairs
+        .lines()
+        .skip(1)
+        .map(|l| l.split('\t').nth(4).unwrap())
+        .collect();
+    let expected: Vec<&str> = rows.iter().map(|r| r[col("epcr_amplicons")]).collect();
+    assert_eq!(counts, expected);
+}
+
+#[test]
+fn epcr_single_pair_to_stdout() {
+    // a pair from the chloroplast table, also given as a gzip target
+    let fa = fs::read(data("NC_000932.1_Arabidopsis_cp.fasta")).unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let gz = dir.path().join("cp.fa.gz");
+    let mut e = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+    e.write_all(&fa).unwrap();
+    fs::write(&gz, e.finish().unwrap()).unwrap();
+    let out = bin()
+        .args([
+            "epcr",
+            "-F",
+            "ATCCGCCCCTACGCTACTAT",
+            "-R",
+            "AAGGTGGAATTTGCTACCTTTTT",
+            "--sequence",
+            gz.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    let s = String::from_utf8(out.stdout).unwrap();
+    let lines: Vec<&str> = s.lines().collect();
+    assert_eq!(lines.len(), 2, "{s}");
+    let f: Vec<&str> = lines[1].split('\t').collect();
+    assert_eq!(&f[..5], ["pair1", "NC_000932.1", "71", "171", "101"]);
+    assert_eq!(f.last().unwrap().len(), 101);
+    assert!(f.last().unwrap().starts_with("ATCCGCCCCTACGCTACTAT"));
+}
+
+#[test]
+fn epcr_rejects_bad_usage() {
+    let input = data("tricky.fasta");
+    let input = input.to_str().unwrap();
+    for args in [
+        vec!["run", "-", "--primers", "--epcr"],
+        vec!["run", input, "-f", "primers"],
+        vec!["run", input, "--epcr"],
+        vec!["epcr", input],
+        vec![
+            "epcr",
+            input,
+            "-F",
+            "ACGTACGTACGTACGT",
+            "-R",
+            "ACGTXCGTACGTACGT",
+        ],
+        vec![
+            "epcr",
+            input,
+            "-F",
+            "ACGTACGTACGTACGT",
+            "-R",
+            "ACGTACGTACGTACGT",
+            "--mismatches",
+            "1",
+            "--three-prime-mismatches",
+            "2",
+        ],
+    ] {
+        let out = bin().args(&args).stdin(Stdio::null()).output().unwrap();
+        assert!(!out.status.success(), "{args:?} should fail");
+    }
+}

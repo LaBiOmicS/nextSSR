@@ -49,6 +49,6 @@ jobs:
       - name: WebAssembly output equals CLI output
         run: |
           cargo build --release -p nextssr
-          node scripts/wasm_check.mjs tests/data/tricky.fasta '{"imperfect":true,"primers":true}' /tmp/w
-          ./target/release/nextssr run tests/data/tricky.fasta -o /tmp/c --imperfect --primers -f tsv,gff3,misa,statistics,bed -q
-          for f in tsv gff3 misa statistics bed; do cmp /tmp/w.$f /tmp/c.$f; done
+          node scripts/wasm_check.mjs tests/data/tricky.fasta '{"imperfect":true,"primers":true,"num_pairs":3,"epcr":true}' /tmp/w
+          ./target/release/nextssr run tests/data/tricky.fasta -o /tmp/c --imperfect --primers --num-pairs 3 --epcr -f tsv,gff3,misa,statistics,bed,p3in -q
+          for f in tsv gff3 misa statistics bed p3in primers.tsv epcr.tsv; do cmp /tmp/w.$f /tmp/c.$f; done

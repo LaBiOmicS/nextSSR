@@ -12,5 +12,19 @@ const t0 = performance.now();
 const a = new Analyzer(opts || "{}", fasta);
 for await (const chunk of createReadStream(fasta, { highWaterMark: 1 << 20 })) a.push(chunk);
 const summary = JSON.parse(a.finish());
-for (const f of ["tsv", "gff3", "misa", "statistics", "bed"]) writeFileSync(`${prefix}.${f}`, a.output(f));
+const formats = ["tsv", "gff3", "misa", "statistics", "bed"];
+const o = JSON.parse(opts || "{}");
+if (o.primers) {
+  formats.push("p3in");
+  if (o.epcr) {
+    // second pass: specificity of the designed pairs
+    const e = a.epcr_scanner();
+    for await (const chunk of createReadStream(fasta, { highWaterMark: 1 << 20 })) e.push(chunk);
+    e.finish();
+    a.set_epcr(e);
+    writeFileSync(`${prefix}.epcr.tsv`, a.output("epcr"));
+  }
+  writeFileSync(`${prefix}.primers.tsv`, a.output("primers"));
+}
+for (const f of formats) writeFileSync(`${prefix}.${f}`, a.output(f));
 console.log(`wasm: ${summary.stats.sequences} seqs, ${summary.stats.ssrs} SSRs, ${(performance.now() - t0).toFixed(0)} ms`);

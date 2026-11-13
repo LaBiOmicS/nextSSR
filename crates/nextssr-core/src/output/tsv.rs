@@ -79,7 +79,8 @@ pub fn write_record(out: &mut String, r: &RecordResult, c: TsvColumns) {
         );
         if c.primers {
             match &l.primers {
-                Some(PrimerOutcome::Designed(p)) => {
+                Some(o @ PrimerOutcome::Designed { .. }) => {
+                    let p = o.pair().expect("designed outcome has a pair");
                     let _ = write!(
                         out,
                         "\tok\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",

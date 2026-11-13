@@ -6,7 +6,8 @@
 //!   `tetranucleotide_repeat_microsatellite_feature` and `microsatellite` (unit >= 5),
 //!   the same SO terms used by MISA-web;
 //! * compound SSRs: a `repeat_region` parent with one child feature per SSR;
-//! * primers: a `PCR_product` with two `primer_binding_site` children.
+//! * primers: one `PCR_product` per designed pair (`rank` 1 = best) with two
+//!   `primer_binding_site` children.
 //!
 //! Reserved characters in column 1 and attribute values are percent-encoded.
 
@@ -84,20 +85,22 @@ fn ssr_attrs(s: &Ssr) -> String {
 }
 
 fn write_primers(out: &mut String, seqid: &str, parent: &str, l: &Locus) {
-    let Some(PrimerOutcome::Designed(p)) = &l.primers else {
+    let Some(PrimerOutcome::Designed { pairs }) = &l.primers else {
         return;
     };
-    let pcr = format!("{parent}.pcr");
-    let _ = writeln!(
+    for (rank, p) in pairs.iter().enumerate() {
+        let rank = rank + 1;
+        let pcr = format!("{parent}.pcr{rank}");
+        let _ = writeln!(
         out,
-        "{seqid}\tnextSSR\tPCR_product\t{}\t{}\t.\t.\t.\tID={pcr};Parent={parent};product_size={};pair_penalty={}",
+        "{seqid}\tnextSSR\tPCR_product\t{}\t{}\t.\t.\t.\tID={pcr};Parent={parent};rank={rank};product_size={};pair_penalty={}",
         p.left.start,
         p.right.end,
         p.product_size,
         fmt_f(p.penalty)
     );
-    for (pr, strand, tag) in [(&p.left, '+', "left"), (&p.right, '-', "right")] {
-        let _ = writeln!(
+        for (pr, strand, tag) in [(&p.left, '+', "left"), (&p.right, '-', "right")] {
+            let _ = writeln!(
             out,
             "{seqid}\tnextSSR\tprimer_binding_site\t{}\t{}\t.\t{strand}\t.\tID={pcr}.{tag};Parent={pcr};sequence={};tm={};gc={}",
             pr.start,
@@ -106,6 +109,7 @@ fn write_primers(out: &mut String, seqid: &str, parent: &str, l: &Locus) {
             fmt_f(pr.tm),
             fmt_f(pr.gc)
         );
+        }
     }
 }
 

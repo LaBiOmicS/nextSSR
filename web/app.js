@@ -6,16 +6,20 @@ const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "modu
 
 const DEFAULT_REPEATS = { 1: 10, 2: 6, 3: 5, 4: 5, 5: 5, 6: 5 };
 let input = null; // { file, name } | { text, name, labelKey }
-let last = null; // { summary, preview, seconds }
+let last = null; // { summary, preview, pairs, seconds }
+let lastEpcr = null; // { summary, seconds } of the standalone e-PCR
 let lastProgress = null;
+let tool = "ssr"; // "ssr" | "epcr"
 
 // ---------- language ----------
 function applyLang(l) {
   setLang(l);
   document.querySelectorAll(".lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang()));
   renderUnitLabels();
+  setTool(tool);
   if (input) $("file-name").textContent = inputLabel();
-  if (last) render();
+  if (tool === "ssr" && last) render();
+  if (tool === "epcr" && lastEpcr) renderEpcr();
   if (lastProgress && !last) showProgress(lastProgress);
 }
 document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
@@ -33,7 +37,30 @@ function renderUnitLabels() {
     $(`ul${u}`).parentElement.title = t(`u.${u}`);
   }
 }
-$("primers").addEventListener("change", () => ($("primer-opts").hidden = !$("primers").checked));
+function syncEpcrOpts() {
+  $("epcr-opts").hidden = !(tool === "epcr" || ($("primers").checked && $("epcr").checked));
+}
+$("primers").addEventListener("change", () => {
+  $("primer-opts").hidden = !$("primers").checked;
+  syncEpcrOpts();
+});
+$("epcr").addEventListener("change", syncEpcrOpts);
+
+// ---------- tool ----------
+function setTool(v) {
+  tool = v;
+  document.querySelectorAll(".seg button").forEach((b) => b.classList.toggle("on", b.dataset.tool === tool));
+  $("ssr-params").hidden = tool !== "ssr";
+  $("epcr-params").hidden = tool !== "epcr";
+  syncEpcrOpts();
+  $("run-btn").textContent = t(tool === "ssr" ? "app.run" : "app.run.epcr");
+  $("empty").textContent = t(tool === "ssr" ? "app.empty" : "app.empty.epcr");
+  const has = tool === "ssr" ? last : lastEpcr;
+  $("empty").hidden = !!has;
+  $("results").hidden = tool !== "ssr" || !last;
+  $("epcr-results").hidden = tool !== "epcr" || !lastEpcr;
+}
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => setTool(b.dataset.tool)));
 $("mode").addEventListener("change", () => {
   const misa = $("mode").value === "misa";
   $("imperfect").disabled = misa;
@@ -64,8 +91,20 @@ function options() {
     tm_min: num("tmin"), tm_opt: num("topt"), tm_max: num("tmax"),
     size_min: num("smin"), size_opt: num("sopt"), size_max: num("smax"),
     gc_min: num("gmin"), gc_max: num("gmax"),
+    num_pairs: num("npairs"),
+    epcr: $("primers").checked && $("epcr").checked,
+    ...epcrOptions(),
     flank: num("flank") || 0,
     preview_limit: 5000,
+  };
+}
+
+function epcrOptions() {
+  return {
+    mismatches: num("mm"),
+    three_prime_mismatches: num("mm3"),
+    three_prime_len: num("len3"),
+    epcr_max_product: num("emax"),
   };
 }
 
@@ -102,24 +141,36 @@ $("example").addEventListener("click", async () => {
 });
 
 // ---------- run ----------
+function showError(msg) {
+  $("error").textContent = t("dyn.error", { m: msg });
+  $("error").hidden = false;
+}
+
 $("run-btn").addEventListener("click", () => {
   if (!input) return;
   $("error").hidden = true;
+  const src = { file: input.file || null, text: input.text || null, name: input.name };
+  if (tool === "epcr") {
+    const primers = $("primer-list").value;
+    if (!primers.trim()) return showError(t("dyn.epcr.nopairs"));
+    lastEpcr = null;
+    worker.postMessage({ type: "epcr", ...src, primers, options: epcrOptions() });
+  } else {
+    last = null;
+    worker.postMessage({ type: "run", ...src, options: options() });
+  }
   $("progress").hidden = false;
   $("bar").style.width = "0%";
   $("progress-text").textContent = t("dyn.starting");
   $("run-btn").disabled = true;
-  last = null;
   lastProgress = null;
-  worker.postMessage({ type: "run", file: input.file || null, text: input.text || null, name: input.name, options: options() });
 });
 
 function showProgress(m) {
   const pct = m.total ? (100 * m.read) / m.total : 0;
   $("bar").style.width = `${pct.toFixed(1)}%`;
-  $("progress-text").textContent = t("dyn.progress", {
-    read: fmtBytes(m.read), total: fmtBytes(m.total), seqs: fmt(m.stats.sequences), ssrs: fmt(m.stats.ssrs),
-  });
+  const vars = { read: fmtBytes(m.read), total: fmtBytes(m.total), seqs: fmt(m.stats.sequences), ssrs: fmt(m.stats.ssrs) };
+  $("progress-text").textContent = t(m.phase === "epcr" ? "dyn.epcr.progress" : "dyn.progress", vars);
 }
 
 worker.onmessage = (e) => {
@@ -129,13 +180,17 @@ worker.onmessage = (e) => {
   else if (m.type === "done") {
     $("bar").style.width = "100%";
     $("run-btn").disabled = false;
-    last = { summary: m.summary, preview: m.preview, seconds: m.seconds };
-    render();
+    last = { summary: m.summary, preview: m.preview, pairs: m.pairs, seconds: m.seconds };
+    if (tool === "ssr") render();
+  } else if (m.type === "epcr-done") {
+    $("bar").style.width = "100%";
+    $("run-btn").disabled = false;
+    lastEpcr = { summary: m.summary, seconds: m.seconds };
+    if (tool === "epcr") renderEpcr();
   } else if (m.type === "output") {
-    download(m.text, m.format);
+    download(m.text, m.format, m.tool);
   } else if (m.type === "error") {
-    $("error").textContent = t("dyn.error", { m: m.message });
-    $("error").hidden = false;
+    showError(m.message);
     $("run-btn").disabled = false;
   }
 };
@@ -162,6 +217,7 @@ function render() {
   const s = sum.stats;
   $("progress-text").textContent = t("dyn.done", { s: fmtD(seconds, 2) });
   $("results").hidden = false;
+  $("epcr-results").hidden = true;
   $("empty").hidden = true;
   const mb = s.total_bp / 1e6;
   const cards = [
@@ -174,12 +230,14 @@ function render() {
     ["card.imperfect", fmt(s.imperfect)],
   ];
   if (sum.config.primers) cards.push(["card.primers", `${fmt(s.primers_designed)} / ${fmt(s.loci)}`]);
+  if (sum.epcr) cards.push(["card.locispec", `${fmt(sum.epcr.loci_with_specific_pair)} / ${fmt(s.primers_designed)}`]);
   cards.push(["card.time", `${fmtD(seconds, 2)} s`]);
   $("cards").innerHTML = cards.map(([k, v]) => `<div class="card"><b>${v}</b><span>${t(k)}</span></div>`).join("");
 
   const fmts = ["tsv", "gff3", "bed", "misa", "statistics", "json", "p3in"];
-  $("downloads").innerHTML = fmts.map((f) => `<button type="button" data-f="${f}">⬇ ${t(`dl.${f}`)}</button>`).join("");
-  $("downloads").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => worker.postMessage({ type: "output", format: b.dataset.f })));
+  if (sum.config.primers) fmts.push("primers");
+  if (sum.epcr) fmts.push("epcr");
+  downloadButtons($("downloads"), fmts, "ssr");
 
   const perUnit = Object.entries(s.per_unit).map(([u, c]) => [Number(u), c]);
   const maxU = Math.max(1, ...perUnit.map(([, c]) => c));
@@ -204,15 +262,22 @@ function renderTable() {
   const withPrimers = last.summary.config.primers;
   const rows = last.preview.filter((r) => !q || `${r.seq_id} ${r.ssr_type} ${r.pattern}`.toLowerCase().includes(q)).slice(0, 2000);
   let h = `<tr><th>${t("th.seq")}</th><th class="num">#</th><th>${t("th.type")}</th><th>${t("th.ssr")}</th><th class="num">${t("th.size")}</th><th class="num">${t("th.start")}</th><th class="num">${t("th.end")}</th>`;
+  const pairs = last.pairs;
   if (withPrimers) h += `<th>${t("th.fwd")}</th><th>${t("th.rev")}</th><th class="num">${t("th.product")}</th>`;
+  if (withPrimers && pairs) h += `<th>${t("th.spec")}</th>`;
   h += `</tr>`;
   for (const r of rows) {
     h += `<tr><td>${esc(r.seq_id)}</td><td class="num">${r.nr}</td><td><span class="pill">${esc(r.ssr_type)}</span></td><td class="pat" title="${esc(r.pattern)}">${esc(r.pattern)}</td><td class="num">${fmt(r.end - r.start + 1)}</td><td class="num">${fmt(r.start)}</td><td class="num">${fmt(r.end)}</td>`;
     if (withPrimers) {
-      const p = r.primers || {};
-      h += p.status === "designed"
+      const o = r.primers || {};
+      const p = o.status === "designed" ? o.pairs[0] : null;
+      h += p
         ? `<td class="mono" title="Tm ${p.left.tm} °C">${p.left.seq}</td><td class="mono" title="Tm ${p.right.tm} °C">${p.right.seq}</td><td class="num">${p.product_size}</td>`
-        : `<td colspan="3" class="muted">${esc(p.reason || "–")}</td>`;
+        : `<td colspan="3" class="muted">${esc(o.reason || "–")}</td>`;
+      if (pairs) {
+        const st = p && pairs[`${r.seq_id}_${r.nr}_1`];
+        h += st ? `<td>${statusPill(st[0], st[1])}</td>` : `<td class="muted">–</td>`;
+      }
     }
     h += `</tr>`;
   }
@@ -220,8 +285,54 @@ function renderTable() {
 }
 $("filter").addEventListener("input", renderTable);
 
-function download(text, format) {
-  const ext = { json: "summary.json" }[format] || format;
+function statusPill(status, amplicons) {
+  return `<span class="pill st-${status}" title="${t("th.amplicons")}: ${fmt(amplicons)}">${t(`st.${status}`)}</span>`;
+}
+
+function downloadButtons(el, fmts, from) {
+  el.innerHTML = fmts.map((f) => `<button type="button" data-f="${f}">⬇ ${t(`dl.${f}`)}</button>`).join("");
+  el.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => worker.postMessage({ type: "output", format: b.dataset.f, tool: from })));
+}
+
+// ---------- standalone e-PCR ----------
+function renderEpcr() {
+  const { summary: sum, seconds } = lastEpcr;
+  const c = sum.pairs_by_status;
+  $("progress-text").textContent = t("dyn.done", { s: fmtD(seconds, 2) });
+  $("empty").hidden = true;
+  $("results").hidden = true;
+  $("epcr-results").hidden = false;
+  const amplicons = sum.pairs.reduce((a, p) => a + p.amplicons, 0);
+  const cards = [
+    ["card.seqs", fmt(sum.sequences)],
+    ["card.size", fmtBp(sum.bp)],
+    ["card.primers", fmt(sum.pairs.length)],
+    ["card.specific", fmt(c.specific || 0)],
+    ["card.nonspecific", fmt(c.nonspecific || 0)],
+    ["card.noproduct", fmt(c.no_product || 0)],
+    ["card.amplicons", fmt(amplicons)],
+    ["card.time", `${fmtD(seconds, 2)} s`],
+  ];
+  $("ecards").innerHTML = cards.map(([k, v]) => `<div class="card"><b>${v}</b><span>${t(k)}</span></div>`).join("");
+  $("esat").hidden = !sum.pairs.some((p) => p.saturated);
+  downloadButtons($("edownloads"), ["epcr", "pairs"], "epcr");
+  renderPairs();
+}
+
+function renderPairs() {
+  if (!lastEpcr) return;
+  const q = $("efilter").value.trim().toLowerCase();
+  const rows = lastEpcr.summary.pairs.filter((p) => !q || `${p.id} ${p.forward} ${p.reverse} ${p.status}`.toLowerCase().includes(q)).slice(0, 2000);
+  let h = `<tr><th>${t("th.pair")}</th><th>${t("th.fwd")}</th><th>${t("th.rev")}</th><th>${t("th.status")}</th><th class="num">${t("th.amplicons")}</th></tr>`;
+  for (const p of rows) {
+    h += `<tr><td>${esc(p.id)}</td><td class="mono">${esc(p.forward)}</td><td class="mono">${esc(p.reverse)}</td><td>${statusPill(p.status, p.amplicons)}</td><td class="num">${fmt(p.amplicons)}</td></tr>`;
+  }
+  $("epairs").innerHTML = h;
+}
+$("efilter").addEventListener("input", renderPairs);
+
+function download(text, format, from) {
+  const ext = { json: "summary.json", primers: "primers.tsv", epcr: "epcr.tsv", pairs: "epcr_pairs.tsv" }[format] || format;
   const base = (input && input.name ? input.name : "nextssr").replace(/\.(gz|bgz)$/i, "");
   const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
   const a = Object.assign(document.createElement("a"), { href: url, download: `${base}.${ext}` });

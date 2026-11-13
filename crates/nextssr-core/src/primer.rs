@@ -46,6 +46,8 @@ pub struct PrimerParams {
     pub avoid_other_ssrs: bool,
     /// Best candidates kept per side before pairing.
     pub max_candidates: usize,
+    /// Number of alternative primer pairs reported per locus (best first).
+    pub num_return: usize,
     pub thermo: ThermoParams,
 }
 
@@ -71,6 +73,7 @@ impl Default for PrimerParams {
             max_pair_end: 3,
             avoid_other_ssrs: true,
             max_candidates: 150,
+            num_return: 1,
             thermo: ThermoParams::default(),
         }
     }
@@ -99,6 +102,9 @@ impl PrimerParams {
         }
         if self.gc_clamp > 5 {
             return e("GC clamp must be <= 5");
+        }
+        if !(1..=100).contains(&self.num_return) {
+            return e("number of primer pairs per locus must be in 1..=100");
         }
         Ok(())
     }
@@ -129,8 +135,13 @@ pub struct PrimerPair {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(tag = "status", rename_all = "lowercase")]
 pub enum PrimerOutcome {
-    Designed(PrimerPair),
-    Failed { reason: String },
+    /// One or more pairs, best (lowest penalty) first.
+    Designed {
+        pairs: Vec<PrimerPair>,
+    },
+    Failed {
+        reason: String,
+    },
 }
 
 impl PrimerOutcome {
@@ -140,10 +151,16 @@ impl PrimerOutcome {
         }
     }
 
+    /// Best pair.
     pub fn pair(&self) -> Option<&PrimerPair> {
+        self.pairs().first()
+    }
+
+    /// All designed pairs, best first (empty on failure).
+    pub fn pairs(&self) -> &[PrimerPair] {
         match self {
-            PrimerOutcome::Designed(p) => Some(p),
-            PrimerOutcome::Failed { .. } => None,
+            PrimerOutcome::Designed { pairs } => pairs,
+            PrimerOutcome::Failed { .. } => &[],
         }
     }
 }
@@ -400,18 +417,24 @@ pub fn design(
         return PrimerOutcome::fail("no_right_primer");
     }
 
-    let mut best: Option<(f64, &Cand, &Cand, usize)> = None;
-    for l in &left {
-        if let Some((bp, ..)) = best {
-            if l.penalty >= bp {
-                break; // sorted: no better pair possible
-            }
+    // Keep the `num_return` best pairs, sorted by penalty (ties: first found).
+    let n_ret = p.num_return.max(1);
+    let mut best: Vec<(f64, usize, usize, usize)> = Vec::with_capacity(n_ret + 1);
+    let bound = |best: &Vec<(f64, usize, usize, usize)>| {
+        if best.len() < n_ret {
+            f64::INFINITY
+        } else {
+            best[n_ret - 1].0
         }
-        for r in &right {
-            if let Some((bp, ..)) = best {
-                if l.penalty + r.penalty >= bp {
-                    break;
-                }
+    };
+    for (li, l) in left.iter().enumerate() {
+        if l.penalty >= bound(&best) {
+            break; // sorted: no better pair possible
+        }
+        for (ri, r) in right.iter().enumerate() {
+            let b = bound(&best);
+            if l.penalty + r.penalty >= b {
+                break;
             }
             let product = r.pos + r.len - l.pos;
             if product < p.product_min || product > p.product_max {
@@ -422,22 +445,22 @@ pub fn design(
                 continue;
             }
             let pen = l.penalty + r.penalty + dtm;
-            if let Some((bp, ..)) = best {
-                if pen >= bp {
-                    continue;
-                }
+            if pen >= b {
+                continue;
             }
             if compl_any(&l.seq, &r.seq) > p.max_pair_any
                 || compl_end(&l.seq, &r.seq).max(compl_end(&r.seq, &l.seq)) > p.max_pair_end
             {
                 continue;
             }
-            best = Some((pen, l, r, product));
+            let at = best.partition_point(|x| x.0 <= pen);
+            best.insert(at, (pen, li, ri, product));
+            best.truncate(n_ret);
         }
     }
-    let Some((pen, l, r, product)) = best else {
+    if best.is_empty() {
         return PrimerOutcome::fail("no_compatible_pair");
-    };
+    }
     let mk = |c: &Cand| Primer {
         seq: String::from_utf8(c.seq.clone()).expect("ASCII"),
         start: c.pos + 1,
@@ -446,12 +469,17 @@ pub fn design(
         gc: round2(c.gc),
         penalty: round3(c.penalty),
     };
-    PrimerOutcome::Designed(PrimerPair {
-        left: mk(l),
-        right: mk(r),
-        product_size: product,
-        penalty: round3(pen),
-    })
+    PrimerOutcome::Designed {
+        pairs: best
+            .into_iter()
+            .map(|(pen, li, ri, product)| PrimerPair {
+                left: mk(&left[li]),
+                right: mk(&right[ri]),
+                product_size: product,
+                penalty: round3(pen),
+            })
+            .collect(),
+    }
 }
 
 fn round2(x: f64) -> f64 {
@@ -516,6 +544,27 @@ mod tests {
             &s[pair.left.start - 1..pair.left.end],
             pair.left.seq.as_bytes()
         );
+    }
+
+    #[test]
+    fn alternative_pairs_are_sorted_and_distinct() {
+        let mut s = rnd_seq(400, 7);
+        s.extend_from_slice(b"AGAGAGAGAGAGAGAGAGAG");
+        s.extend(rnd_seq(400, 99));
+        let one = design(&s, 400, 420, &[], &PrimerParams::default());
+        let p = PrimerParams {
+            num_return: 5,
+            ..PrimerParams::default()
+        };
+        let out = design(&s, 400, 420, &[], &p);
+        let pairs = out.pairs();
+        assert_eq!(pairs.len(), 5);
+        // the best pair does not depend on how many alternatives are requested
+        assert_eq!(&pairs[0], one.pair().unwrap());
+        for w in pairs.windows(2) {
+            assert!(w[0].penalty <= w[1].penalty);
+            assert!(w[0].left != w[1].left || w[0].right != w[1].right);
+        }
     }
 
     #[test]

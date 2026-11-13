@@ -10,7 +10,8 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 
-use nextssr_core::output::{bed, gff3, misa, p3in, tsv, Format};
+use nextssr_core::epcr::{self, Epcr, EpcrParams, EpcrReport, PairSpec};
+use nextssr_core::output::{bed, gff3, misa, p3in, primers, tsv, Format};
 use nextssr_core::primer::PrimerParams;
 use nextssr_core::stats::misa_statistics;
 use nextssr_core::thermo::{tm, ThermoParams};
@@ -46,6 +47,8 @@ enum Command {
     InitIni,
     /// Compute primer melting temperatures (SantaLucia 1998, Primer3 default conditions)
     Tm(TmArgs),
+    /// In-silico PCR: find every product of a set of primer pairs in FASTA sequences
+    Epcr(Box<EpcrCmdArgs>),
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -65,7 +68,8 @@ struct RunArgs {
     #[arg(short, long)]
     output: Option<String>,
 
-    /// Comma-separated output formats: tsv,gff3,bed,misa,statistics,json,p3in
+    /// Comma-separated output formats: tsv,gff3,bed,misa,statistics,json,p3in,primers
+    /// (`primers` is added automatically with --primers)
     #[arg(short, long, default_value = "tsv,gff3,misa,statistics,json")]
     formats: String,
 
@@ -113,6 +117,14 @@ struct RunArgs {
     #[command(flatten)]
     primer: PrimerArgs,
 
+    /// Check the specificity of every designed pair by in-silico PCR against the
+    /// input sequences (requires --primers and a file input); writes <prefix>.epcr.tsv
+    #[arg(long, requires = "primers")]
+    epcr: bool,
+
+    #[command(flatten)]
+    epcr_opts: EpcrArgs,
+
     /// Worker threads (default: all logical CPUs)
     #[arg(short, long)]
     threads: Option<usize>,
@@ -155,6 +167,9 @@ struct PrimerArgs {
     /// Allow primers to overlap other SSR loci
     #[arg(long)]
     allow_primers_on_ssrs: bool,
+    /// Alternative primer pairs reported per locus (best first)
+    #[arg(long, default_value_t = 1)]
+    num_pairs: usize,
     #[command(flatten)]
     thermo: ThermoArgs,
 }
@@ -184,6 +199,83 @@ impl ThermoArgs {
             dna_conc: self.dna,
         }
     }
+}
+
+#[derive(Args, Clone)]
+struct EpcrArgs {
+    /// e-PCR: maximum mismatches per primer binding site
+    #[arg(long, default_value_t = 2)]
+    mismatches: usize,
+    /// e-PCR: length of the primer 3'-end region
+    #[arg(long, default_value_t = 5)]
+    three_prime_len: usize,
+    /// e-PCR: maximum mismatches inside the 3'-end region
+    #[arg(long, default_value_t = 0)]
+    three_prime_mismatches: usize,
+    /// e-PCR: product size range "min-max" (min 0 = longer primer)
+    #[arg(long, default_value = "0-2000")]
+    epcr_product: String,
+    /// e-PCR: amplicons listed per pair (all are counted)
+    #[arg(long, default_value_t = 100)]
+    max_amplicons: usize,
+}
+
+impl EpcrArgs {
+    fn params(&self, with_sequence: bool) -> Result<EpcrParams> {
+        let ps: Vec<usize> = parse_list(&self.epcr_product, 2, "--epcr-product")?;
+        let p = EpcrParams {
+            max_mismatches: self.mismatches,
+            three_prime_len: self.three_prime_len,
+            max_three_prime_mismatches: self.three_prime_mismatches,
+            min_product: ps[0],
+            max_product: ps[1],
+            max_amplicons: self.max_amplicons,
+            with_sequence,
+            ..EpcrParams::default()
+        };
+        p.validate()?;
+        Ok(p)
+    }
+}
+
+#[derive(Args)]
+struct EpcrCmdArgs {
+    /// Target FASTA files (plain or gzip/bgzip); `-` reads standard input
+    #[arg(required = true)]
+    targets: Vec<String>,
+
+    /// Primer list: a table with forward/reverse (or left_primer/right_primer)
+    /// columns such as nextSSR .primers.tsv, or lines "ID FORWARD REVERSE"
+    #[arg(short, long, conflicts_with_all = ["forward", "reverse"])]
+    primers: Option<PathBuf>,
+
+    /// Forward primer of a single pair (with --reverse)
+    #[arg(short = 'F', long, requires = "reverse")]
+    forward: Option<String>,
+
+    /// Reverse primer of a single pair (with --forward)
+    #[arg(short = 'R', long, requires = "forward")]
+    reverse: Option<String>,
+
+    /// Output prefix: writes <prefix>.epcr.tsv (amplicons) and
+    /// <prefix>.epcr_pairs.tsv (one line per pair). Default: amplicons to stdout
+    #[arg(short, long)]
+    output: Option<String>,
+
+    /// Include the amplicon sequences
+    #[arg(long)]
+    sequence: bool,
+
+    #[command(flatten)]
+    epcr: EpcrArgs,
+
+    /// Worker threads (default: all logical CPUs)
+    #[arg(short, long)]
+    threads: Option<usize>,
+
+    /// Suppress the summary on stderr
+    #[arg(short, long)]
+    quiet: bool,
 }
 
 #[derive(Args)]
@@ -241,6 +333,7 @@ fn primer_params(a: &PrimerArgs) -> Result<PrimerParams> {
         product_min: ps[0],
         product_max: ps[1],
         avoid_other_ssrs: !a.allow_primers_on_ssrs,
+        num_return: a.num_pairs,
         thermo: a.thermo.params(),
         ..PrimerParams::default()
     };
@@ -444,6 +537,19 @@ fn analyze_batch(batch: &[Record], cfg: &Config) -> Vec<RecordResult> {
     batch.par_iter().map(|r| analyze_record(r, cfg)).collect()
 }
 
+/// Scan every record of `input` with `e`, merging results in input order.
+fn epcr_scan(input: Input, e: &Epcr, report: &mut EpcrReport) -> Result<()> {
+    let max = e.params().max_amplicons;
+    stream_records(input, false, |batch| {
+        let hits: Vec<_> = batch.par_iter().map(|r| e.scan(r.id(), &r.seq)).collect();
+        for (r, h) in batch.iter().zip(hits) {
+            report.add(r.seq.len(), h, max);
+        }
+        Ok(())
+    })?;
+    Ok(())
+}
+
 fn run(a: RunArgs) -> Result<()> {
     let t0 = Instant::now();
     setup_threads(a.threads);
@@ -452,11 +558,30 @@ fn run(a: RunArgs) -> Result<()> {
     for f in a.formats.split(',').filter(|s| !s.trim().is_empty()) {
         match Format::parse(f) {
             Some(fm) => formats.push(fm),
-            None => bail!("unknown format {f:?} (expected tsv,gff3,bed,misa,statistics,json,p3in)"),
+            None => bail!(
+                "unknown format {f:?} (expected tsv,gff3,bed,misa,statistics,json,p3in,primers)"
+            ),
         }
+    }
+    if cfg.primers.is_some() {
+        formats.push(Format::Primers);
+    } else if formats.contains(&Format::Primers) {
+        bail!("the primers format requires --primers");
     }
     formats.sort();
     formats.dedup();
+    let epcr_params = if a.epcr {
+        if a.input == "-" {
+            bail!("--epcr reads the input twice and cannot be used with standard input");
+        }
+        let mut p = a.epcr_opts.params(false)?;
+        // the designed products must always be within the searched range
+        let pmax = cfg.primers.as_ref().map_or(0, |p| p.product_max);
+        p.max_product = p.max_product.max(pmax);
+        Some(p)
+    } else {
+        None
+    };
     let prefix = a.output.clone().unwrap_or_else(|| {
         if a.input == "-" {
             "nextssr".into()
@@ -473,7 +598,7 @@ fn run(a: RunArgs) -> Result<()> {
     let source = open_input(&a.input)?;
     let mut writers: Vec<(Format, BufWriter<File>)> = Vec::new();
     for &f in &formats {
-        if matches!(f, Format::Statistics | Format::Json) {
+        if matches!(f, Format::Statistics | Format::Json | Format::Primers) {
             continue;
         }
         let mut w = create(&out_path(&prefix, f))?;
@@ -487,10 +612,14 @@ fn run(a: RunArgs) -> Result<()> {
     }
 
     let mut stats = Stats::new();
+    let mut primer_rows: Vec<primers::PrimerRow> = Vec::new();
     let info = stream_records(source, !a.no_hash, |batch| {
         let results = analyze_batch(&batch, &cfg);
         for (rec, r) in batch.iter().zip(&results) {
             stats.add_record(r.length, &r.loci);
+            if cfg.primers.is_some() {
+                primer_rows.extend(primers::rows(r));
+            }
             for (f, w) in writers.iter_mut() {
                 let mut s = String::new();
                 match f {
@@ -510,6 +639,38 @@ fn run(a: RunArgs) -> Result<()> {
         w.flush()?;
     }
 
+    // e-PCR specificity of the designed pairs (second pass over the input)
+    let mut epcr_out: Option<(Epcr, EpcrReport)> = None;
+    if let Some(ep) = epcr_params {
+        let specs: Vec<PairSpec> = primer_rows.iter().map(|r| r.spec()).collect();
+        let e = Epcr::new(specs, ep)?;
+        let mut report = EpcrReport::new(e.pairs().len());
+        if !e.pairs().is_empty() {
+            epcr_scan(open_input(&a.input)?, &e, &mut report)?;
+        }
+        let mut s = epcr::amplicons_header(false);
+        epcr::write_amplicons(&mut s, &report, e.pairs(), false);
+        std::fs::write(format!("{prefix}.epcr.tsv"), s)?;
+        epcr_out = Some((e, report));
+    }
+    if formats.contains(&Format::Primers) {
+        let mut s = primers::header(epcr_out.is_some());
+        primers::write(&mut s, &primer_rows, epcr_out.as_ref().map(|(_, r)| r));
+        std::fs::write(out_path(&prefix, Format::Primers), s)?;
+    }
+    let loci_specific = epcr_out.as_ref().map(|(_, rep)| {
+        let mut n = 0u64;
+        let mut last: Option<(&str, usize)> = None;
+        for (row, res) in primer_rows.iter().zip(&rep.results) {
+            let key = (row.seq_id.as_str(), row.nr);
+            if res.status(true) == epcr::Status::Specific && last != Some(key) {
+                n += 1;
+                last = Some(key);
+            }
+        }
+        n
+    });
+
     if formats.contains(&Format::Statistics) {
         let text = misa_statistics(
             &stats,
@@ -522,7 +683,7 @@ fn run(a: RunArgs) -> Result<()> {
     }
     let elapsed = t0.elapsed().as_secs_f64();
     if formats.contains(&Format::Json) {
-        let summary = serde_json::json!({
+        let mut summary = serde_json::json!({
             "tool": "nextSSR",
             "version": nextssr_core::VERSION,
             "command": std::env::args().collect::<Vec<_>>(),
@@ -533,6 +694,14 @@ fn run(a: RunArgs) -> Result<()> {
             "stats": stats,
             "per_class": stats.per_class(),
         });
+        if let Some((e, rep)) = &epcr_out {
+            summary["epcr"] = serde_json::json!({
+                "params": e.params(),
+                "pairs": e.pairs().len(),
+                "pairs_by_status": rep.status_counts(e.pairs()),
+                "loci_with_specific_pair": loci_specific,
+            });
+        }
         std::fs::write(
             out_path(&prefix, Format::Json),
             serde_json::to_string_pretty(&summary)?,
@@ -556,8 +725,92 @@ fn run(a: RunArgs) -> Result<()> {
             elapsed,
             rayon::current_num_threads()
         );
+        if let (Some((e, rep)), Some(n)) = (&epcr_out, loci_specific) {
+            let c = rep.status_counts(e.pairs());
+            eprintln!(
+                "  e-PCR: {} pairs: {} specific, {} nonspecific; {}/{} loci have a specific pair",
+                e.pairs().len(),
+                c.get("specific").copied().unwrap_or(0),
+                c.get("nonspecific").copied().unwrap_or(0),
+                n,
+                stats.primers_designed
+            );
+        }
         for f in &formats {
             eprintln!("  {}", out_path(&prefix, *f).display());
+        }
+        if epcr_out.is_some() {
+            eprintln!("  {prefix}.epcr.tsv");
+        }
+    }
+    Ok(())
+}
+
+fn run_epcr(a: EpcrCmdArgs) -> Result<()> {
+    let t0 = Instant::now();
+    setup_threads(a.threads);
+    let params = a.epcr.params(a.sequence)?;
+    let specs = match (&a.primers, &a.forward, &a.reverse) {
+        (Some(path), _, _) => {
+            let text = std::fs::read_to_string(path)
+                .with_context(|| format!("reading {}", path.display()))?;
+            epcr::parse_primer_list(&text)?
+        }
+        (None, Some(f), Some(r)) => vec![PairSpec {
+            id: "pair1".into(),
+            forward: f.clone(),
+            reverse: r.clone(),
+            expected: None,
+        }],
+        _ => bail!("give a primer list with --primers, or one pair with --forward/--reverse"),
+    };
+    if specs.is_empty() {
+        bail!("no primer pairs found");
+    }
+    if a.targets.iter().filter(|t| *t == "-").count() > 1 {
+        bail!("standard input can be read only once");
+    }
+    let e = Epcr::new(specs, params)?;
+    let inputs: Vec<Input> = a
+        .targets
+        .iter()
+        .map(|t| open_input(t))
+        .collect::<Result<_>>()?;
+    let mut report = EpcrReport::new(e.pairs().len());
+    for input in inputs {
+        epcr_scan(input, &e, &mut report)?;
+    }
+    let mut amp = epcr::amplicons_header(a.sequence);
+    epcr::write_amplicons(&mut amp, &report, e.pairs(), a.sequence);
+    match &a.output {
+        Some(prefix) => {
+            std::fs::write(format!("{prefix}.epcr.tsv"), amp)?;
+            let mut s = String::new();
+            epcr::write_pairs(&mut s, &report, e.pairs());
+            std::fs::write(format!("{prefix}.epcr_pairs.tsv"), s)?;
+        }
+        None => io::stdout().lock().write_all(amp.as_bytes())?,
+    }
+    if !a.quiet {
+        let c = report.status_counts(e.pairs());
+        let total: u64 = report.results.iter().map(|r| r.amplicons).sum();
+        eprintln!(
+            "nextSSR e-PCR: {} pairs vs {} sequences ({} bp): {} amplicons; {} pairs with one product, {} with several, {} with none; {:.2}s with {} threads",
+            e.pairs().len(),
+            report.sequences,
+            report.bp,
+            total,
+            c.get("specific").copied().unwrap_or(0),
+            c.get("nonspecific").copied().unwrap_or(0),
+            c.get("no_product").copied().unwrap_or(0),
+            t0.elapsed().as_secs_f64(),
+            rayon::current_num_threads()
+        );
+        if report.results.iter().any(|r| r.saturated) {
+            eprintln!("  warning: some primers have too many binding sites; their counts are lower bounds");
+        }
+        if let Some(prefix) = &a.output {
+            eprintln!("  {prefix}.epcr.tsv\n  {prefix}.epcr_pairs.tsv");
         }
     }
     Ok(())
@@ -647,6 +900,7 @@ fn main() {
             Ok(())
         }
         Command::Tm(a) => run_tm(a),
+        Command::Epcr(a) => run_epcr(*a),
     };
     if let Err(e) = res {
         eprintln!("nextssr: error: {e:#}");

@@ -7,6 +7,7 @@ pub mod bed;
 pub mod gff3;
 pub mod misa;
 pub mod p3in;
+pub mod primers;
 pub mod tsv;
 
 /// Output formats supported by nextSSR.
@@ -26,10 +27,12 @@ pub enum Format {
     Json,
     /// Primer3 Boulder-IO input (`.p3in`).
     P3in,
+    /// One row per designed primer pair (`.primers.tsv`).
+    Primers,
 }
 
 impl Format {
-    pub const ALL: [Format; 7] = [
+    pub const ALL: [Format; 8] = [
         Format::Tsv,
         Format::Gff3,
         Format::Bed,
@@ -37,6 +40,7 @@ impl Format {
         Format::Statistics,
         Format::Json,
         Format::P3in,
+        Format::Primers,
     ];
 
     pub fn name(self) -> &'static str {
@@ -48,12 +52,14 @@ impl Format {
             Format::Statistics => "statistics",
             Format::Json => "json",
             Format::P3in => "p3in",
+            Format::Primers => "primers",
         }
     }
 
     pub fn extension(self) -> &'static str {
         match self {
             Format::Json => "summary.json",
+            Format::Primers => "primers.tsv",
             other => other.name(),
         }
     }

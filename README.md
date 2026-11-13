@@ -11,8 +11,9 @@
 
 nextSSR is a drop-in replacement for [MISA](https://webblast.ipk-gatersleben.de/misa/) written in Rust.
 It reproduces MISA's output byte for byte when you need compatibility, and provides a more accurate
-engine when you want more: every maximal repeat, imperfect SSRs, standard output formats and
-built-in primer design. The same engine is compiled to WebAssembly, so the website analyses your
+engine when you want more: every maximal repeat, imperfect SSRs, standard output formats,
+built-in primer design and an in-silico PCR that checks that each primer pair amplifies a single
+product. The same engine is compiled to WebAssembly, so the website analyses your
 data locally, without uploading anything.
 
 ## Why
@@ -25,7 +26,8 @@ MISA is the de facto standard for SSR discovery, but `misa.pl`:
 - prints a **long stretch of unrelated sequence** for overlapping compound SSRs (Perl `substr` with a
   negative length);
 - reports **perfect repeats only**;
-- is single-threaded, writes one GFF file per sequence, and needs extra scripts plus Primer3 for primers.
+- is single-threaded, writes one GFF file per sequence, and needs extra scripts plus Primer3 for
+  primers (with no check that they amplify a single locus).
 
 | | MISA (misa.pl 2.0) | nextSSR |
 |---|---|---|
@@ -33,7 +35,8 @@ MISA is the de facto standard for SSR discovery, but `misa.pl`:
 | SSRs masked by the regex scan | possible | none (native mode) |
 | Imperfect SSRs | ✗ | ✓ |
 | Valid single-file GFF3 | one file per sequence | ✓ |
-| Primer design | external scripts + Primer3 | built in |
+| Primer design | external scripts + Primer3 | built in, several pairs per locus |
+| Primer specificity (in-silico PCR) | ✗ | ✓ |
 | Multithreading | ✗ | ✓ (deterministic output) |
 | gzip / bgzip input | ✗ | ✓ |
 | In-browser, no upload | server upload (MISA-web) | ✓ |
@@ -68,6 +71,13 @@ zcat genome.fa.gz | nextssr run - -o genome
 
 # primer melting temperature (SantaLucia 1998, Primer3 default conditions)
 nextssr tm AGCTGCATGCAGTCAGTCAG
+
+# 3 primer pairs per locus, each checked by in-silico PCR against the input genome
+nextssr run genome.fa --primers --num-pairs 3 --epcr
+
+# in-silico PCR of a primer list against other genomes (e.g. marker transferability)
+nextssr epcr -p genome.fa.primers.tsv other1.fa.gz other2.fa.gz -o transfer
+nextssr epcr -F ATCCGCCCCTACGCTACTAT -R AAGGTGGAATTTGCTACCTTTTT genome.fa --sequence
 ```
 
 `nextssr run --help` lists every option (imperfect seeds, gap and purity; primer size, Tm, GC,
@@ -104,7 +114,9 @@ insertions and deletions are all absorbed.
 | `.bed` | BED6 intervals |
 | `.misa`, `.statistics` | MISA formats |
 | `.summary.json` | parameters, statistics, runtime, input SHA-256 |
-| `.p3in` | Primer3 (`primer3_core`) Boulder-IO input, the successor of MISA's `p3_in.pl` |
+| `.primers.tsv` | one row per designed pair (`--primers`); with `--epcr` also its specificity and the recommended pair of each locus |
+| `.epcr.tsv` | every product predicted by the in-silico PCR (`--epcr`, `nextssr epcr`) |
+| `.p3in` | Primer3 (`primer3_core`) Boulder-IO input, the successor of MISA's `p3_in.pl`, with the same settings as the built-in designer and the other SSRs as excluded regions |
 
 ### Primer design
 
@@ -114,6 +126,34 @@ Primer3: size 18–27 (opt. 20), Tm 57–63 °C (opt. 60), SantaLucia (1998) the
 ≤ 8 (any) and ≤ 3 (3′ end), poly-X ≤ 5. Additionally, GC is limited to 30–70 %, the Tm
 difference between primers to 3 °C, and primers are never placed over other SSR loci.
 
+`--num-pairs N` reports the N best pairs of each locus (ranked by penalty: distance to the optimal
+Tm and size plus the Tm difference). They appear in `.primers.tsv` and as `PCR_product` features
+with `rank=` in the GFF3; the `.tsv` table keeps the best pair.
+
+### In-silico PCR (e-PCR)
+
+The e-PCR engine finds every product a primer pair can amplify:
+
+- both strands are searched and each primer may act as forward or reverse, so single-primer
+  products (`F/F`, `R/R`) are found as well as `F/R` and `R/F`;
+- a binding site may have up to `--mismatches` mismatches (default 2), of which at most
+  `--three-prime-mismatches` (default 0) within the last `--three-prime-len` bases (default 5) of
+  the primer's 3′ end; IUPAC codes are allowed in primers, while `N` in the template never matches;
+- products between the longer primer length and `--epcr-product` (default `0-2000`) are counted.
+
+Sites are found with an exact pigeonhole filter (a primer with ≤ *m* mismatches contains one of
+*m* + 1 disjoint segments without mismatches), so nothing within the limits is missed; more
+mismatches mean shorter seeds and a slower search.
+
+With `nextssr run --primers --epcr`, every designed pair is searched in the input genome (a second
+pass over the file). A pair is `specific` when its designed product is the only one,
+`nonspecific` when it has more, and the best-ranked specific pair of each locus is marked as
+`recommended` in `.primers.tsv`. `nextssr epcr` takes any primer list (a table with
+forward/reverse or `left_primer`/`right_primer` columns, such as `.primers.tsv`, or lines
+`ID FORWARD REVERSE` as in e-PCR/me-PCR STS files) and any number of FASTA targets, and writes
+the products (`.epcr.tsv`, `--sequence` adds their sequences) and a per-pair summary
+(`.epcr_pairs.tsv`).
+
 ## Performance
 
 *S. cerevisiae* S288C (16 chromosomes, 12.1 Mb), AMD/Intel laptop, 4 threads:
@@ -122,7 +162,9 @@ difference between primers to 3 °C, and primers are never placed over other SSR
 |---|---|
 | `nextssr misa` (MISA-identical output) | 0.36 s (1 process) |
 | `nextssr run` (native, all default outputs) | 0.20 s |
-| `nextssr run --imperfect --primers` | 1.5 s |
+| `nextssr run --imperfect --primers` | 1.2 s |
+| `nextssr run --imperfect --primers --epcr` (3,012 pairs) | 2.4 s |
+| `nextssr run --imperfect --primers --num-pairs 3 --epcr` | 4.7 s |
 | same in the browser (WebAssembly, 1 thread, Node 24) | 4.6 s |
 
 ## Verification
@@ -149,7 +191,7 @@ The `pages.yml` workflow publishes it to GitHub Pages on every push to `main`
 ## Repository layout
 
 ```
-crates/nextssr-core   detection engine, primers, statistics, output formats (no I/O; compiles to WASM)
+crates/nextssr-core   detection engine, primers, e-PCR, statistics, output formats (no I/O; compiles to WASM)
 crates/nextssr-cli    `nextssr` binary
 crates/nextssr-wasm   WebAssembly bindings
 web/                  trilingual website + online tool

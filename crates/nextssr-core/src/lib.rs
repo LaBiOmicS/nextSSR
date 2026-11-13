@@ -12,8 +12,12 @@
 //!   optionally merges interrupted repeats into imperfect SSRs and renders
 //!   compound SSRs with correct interruption sequences.
 //!
+//! Primer pairs (designed or user supplied) can be checked for specificity
+//! with the in-silico PCR engine in [`epcr`].
+//!
 //! The crate has no I/O dependencies so that it compiles to WebAssembly.
 
+pub mod epcr;
 pub mod fasta;
 pub mod imperfect;
 pub mod locus;
@@ -26,6 +30,7 @@ pub mod scan;
 pub mod stats;
 pub mod thermo;
 
+pub use epcr::{Epcr, EpcrParams, EpcrReport, PairSpec};
 pub use fasta::{FastaParser, Record};
 pub use locus::{Locus, Ssr};
 pub use params::{Config, Definition, ImperfectParams, MisaIni, Mode, ParamError};
